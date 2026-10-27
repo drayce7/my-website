@@ -1,0 +1,24 @@
+{
+  "siteName": "fetchd",
+  "title": "fetch cl",
+  "description": "Welcome to my new website built with Nibula!",
+  "keywords": "keyword1, keyword2, keyword3",
+  "domain": "yoursite.com",
+  "url": "https://yoursite.com",
+  "lang": "en",
+  "author": {
+      "fullName": "Name and surname",
+      "website": "https://example.com"
+  },
+  "theme": "dark",
+  "logo": "/assets/brand/logo.svg",
+  "legal": {
+    "privacy": "/privacy/",
+    "cookie": "/cookies/",
+    "terms": "/terms/",
+    "copyright": {
+      "year": "2026",
+      "text": "All rights reserved."
+    }
+  }
+}

@@ -1,0 +1,15 @@
+---
+title: "404"
+permalink: "404.html"
+layout: base.njk
+---
+
+{# To keep order, create a new component in components/ and include it here #}
+{% include "not-found.njk" ignore missing %}
+
+{# Markdown files live in components/ too. Pass the data the file needs #}
+{#
+<div class="markdown-body">
+    {% renderFile "your-file.md" | componentsPath, { alias: fileName }, "njk,md" %}
+</div>
+#}

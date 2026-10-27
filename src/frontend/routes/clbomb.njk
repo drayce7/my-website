@@ -1,0 +1,461 @@
+---
+layout: "base.njk"
+title: "CLbomb"
+permalink: "/clbomb/"
+---
+<style>
+    body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; }
+    .bomb-container { max-width: 1000px; margin: 20px auto; padding: 20px; }
+
+    .top-line { display: flex; gap: 15px; align-items: center; background: #1e1e1e; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+    
+    .input-group { display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+    .input-group label { font-weight: bold; color: #888; font-size: 14px; text-transform: uppercase; }
+    
+    .number-input, .search-input { padding: 10px; font-size: 16px; font-weight: bold; background: #111; border: 2px solid #444; color: white; border-radius: 8px; outline: none; }
+    .number-input { width: 70px; text-align: center; }
+    .search-input { width: 100px; }
+    .number-input:focus, .search-input:focus { border-color: #3b82f6; }
+
+    /* Locked state for Search Mode */
+    .number-input.locked { background: #222; color: #888; border-color: #333; cursor: not-allowed; }
+
+    .go-btn { padding: 10px 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .go-btn:hover { background: #2563eb; }
+    .btn-exit { background: #ef4444; }
+    .btn-exit:hover { background: #dc2626; }
+
+    .main-text-box { flex-grow: 1; background-color: #2e8555; border: 2px solid #236b43; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; font-size: 16px; font-weight: bold; color: white; transition: 0.2s; }
+    .main-text-box:hover { background-color: #236b43; }
+    .main-text-box.active { border-color: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+    .main-text-box.void-state { background-color: #4a0000; border-color: #ff0000; cursor: not-allowed; color: #ffaaaa; }
+
+    .tabs-container { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+    .tab-btn { padding: 10px 15px; background: #222; color: #ccc; border: 1px solid #444; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; flex-grow: 1; text-align: center; }
+    .tab-btn:hover { background: #333; color: white; }
+    .tab-btn.active { background: #3b82f6; color: white; border-color: #2563eb; }
+
+    .copy-panel { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 20px; margin-bottom: 30px; }
+    .copy-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+    .copy-text-display { flex-grow: 1; padding: 12px; background: #111; border: 1px solid #444; border-radius: 6px; min-height: 20px; color: #ccc; font-size: 14px; }
+    .copy-text-display.void-state { background-color: #330000; border-color: #ff0000; color: #ff5555; font-weight: bold; text-align: center; }
+    
+    .btn-icon { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; background-color: #3b82f6; color: white; font-size: 18px; transition: 0.2s; }
+    .btn-icon:hover { background-color: #2563eb; }
+    .btn-icon:disabled { background-color: #444; cursor: not-allowed; }
+
+    .manage-section { background: #181818; border-radius: 12px; border: 1px solid #333; padding: 20px; }
+    .manage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    .manage-category h3 { color: #888; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 10px;}
+    .manage-item { display: flex; gap: 8px; margin-bottom: 8px; }
+    .manage-item input { flex-grow: 1; padding: 8px; background-color: #222; border: 1px solid #444; color: white; border-radius: 6px; }
+    .btn-delete { background-color: #ef4444; padding: 6px 10px; color: white; border: none; border-radius: 6px; cursor: pointer;}
+    .btn-add { background-color: #2e8555; width: 100%; margin-top: 5px; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;}
+
+    .danger-zone { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #444; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+    .btn-danger { background-color: #ef4444; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-danger:hover { background-color: #dc2626; }
+    
+    .status-badge { background: #333; color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-right: 10px; display: none; }
+    .status-badge.search-mode { display: inline-block; background: #f59e0b; color: #000; }
+</style>
+
+<main class="bomb-container">
+    <h1>CLbomb <span id="modeIndicator" class="status-badge">SEARCH MODE</span></h1>
+    
+    <div class="top-line">
+        <!-- Number Input -->
+        <div class="input-group" id="numberInputGroup">
+            <label>Number:</label>
+            <input type="text" id="activeNumber" class="number-input" maxlength="3" placeholder="000">
+            <button id="actionBtn" class="go-btn" onclick="handleNumberAction()">➔</button>
+        </div>
+        
+        <!-- Search Input -->
+        <div class="input-group">
+            <label>Search:</label>
+            <input type="text" id="searchNumber" class="search-input" placeholder="Search #" onkeypress="handleSearchEnter(event)">
+            <button class="go-btn" onclick="searchNumber()">🔍</button>
+        </div>
+
+        <div class="main-text-box" id="mainTextDisplay" onclick="clickMainText()">
+            Enter number to start
+        </div>
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" id="tab-pca-standard" onclick="switchTab('pca', 'standard')">Standard PCA</button>
+        <button class="tab-btn" id="tab-pca-followup1" onclick="switchTab('pca', 'followup1')">Standard PCA 1</button>
+        <button class="tab-btn" id="tab-pca-followup2" onclick="switchTab('pca', 'followup2')">Standard PCA 2</button>
+        
+        <button class="tab-btn" id="tab-pva-standard" onclick="switchTab('pva', 'standard')">Standard PVA</button>
+        <button class="tab-btn" id="tab-pva-followup1" onclick="switchTab('pva', 'followup1')">Standard PVA 1</button>
+        <button class="tab-btn" id="tab-pva-followup2" onclick="switchTab('pva', 'followup2')">Standard PVA 2</button>
+    </div>
+
+    <div class="copy-panel" id="copyPanel">
+        <div id="panel-pca">
+            <div class="copy-row">
+                <div class="copy-text-display" id="pca-display-1">Loading...</div>
+                <button class="btn-icon" id="pca-btn-1" onclick="copyToClipboard('pca-display-1', 'pca-btn-1')">📋</button>
+            </div>
+            <div class="copy-row">
+                <div class="copy-text-display" id="pca-display-2">Loading...</div>
+                <button class="btn-icon" id="pca-btn-2" onclick="copyToClipboard('pca-display-2', 'pca-btn-2')">📋</button>
+            </div>
+        </div>
+
+        <div id="panel-pva" style="display: none;">
+            <div class="copy-row">
+                <div class="copy-text-display" id="pva-display-1">Loading...</div>
+                <button class="btn-icon" id="pva-btn-1" onclick="copyToClipboard('pva-display-1', 'pva-btn-1')">📋</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="manage-section">
+        <h2>Manage Your Texts</h2>
+        
+        <div class="manage-grid">
+            <div>
+                <div class="manage-category">
+                    <h3>Standard PCA</h3>
+                    <div id="pca-standard-list"></div>
+                    <button class="btn-add" onclick="addNewText('pca', 'standard')">+ Add</button>
+                </div>
+                <div class="manage-category" style="margin-top:15px;">
+                    <h3>Standard PCA 1</h3>
+                    <div id="pca-followup1-list"></div>
+                    <button class="btn-add" onclick="addNewText('pca', 'followup1')">+ Add</button>
+                </div>
+                <div class="manage-category" style="margin-top:15px;">
+                    <h3>Standard PCA 2</h3>
+                    <div id="pca-followup2-list"></div>
+                    <button class="btn-add" onclick="addNewText('pca', 'followup2')">+ Add</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="manage-category">
+                    <h3>Standard PVA</h3>
+                    <div id="pva-standard-list"></div>
+                    <button class="btn-add" onclick="addNewText('pva', 'standard')">+ Add</button>
+                </div>
+                <div class="manage-category" style="margin-top:15px;">
+                    <h3>Standard PVA 1</h3>
+                    <div id="pva-followup1-list"></div>
+                    <button class="btn-add" onclick="addNewText('pva', 'followup1')">+ Add</button>
+                </div>
+                <div class="manage-category" style="margin-top:15px;">
+                    <h3>Standard PVA 2</h3>
+                    <div id="pva-followup2-list"></div>
+                    <button class="btn-add" onclick="addNewText('pva', 'followup2')">+ Add</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="danger-zone">
+            <button class="btn-danger" onclick="clearQueue()">Clear Unassigned Queue</button>
+            <button class="btn-danger" onclick="clearCurrentNumber()">Clear Current Number History</button>
+            <button class="btn-danger" onclick="clearEverything()">🗑️ Clear EVERYTHING</button>
+        </div>
+    </div>
+</main>
+
+<script>
+    const defaultData = {
+        pca: { standard: ["PCA Main 1", "PCA Main 2"], followup1: ["PCA 1 Sub A", "PCA 1 Sub B"], followup2: ["PCA 2 Sub A"] },
+        pva: { standard: ["PVA Main"], followup1: ["PVA 1 Sub"], followup2: ["PVA 2 Sub"] }
+    };
+
+    let data = JSON.parse(localStorage.getItem('clbomb_data')) || defaultData;
+    
+    let rawDatabase = JSON.parse(localStorage.getItem('clbomb_database')) || {}; 
+    let database = {};
+    for (let key in rawDatabase) {
+        if (rawDatabase[key].assignedTexts) {
+            database[key] = rawDatabase[key];
+        } else if (rawDatabase[key].mainTexts) {
+            database[key] = { assignedTexts: rawDatabase[key].mainTexts };
+        } else {
+            database[key] = { assignedTexts: [] };
+        }
+    }
+
+    let masterQueue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
+    
+    let currentActiveNumber = null;
+    let currentDisplayIndex = 0;
+    let currentTab = { type: 'pca', category: 'standard' }; 
+    let isSearchMode = false; 
+
+    function saveToStorage() {
+        localStorage.setItem('clbomb_data', JSON.stringify(data));
+        localStorage.setItem('clbomb_database', JSON.stringify(database));
+        localStorage.setItem('clbomb_queue', JSON.stringify(masterQueue));
+    }
+
+    function switchTab(type, category) {
+        currentTab = { type, category };
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`tab-${type}-${category}`).classList.add('active');
+
+        if (type === 'pca') {
+            document.getElementById('panel-pca').style.display = 'block';
+            document.getElementById('panel-pva').style.display = 'none';
+        } else {
+            document.getElementById('panel-pca').style.display = 'none';
+            document.getElementById('panel-pva').style.display = 'block';
+        }
+        renderCopyBoxes(type, category);
+    }
+
+    // Handle the Arrow / Exit button dynamically
+    function handleNumberAction() {
+        if (isSearchMode) {
+            exitSearchMode();
+        } else {
+            setActiveNumber();
+        }
+    }
+
+    function exitSearchMode() {
+        isSearchMode = false;
+        document.getElementById('modeIndicator').classList.remove('search-mode');
+        
+        const numInput = document.getElementById('activeNumber');
+        numInput.classList.remove('locked');
+        numInput.disabled = false;
+        numInput.value = ""; // Clear the search number
+        
+        const actionBtn = document.getElementById('actionBtn');
+        actionBtn.textContent = "➔";
+        actionBtn.classList.remove('btn-exit');
+
+        // Reset display
+        document.getElementById('mainTextDisplay').textContent = "Enter number to start";
+        document.getElementById('mainTextDisplay').classList.remove('active', 'void-state');
+        currentActiveNumber = null;
+        
+        renderCopyBoxes(currentTab.type, currentTab.category);
+    }
+
+    function setActiveNumber() {
+        const numInput = document.getElementById('activeNumber').value;
+        if(!numInput) return;
+        
+        isSearchMode = false;
+        currentActiveNumber = numInput;
+        if (!database[currentActiveNumber]) {
+            database[currentActiveNumber] = { assignedTexts: [] };
+        }
+        
+        currentDisplayIndex = 0; 
+        document.getElementById('mainTextDisplay').classList.add('active');
+        
+        // Auto-grab if we have texts waiting
+        if (database[currentActiveNumber].assignedTexts.length === 0 && masterQueue.length > 0) {
+            clickMainText(); 
+        } else {
+            updateMainTextDisplay();
+        }
+        renderCopyBoxes(currentTab.type, currentTab.category);
+    }
+
+    function clickMainText() {
+        if (!currentActiveNumber) return;
+        
+        const assignedList = database[currentActiveNumber].assignedTexts;
+
+        if (currentDisplayIndex >= assignedList.length - 1) {
+            if (!isSearchMode && masterQueue.length > 0) {
+                const newText = masterQueue.shift(); 
+                assignedList.push(newText);          
+                currentDisplayIndex = assignedList.length - 1; 
+                saveToStorage();
+            } else {
+                currentDisplayIndex = assignedList.length; 
+            }
+        } else {
+            currentDisplayIndex++;
+        }
+        
+        updateMainTextDisplay();
+        renderCopyBoxes(currentTab.type, currentTab.category);
+    }
+
+    function updateMainTextDisplay() {
+        if (!currentActiveNumber) return;
+        const assignedList = database[currentActiveNumber].assignedTexts;
+        const displayBox = document.getElementById('mainTextDisplay');
+        
+        displayBox.classList.remove('void-state');
+
+        if (currentDisplayIndex < assignedList.length) {
+            displayBox.textContent = assignedList[currentDisplayIndex];
+        } else {
+            displayBox.textContent = "VOID - End of history";
+            displayBox.classList.add('void-state');
+        }
+    }
+
+    // Lock the number box and switch to Search Mode
+    function searchNumber() {
+        const searchVal = document.getElementById('searchNumber').value;
+        if (!searchVal) return;
+
+        if (database[searchVal] && database[searchVal].assignedTexts.length > 0) {
+            isSearchMode = true; 
+            
+            // Lock the number input
+            const numInput = document.getElementById('activeNumber');
+            numInput.value = searchVal;
+            numInput.classList.add('locked');
+            numInput.disabled = true;
+
+            // Change arrow to Exit button
+            const actionBtn = document.getElementById('actionBtn');
+            actionBtn.textContent = "❌";
+            actionBtn.classList.add('btn-exit');
+
+            // Show badge
+            document.getElementById('modeIndicator').classList.add('search-mode');
+
+            currentActiveNumber = searchVal;
+            currentDisplayIndex = 0; 
+            
+            document.getElementById('mainTextDisplay').classList.add('active');
+            updateMainTextDisplay();
+            renderCopyBoxes(currentTab.type, currentTab.category);
+        } else {
+            alert(`No history found for Number ${searchVal}`);
+        }
+    }
+
+    function handleSearchEnter(event) {
+        if (event.key === 'Enter') searchNumber();
+    }
+
+    function renderCopyBoxes(type, category) {
+        const list = data[type][category];
+        
+        const assignedList = currentActiveNumber && database[currentActiveNumber] ? database[currentActiveNumber].assignedTexts : [];
+        const isVoid = (currentActiveNumber && currentDisplayIndex >= assignedList.length && (isSearchMode || masterQueue.length === 0));
+
+        const disp1 = document.getElementById(type + '-display-1');
+        const btn1 = document.getElementById(type + '-btn-1');
+        
+        if (isVoid) {
+            disp1.textContent = "VOID 🔴";
+            disp1.classList.add('void-state');
+            btn1.disabled = true;
+            
+            if (type === 'pca') {
+                const disp2 = document.getElementById(type + '-display-2');
+                const btn2 = document.getElementById(type + '-btn-2');
+                disp2.textContent = "VOID 🔴";
+                disp2.classList.add('void-state');
+                btn2.disabled = true;
+            }
+            return;
+        } else {
+            disp1.classList.remove('void-state');
+            btn1.disabled = false;
+            if (type === 'pca') {
+                document.getElementById(type + '-display-2').classList.remove('void-state');
+                document.getElementById(type + '-btn-2').disabled = false;
+            }
+        }
+
+        if (!list || list.length === 0) {
+            disp1.textContent = "Empty...";
+            if (type === 'pca') document.getElementById(type + '-display-2').textContent = "Empty...";
+            return;
+        }
+
+        disp1.textContent = list[Math.floor(Math.random() * list.length)];
+        if (type === 'pca') {
+            document.getElementById(type + '-display-2').textContent = list[Math.floor(Math.random() * list.length)];
+        }
+    }
+
+    function copyToClipboard(displayId, btnId) {
+        const text = document.getElementById(displayId).textContent;
+        if (text.includes("VOID") || text === "Empty...") return; 
+        
+        navigator.clipboard.writeText(text);
+        const btn = document.getElementById(btnId);
+        const originalText = btn.textContent;
+        btn.textContent = "✅";
+        setTimeout(() => { btn.textContent = originalText; }, 1000);
+    }
+
+    function clearQueue() {
+        if(confirm("Clear all texts waiting in the queue?")) {
+            masterQueue = [];
+            saveToStorage();
+            updateMainTextDisplay();
+            renderCopyBoxes(currentTab.type, currentTab.category);
+        }
+    }
+
+    function clearCurrentNumber() {
+        if(!currentActiveNumber) {
+            alert("Please select a number first.");
+            return;
+        }
+        if(confirm(`Clear all history saved under Number ${currentActiveNumber}?`)) {
+            database[currentActiveNumber].assignedTexts = [];
+            currentDisplayIndex = 0;
+            saveToStorage();
+            updateMainTextDisplay();
+            renderCopyBoxes(currentTab.type, currentTab.category);
+        }
+    }
+
+    function clearEverything() {
+        if(confirm("WARNING: This will delete ALL numbers, ALL saved history, and ALL unassigned texts. Are you sure?")) {
+            localStorage.removeItem('clbomb_data');
+            localStorage.removeItem('clbomb_database');
+            localStorage.removeItem('clbomb_queue');
+            window.location.reload();
+        }
+    }
+
+    function renderLists() {
+        ['pca', 'pva'].forEach(type => {
+            ['standard', 'followup1', 'followup2'].forEach(category => {
+                const container = document.getElementById(`${type}-${category}-list`);
+                if(!container) return;
+                container.innerHTML = '';
+                data[type][category].forEach((text, index) => {
+                    container.innerHTML += `
+                        <div class="manage-item">
+                            <input type="text" value="${text}" onchange="updateText('${type}', '${category}', ${index}, this.value)">
+                            <button class="btn-delete" onclick="deleteText('${type}', '${category}', ${index})">X</button>
+                        </div>
+                    `;
+                });
+            });
+        });
+    }
+
+    function addNewText(type, category) {
+        data[type][category].push("New text...");
+        saveToStorage(); 
+        renderLists();
+    }
+    function deleteText(type, category, index) {
+        data[type][category].splice(index, 1);
+        saveToStorage(); 
+        renderLists();
+    }
+    function updateText(type, category, index, value) {
+        data[type][category][index] = value;
+        saveToStorage(); 
+        renderCopyBoxes(currentTab.type, currentTab.category);
+    }
+
+    renderLists();
+    switchTab('pca', 'standard'); 
+</script>

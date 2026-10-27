@@ -1,0 +1,33 @@
+// Getting root rules from _root.scss
+@use 'root' as root; // Usage: root.$value-name
+
+// Frameworks imports
+// @import "modules/frameworks/bootstrap";
+// @import "modules/frameworks/bulma";
+
+// Markdown styling. Applies to content rendered with renderFile
+@import "modules/markdown";
+
+// Modules imports
+@import "modules/typography";
+
+@import "modules/header";
+@import "modules/footer";
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+}
+
+main {
+    flex: 1;
+}
