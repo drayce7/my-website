@@ -7,10 +7,8 @@ permalink: "/clbomb/"
 
 <style>
     body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; }
-    /* Reduced top margin to bring everything up */
     .bomb-container { max-width: 1000px; margin: 0 auto; padding: 10px 20px; }
 
-    /* Compact Top Control Area */
     .top-line { display: flex; gap: 10px; align-items: center; background: #1e1e1e; border: 1px solid #333; border-radius: 10px; padding: 10px 15px; margin-bottom: 15px; }
     .input-group { display: flex; align-items: center; gap: 8px; }
     .input-group label { font-weight: bold; color: #888; font-size: 13px; text-transform: uppercase; }
@@ -25,18 +23,22 @@ permalink: "/clbomb/"
     
     .status-text { flex-grow: 1; font-weight: bold; font-size: 14px; color: #aaa; text-align: right; }
 
-    /* Compact Main Text Box */
-    .main-text-box { background-color: #2e8555; border: 2px solid #236b43; border-radius: 8px; padding: 15px; text-align: center; font-size: 18px; font-weight: bold; color: white; transition: 0.2s; margin-bottom: 15px; min-height: 24px;}
+    /* Made the green box clickable with a pointer cursor */
+    .main-text-box { 
+        background-color: #2e8555; border: 2px solid #236b43; border-radius: 8px; 
+        padding: 15px; text-align: center; font-size: 18px; font-weight: bold; 
+        color: white; transition: 0.2s; margin-bottom: 15px; min-height: 24px;
+        cursor: pointer; user-select: none;
+    }
+    .main-text-box:hover { background-color: #236b43; }
     .main-text-box.active { border-color: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
-    .main-text-box.void-state { background-color: #4a0000; border-color: #ff0000; color: #ffaaaa; }
+    .main-text-box.void-state { background-color: #4a0000; border-color: #ff0000; color: #ffaaaa; cursor: not-allowed; }
 
-    /* Compact Tabs */
     .tabs-container { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
     .tab-btn { padding: 8px 12px; background: #222; color: #ccc; border: 1px solid #444; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; flex-grow: 1; text-align: center; font-size: 14px;}
     .tab-btn:hover { background: #333; color: white; }
     .tab-btn.active { background: #3b82f6; color: white; border-color: #2563eb; }
 
-    /* Compact Copy Panel */
     .copy-panel { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
     .copy-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
     .copy-row:last-child { margin-bottom: 0; }
@@ -47,7 +49,6 @@ permalink: "/clbomb/"
     .btn-icon:hover { background-color: #2563eb; }
     .btn-icon:disabled { background-color: #444; cursor: not-allowed; }
 
-    /* Manage Section */
     .manage-section { background: #181818; border-radius: 12px; border: 1px solid #333; padding: 20px; }
     .manage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .manage-category h3 { color: #888; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 10px;}
@@ -60,7 +61,6 @@ permalink: "/clbomb/"
 <main class="bomb-container">
     <h1 style="margin-top: 10px; margin-bottom: 10px;">CLbomb</h1>
     
-    <!-- TOP SINGLE BOX -->
     <div class="top-line">
         <div class="input-group">
             <label>Number:</label>
@@ -72,12 +72,11 @@ permalink: "/clbomb/"
         <div class="status-text" id="statusDisplay">Ready</div>
     </div>
 
-    <!-- MAIN TEXT DISPLAY (Shows actual text instantly) -->
-    <div class="main-text-box" id="mainTextDisplay" style="display: none;">
+    <!-- GREEN BOX (Clicking it now copies) -->
+    <div class="main-text-box" id="mainTextDisplay" style="display: none;" onclick="copyMainText()">
         Waiting for number...
     </div>
 
-    <!-- TABS & COPY BOXES -->
     <div class="tabs-container">
         <button class="tab-btn active" id="tab-pca-standard" onclick="switchTab('pca', 'standard')">Standard PCA</button>
         <button class="tab-btn" id="tab-pca-followup1" onclick="switchTab('pca', 'followup1')">Standard PCA 1</button>
@@ -108,7 +107,6 @@ permalink: "/clbomb/"
         </div>
     </div>
 
-    <!-- MANAGE SECTION -->
     <div class="manage-section">
         <h2>Manage Your Texts</h2>
         <div class="manage-grid">
@@ -152,12 +150,10 @@ permalink: "/clbomb/"
 </main>
 
 <script>
-    // --- SUPABASE SETUP ---
     const SUPABASE_URL = 'https://kbdyicxkldqyceorqjcf.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_uoSULCy1-PGGfd3E9dcfww__PxdPjDb';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // --- STATIC LOCAL DATA ---
     let data = JSON.parse(localStorage.getItem('clbomb_data')) || {
         pca: { standard: ["PCA Main 1", "PCA Main 2"], followup1: ["PCA 1 Sub A"], followup2: ["PCA 2 Sub A"] },
         pva: { standard: ["PVA Main"], followup1: ["PVA 1 Sub"], followup2: ["PVA 2 Sub"] }
@@ -181,28 +177,25 @@ permalink: "/clbomb/"
         displayBox.style.display = 'block';
         displayBox.classList.add('active');
         displayBox.classList.remove('void-state');
-        displayBox.textContent = "Fetching text...";
         
         document.getElementById('statusDisplay').textContent = `ADD MODE: ${num}`;
         document.getElementById('statusDisplay').style.color = '#f59e0b';
 
-        // Get from Queue
         let masterQueue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
         
         if (masterQueue.length === 0) {
-            displayBox.textContent = "VOID - No texts left in your Page 1 Queue!";
+            displayBox.textContent = "VOID - No texts left in Page 1 Queue!";
             displayBox.classList.add('void-state');
             renderCopyBoxes(currentTab.type, currentTab.category);
             return;
         }
 
-        // Instantly grab the text and display it
+        // Grab and display instantly
         const nextText = masterQueue.shift(); 
         localStorage.setItem('clbomb_queue', JSON.stringify(masterQueue));
-
         displayBox.textContent = nextText;
         
-        // Save to cloud in the background
+        // Save to cloud
         cloudTextsForNumber = await fetchTextsFromCloud(num);
         cloudTextsForNumber.push(nextText);
         await saveTextToCloud(num, nextText);
@@ -224,8 +217,7 @@ permalink: "/clbomb/"
         const displayBox = document.getElementById('mainTextDisplay');
         displayBox.style.display = 'block';
         displayBox.classList.add('active');
-        displayBox.textContent = "Searching cloud...";
-
+        
         cloudTextsForNumber = await fetchTextsFromCloud(num);
 
         if (cloudTextsForNumber.length === 0) {
@@ -233,7 +225,7 @@ permalink: "/clbomb/"
             displayBox.classList.add('void-state');
             document.getElementById('statusDisplay').textContent = `NO TEXTS FOR ${num}`;
         } else {
-            displayBox.textContent = cloudTextsForNumber[0]; // Show the first saved text
+            displayBox.textContent = cloudTextsForNumber[0]; 
             document.getElementById('statusDisplay').textContent = `FOUND ${cloudTextsForNumber.length} TEXTS`;
         }
 
@@ -250,6 +242,21 @@ permalink: "/clbomb/"
     async function fetchTextsFromCloud(number) {
         const { data: existing } = await supabaseClient.from('clbomb_data').select('assigned_texts').eq('number', number).single();
         return existing ? existing.assigned_texts : [];
+    }
+
+    // --- NEW: COPY MAIN TEXT ---
+    function copyMainText() {
+        const text = document.getElementById('mainTextDisplay').textContent;
+        
+        if (text.includes("VOID") || text.includes("Waiting") || text === "") return;
+
+        navigator.clipboard.writeText(text);
+        
+        // Flash the box green to show it was copied
+        const box = document.getElementById('mainTextDisplay');
+        const originalBg = box.style.backgroundColor;
+        box.style.backgroundColor = "#10b981"; 
+        setTimeout(() => { box.style.backgroundColor = originalBg; }, 300);
     }
 
     // --- UI RENDERING ---
