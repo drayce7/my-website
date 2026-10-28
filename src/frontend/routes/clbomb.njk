@@ -23,7 +23,6 @@ permalink: "/clbomb/"
     
     .status-text { flex-grow: 1; font-weight: bold; font-size: 14px; color: #aaa; text-align: right; }
 
-    /* Main Text Area */
     .main-text-container { display: flex; gap: 10px; margin-bottom: 15px; }
     .main-text-box { 
         flex-grow: 1; background-color: #2e8555; border: 2px solid #236b43; border-radius: 8px; 
@@ -169,7 +168,7 @@ permalink: "/clbomb/"
     let currentMode = null; 
     let currentTab = { type: 'pca', category: 'standard' };
     let cloudTextsForNumber = [];
-    let searchIndex = 0; // Tracks where we are in Search Mode
+    let searchIndex = 0; 
 
     // --- ACTIONS ---
 
@@ -199,7 +198,7 @@ permalink: "/clbomb/"
 
         currentNumber = num;
         currentMode = 'search';
-        searchIndex = 0; // Reset index to start from the first saved text
+        searchIndex = 0;
 
         document.getElementById('statusDisplay').textContent = `SEARCHING ${num}...`;
         document.getElementById('statusDisplay').style.color = '#3b82f6';
@@ -225,19 +224,13 @@ permalink: "/clbomb/"
         renderCopyBoxes(currentTab.type, currentTab.category);
     }
 
-    // --- THE CAROUSEL LOGIC ---
-
     async function handleMainTextClick() {
         if (currentMode === 'add') {
-            // Copy first
             copyMainText();
-            // Then assign next
             await assignNextFromQueue();
         } 
         else if (currentMode === 'search') {
-            // Copy first
             copyMainText();
-            // Then rotate through search history
             if (searchIndex < cloudTextsForNumber.length - 1) {
                 searchIndex++;
                 document.getElementById('mainTextDisplay').textContent = cloudTextsForNumber[searchIndex];
@@ -262,29 +255,78 @@ permalink: "/clbomb/"
             return;
         }
 
+        // Temporarily show the text
         const nextText = masterQueue.shift(); 
-        localStorage.setItem('clbomb_queue', JSON.stringify(masterQueue));
         displayBox.textContent = nextText;
-        
-        cloudTextsForNumber = await fetchTextsFromCloud(currentNumber);
-        cloudTextsForNumber.push(nextText);
-        await saveTextToCloud(currentNumber, nextText);
+        document.getElementById('statusDisplay').textContent = `SAVING TO ${currentNumber}...`;
 
-        document.getElementById('statusDisplay').textContent = `SAVED TO ${currentNumber}`;
+        // Attempt to save to cloud
+        const success = await saveTextToCloud(currentNumber, nextText);
+
+        if (success) {
+            // Only remove from local queue if the cloud save was successful
+            localStorage.setItem('clbomb_queue', JSON.stringify(masterQueue));
+            cloudTextsForNumber.push(nextText);
+            document.getElementById('statusDisplay').textContent = `SAVED TO ${currentNumber}`;
+            document.getElementById('statusDisplay').style.color = '#10b981'; // Green
+        } else {
+            // Put the text back if it failed
+            masterQueue.unshift(nextText);
+            document.getElementById('statusDisplay').textContent = `ERROR SAVING TO CLOUD!`;
+            document.getElementById('statusDisplay').style.color = '#ef4444'; // Red
+            displayBox.textContent = "Error saving to database. Check console (F12).";
+            displayBox.classList.add('void-state');
+        }
+
         renderCopyBoxes(currentTab.type, currentTab.category);
     }
 
     // --- CLOUD FUNCTIONS ---
 
     async function saveTextToCloud(number, text) {
-        const { data: existing } = await supabaseClient.from('clbomb_data').select('assigned_texts').eq('number', number).single();
-        let currentTexts = existing ? existing.assigned_texts : [];
-        currentTexts.push(text);
-        await supabaseClient.from('clbomb_data').upsert({ number: number, assigned_texts: currentTexts });
+        try {
+            // 1. Fetch existing
+            const { data: existing, error: fetchErr } = await supabaseClient
+                .from('clbomb_data')
+                .select('assigned_texts')
+                .eq('number', number)
+                .single();
+
+            if (fetchErr && fetchErr.code !== 'PGRST116') {
+                console.error("Fetch Error:", fetchErr);
+                return false;
+            }
+
+            let currentTexts = existing ? existing.assigned_texts : [];
+            currentTexts.push(text);
+
+            // 2. Upsert
+            const { error: upsertErr } = await supabaseClient
+                .from('clbomb_data')
+                .upsert({ number: number, assigned_texts: currentTexts });
+
+            if (upsertErr) {
+                console.error("Upsert Error:", upsertErr);
+                return false;
+            }
+            return true;
+
+        } catch (err) {
+            console.error("Unexpected Error:", err);
+            return false;
+        }
     }
 
     async function fetchTextsFromCloud(number) {
-        const { data: existing } = await supabaseClient.from('clbomb_data').select('assigned_texts').eq('number', number).single();
+        const { data: existing, error } = await supabaseClient
+            .from('clbomb_data')
+            .select('assigned_texts')
+            .eq('number', number)
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error("Fetch error:", error);
+        }
         return existing ? existing.assigned_texts : [];
     }
 
@@ -296,7 +338,6 @@ permalink: "/clbomb/"
 
         navigator.clipboard.writeText(text);
         
-        // Visual feedback flash
         const box = document.getElementById('mainTextDisplay');
         const originalBg = box.style.backgroundColor;
         box.style.backgroundColor = "#10b981"; 
