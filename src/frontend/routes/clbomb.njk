@@ -8,7 +8,6 @@ permalink: "/clbomb/"
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-  // Your Firebase Keys
   const firebaseConfig = {
     apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
     authDomain: "clbomb.firebaseapp.com",
@@ -21,13 +20,11 @@ permalink: "/clbomb/"
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // Expose Firebase functions to the global window so the regular script can use them
   window.db = db;
   window.doc = doc;
   window.getDoc = getDoc;
   window.setDoc = setDoc;
   
-  // Signal that Firebase is ready
   window.firebaseReady = true;
   window.dispatchEvent(new Event('firebaseLoaded'));
 </script>
@@ -103,6 +100,7 @@ permalink: "/clbomb/"
     </div>
 
     <div class="main-text-container" id="mainTextContainer" style="display: none;">
+        <!-- Clicking this ONLY copies, it does not rotate in Add mode -->
         <div class="main-text-box" id="mainTextDisplay" onclick="handleMainTextClick()">
             Waiting for number...
         </div>
@@ -193,7 +191,6 @@ permalink: "/clbomb/"
     let cloudTextsForNumber = [];
     let searchIndex = 0; 
 
-    // Wait for Firebase to load before enabling buttons
     window.addEventListener('firebaseLoaded', () => {
         document.getElementById('statusDisplay').textContent = "Ready";
     });
@@ -203,7 +200,7 @@ permalink: "/clbomb/"
     async function actionAdd() {
         const num = document.getElementById('mainNumberInput').value.trim();
         if (!num) return alert("Please enter a number first!");
-        if (!window.firebaseReady) return alert("Database still loading, please wait...");
+        if (!window.firebaseReady) return alert("Database still loading...");
 
         currentNumber = num;
         currentMode = 'add';
@@ -218,13 +215,14 @@ permalink: "/clbomb/"
         document.getElementById('statusDisplay').textContent = `ADD MODE: ${num}`;
         document.getElementById('statusDisplay').style.color = '#f59e0b';
 
+        // Grab ONE text and stop
         await assignNextFromQueue();
     }
 
     async function actionSearch() {
         const num = document.getElementById('mainNumberInput').value.trim();
         if (!num) return alert("Please enter a number first!");
-        if (!window.firebaseReady) return alert("Database still loading, please wait...");
+        if (!window.firebaseReady) return alert("Database still loading...");
 
         currentNumber = num;
         currentMode = 'search';
@@ -255,10 +253,11 @@ permalink: "/clbomb/"
     }
 
     async function handleMainTextClick() {
+        // If in Add Mode, clicking the green box ONLY copies the text. It doesn't rotate.
         if (currentMode === 'add') {
             copyMainText();
-            await assignNextFromQueue();
         } 
+        // If in Search Mode, clicking rotates through history.
         else if (currentMode === 'search') {
             copyMainText();
             if (searchIndex < cloudTextsForNumber.length - 1) {
