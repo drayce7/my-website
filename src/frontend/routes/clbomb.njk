@@ -157,7 +157,7 @@ permalink: "/clbomb/"
     const SUPABASE_KEY = 'sb_publishable_uoSULCy1-PGGfd3E9dcfww__PxdPjDb';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // --- STATIC LOCAL DATA (For copy boxes) ---
+    // --- STATIC LOCAL DATA ---
     let data = JSON.parse(localStorage.getItem('clbomb_data')) || {
         pca: { standard: ["PCA Main 1", "PCA Main 2"], followup1: ["PCA 1 Sub A"], followup2: ["PCA 2 Sub A"] },
         pva: { standard: ["PVA Main"], followup1: ["PVA 1 Sub"], followup2: ["PVA 2 Sub"] }
@@ -167,12 +167,90 @@ permalink: "/clbomb/"
     let currentNumber = null;
     let currentMode = null; // 'add' or 'search'
     let currentTab = { type: 'pca', category: 'standard' };
-    
     let cloudTextsForNumber = [];
 
-    // --- CLOUD SYNC ---
+    // --- ACTIONS ---
+
+    function actionAdd() {
+        const num = document.getElementById('mainNumberInput').value.trim();
+        if (!num) return alert("Please enter a number first!");
+
+        currentNumber = num;
+        currentMode = 'add';
+        cloudTextsForNumber = []; // Reset
+
+        // Instantly show the green box and update status
+        document.getElementById('statusDisplay').textContent = `ADD MODE: Assigning to ${num}`;
+        document.getElementById('statusDisplay').style.color = '#f59e0b';
+        
+        const displayBox = document.getElementById('mainTextDisplay');
+        displayBox.style.display = 'block';
+        displayBox.classList.add('active');
+        displayBox.classList.remove('void-state');
+        displayBox.textContent = "Click to assign a text to " + num;
+        
+        renderCopyBoxes(currentTab.type, currentTab.category);
+    }
+
+    async function actionSearch() {
+        const num = document.getElementById('mainNumberInput').value.trim();
+        if (!num) return alert("Please enter a number first!");
+
+        currentNumber = num;
+        currentMode = 'search';
+
+        document.getElementById('statusDisplay').textContent = `SEARCH MODE: Fetching ${num} from cloud...`;
+        document.getElementById('statusDisplay').style.color = '#3b82f6';
+        document.getElementById('mainTextDisplay').style.display = 'none'; 
+
+        // Fetch from cloud
+        cloudTextsForNumber = await fetchTextsFromCloud(num);
+
+        if (cloudTextsForNumber.length === 0) {
+            document.getElementById('statusDisplay').textContent = `No texts found for ${num}`;
+        } else {
+            document.getElementById('statusDisplay').textContent = `Found ${cloudTextsForNumber.length} texts for ${num}`;
+        }
+
+        renderCopyBoxes(currentTab.type, currentTab.category);
+    }
+
+    async function clickMainText() {
+        if (currentMode !== 'add' || !currentNumber) return;
+
+        const displayBox = document.getElementById('mainTextDisplay');
+        displayBox.textContent = "Saving to cloud...";
+
+        let masterQueue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
+        
+        if (masterQueue.length === 0) {
+            displayBox.textContent = "VOID - No texts left in your Page 1 Queue!";
+            displayBox.classList.add('void-state');
+            return;
+        }
+
+        const nextText = masterQueue.shift(); 
+        localStorage.setItem('clbomb_queue', JSON.stringify(masterQueue));
+
+        // Save to Supabase
+        const success = await saveTextToCloud(currentNumber, nextText);
+        
+        if (success) {
+            cloudTextsForNumber.push(nextText);
+            displayBox.textContent = `Saved: "${nextText}" (Click to add another)`;
+            document.getElementById('statusDisplay').textContent = `ADD MODE: ${cloudTextsForNumber.length} texts saved to ${currentNumber}`;
+            
+            // Re-render the copy boxes in case we just un-voided them
+            renderCopyBoxes(currentTab.type, currentTab.category);
+        } else {
+            displayBox.textContent = "Error saving to cloud. Check console (F12).";
+        }
+    }
+
+    // --- CLOUD SYNC FUNCTIONS ---
+
     async function saveTextToCloud(number, text) {
-        // 1. Get existing texts for this number
+        // 1. Fetch existing texts for this number
         const { data: existing, error: fetchErr } = await supabaseClient
             .from('clbomb_data')
             .select('assigned_texts')
@@ -189,7 +267,6 @@ permalink: "/clbomb/"
 
         if (upsertErr) {
             console.error("Save error:", upsertErr);
-            document.getElementById('statusDisplay').textContent = "Error saving to cloud! Check console.";
             return false;
         }
         return true;
@@ -206,77 +283,6 @@ permalink: "/clbomb/"
             console.error("Fetch error:", error);
         }
         return existing ? existing.assigned_texts : [];
-    }
-
-    // --- ACTIONS ---
-
-    async function actionAdd() {
-        const num = document.getElementById('mainNumberInput').value.trim();
-        if (!num) return alert("Please enter a number first!");
-
-        currentNumber = num;
-        currentMode = 'add';
-
-        cloudTextsForNumber = await fetchTextsForCloud(num);
-
-        document.getElementById('statusDisplay').textContent = `ADD MODE: Assigning to ${num}`;
-        document.getElementById('statusDisplay').style.color = '#f59e0b';
-        
-        document.getElementById('mainTextDisplay').style.display = 'block';
-        document.getElementById('mainTextDisplay').classList.add('active');
-        document.getElementById('mainTextDisplay').classList.remove('void-state');
-        document.getElementById('mainTextDisplay').textContent = "Click to add a text to " + num;
-        
-        renderCopyBoxes(currentTab.type, currentTab.category);
-    }
-
-    async function actionSearch() {
-        const num = document.getElementById('mainNumberInput').value.trim();
-        if (!num) return alert("Please enter a number first!");
-
-        currentNumber = num;
-        currentMode = 'search';
-
-        document.getElementById('statusDisplay').textContent = `SEARCH MODE: Viewing ${num}`;
-        document.getElementById('statusDisplay').style.color = '#3b82f6';
-        
-        document.getElementById('mainTextDisplay').style.display = 'none'; 
-
-        cloudTextsForNumber = await fetchTextsFromCloud(num);
-
-        if (cloudTextsForNumber.length === 0) {
-            document.getElementById('statusDisplay').textContent = `No texts found for ${num}`;
-        } else {
-            document.getElementById('statusDisplay').textContent = `Found ${cloudTextsForNumber.length} texts for ${num}`;
-        }
-
-        renderCopyBoxes(currentTab.type, currentTab.category);
-    }
-
-    async function clickMainText() {
-        if (currentMode !== 'add' || !currentNumber) return;
-
-        document.getElementById('mainTextDisplay').textContent = "Saving...";
-
-        let masterQueue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
-        
-        if (masterQueue.length === 0) {
-            document.getElementById('mainTextDisplay').textContent = "VOID - No texts left in queue!";
-            document.getElementById('mainTextDisplay').classList.add('void-state');
-            return;
-        }
-
-        const nextText = masterQueue.shift(); 
-        localStorage.setItem('clbomb_queue', JSON.stringify(masterQueue));
-
-        const success = await saveTextToCloud(currentNumber, nextText);
-        
-        if (success) {
-            cloudTextsForNumber.push(nextText);
-            document.getElementById('mainTextDisplay').textContent = `Saved: "${nextText}" - Click to add another!`;
-            document.getElementById('statusDisplay').textContent = `ADD MODE: ${cloudTextsForNumber.length} texts saved to ${currentNumber}`;
-            renderCopyBoxes(currentTab.type, currentTab.category);
-        }
     }
 
     // --- UI RENDERING ---
@@ -298,7 +304,6 @@ permalink: "/clbomb/"
 
     function renderCopyBoxes(type, category) {
         const list = data[type][category];
-        
         let masterQueue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
         let isVoid = false;
 
