@@ -8,7 +8,52 @@ permalink: "/"
     .home-content { max-width: 800px; margin: 20px auto; padding: 20px; }
     .main-title { text-align: center; margin-bottom: 20px; }
 
-    /* Input Area */
+    /* --- TOGGLE IMAGES CSS --- */
+    .toggle-container {
+        display: flex;
+        justify-content: center;
+        gap: 40px; 
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #1e1e1e;
+        border-radius: 12px;
+        border: 1px solid #333;
+    }
+
+    .toggle-shape {
+        width: 70px;
+        height: 70px;
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s;
+        border: 3px solid #333;
+    }
+    
+    .toggle-shape:hover {
+        opacity: 0.8;
+    }
+
+    /* The Circle */
+    .shape-circle {
+        border-radius: 50%; 
+    }
+
+    /* The Square */
+    .shape-square {
+        border-radius: 12px; 
+    }
+
+    /* Colors */
+    .toggle-shape.is-green {
+        background-color: #10b981; 
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+    }
+
+    .toggle-shape.is-red {
+        background-color: #ef4444;
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+    }
+
+    /* --- EXISTING INPUT AREA CSS --- */
     .input-area { background: #1e1e1e; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
     textarea {
         width: 100%; height: 150px; padding: 15px; font-size: 16px; background: #111; 
@@ -31,7 +76,6 @@ permalink: "/"
     }
     .list-item.confirmed { border-color: #2e8555; background: #1a2a22; }
     
-    /* Text and Edit Input */
     .list-item p { margin: 0; flex-grow: 1; font-size: 15px; line-height: 1.4; white-space: pre-wrap; word-break: break-word;}
     .edit-input {
         flex-grow: 1; padding: 8px 12px; font-size: 15px; background: #111; 
@@ -40,7 +84,6 @@ permalink: "/"
     
     .item-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0;}
     
-    /* Buttons */
     .btn-go { background-color: #f59e0b; color: #000; font-weight: bold; padding: 8px 15px; border-radius: 6px; cursor: pointer; border: none; transition: 0.2s; }
     .btn-go:hover { background-color: #d97706; }
     .btn-go:disabled { background-color: #444; color: #888; cursor: not-allowed; }
@@ -63,6 +106,14 @@ permalink: "/"
 <main class="home-content">
     <h1 class="main-title">clinput <span class="count-badge" id="countBadge">0 Confirmed</span></h1>
     
+    <!-- TOGGLE IMAGES -->
+    <div class="toggle-container">
+        <!-- Circle Toggle (Starts Red) -->
+        <div class="toggle-shape shape-circle is-red" id="circleToggle" onclick="toggleShape('circle')"></div>
+        <!-- Square Toggle (Starts Green) -->
+        <div class="toggle-shape shape-square is-green" id="squareToggle" onclick="toggleShape('square')"></div>
+    </div>
+
     <!-- Paste Area -->
     <div class="input-area">
         <textarea id="bulkInput" placeholder="Paste or type multiple lines of text here. Click 'Split into Items' below."></textarea>
@@ -77,6 +128,29 @@ permalink: "/"
 </main>
 
 <script>
+    // --- TOGGLE LOGIC (EXCLUSIVE) ---
+    function toggleShape(shape) {
+        const circle = document.getElementById('circleToggle');
+        const square = document.getElementById('squareToggle');
+
+        if (shape === 'circle') {
+            // If circle is clicked, make it green and square red
+            circle.classList.remove('is-red');
+            circle.classList.add('is-green');
+            
+            square.classList.remove('is-green');
+            square.classList.add('is-red');
+        } else if (shape === 'square') {
+            // If square is clicked, make it green and circle red
+            square.classList.remove('is-red');
+            square.classList.add('is-green');
+            
+            circle.classList.remove('is-green');
+            circle.classList.add('is-red');
+        }
+    }
+
+    // --- EXISTING LOGIC ---
     let items = [];
     let idCounter = 0;
 
@@ -159,13 +233,12 @@ permalink: "/"
         renderList();
     }
 
-    // UPDATED: Opens search in a background tab
     function searchInternet(text) {
         const query = encodeURIComponent(text);
         const newTab = window.open(`https://www.google.com/search?q=${query}`, '_blank');
         if (newTab) {
-            newTab.blur();    // Push the new tab to the background
-            window.focus();   // Keep your cursor on the clinput page
+            newTab.blur(); 
+            window.focus(); 
         }
     }
 
