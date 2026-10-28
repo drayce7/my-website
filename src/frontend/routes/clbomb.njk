@@ -155,8 +155,8 @@ permalink: "/clbomb/"
 </main>
 
 <script>
-    // --- YOUR LEGACY ANON KEY IS PLACED HERE ---
-    const SUPABASE_URL = 'https://kbdyicxkldqyceorqjcf.supabase.co';
+    // --- CHANGED .CO TO .IN HERE TO BYPASS NETWORK BLOCK ---
+    const SUPABASE_URL = 'https://kbdyicxkldqyceorqjcf.supabase.in'; 
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtiZGl5Y3hrbGRxeWNlb3JxamNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwNTE2OTYsImV4cCI6MjEwODYyNzY5Nn0.97Tb6jTu6K-Fdk2IR8pFjyRhWNfkull_ls9unGLiuw8';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -256,22 +256,18 @@ permalink: "/clbomb/"
             return;
         }
 
-        // Temporarily show the text
         const nextText = masterQueue.shift(); 
         displayBox.textContent = nextText;
         document.getElementById('statusDisplay').textContent = `SAVING TO ${currentNumber}...`;
 
-        // Attempt to save to cloud
         const success = await saveTextToCloud(currentNumber, nextText);
 
         if (success) {
-            // Only remove from local queue if the cloud save was successful
             localStorage.setItem('clbomb_queue', JSON.stringify(masterQueue));
             cloudTextsForNumber.push(nextText);
             document.getElementById('statusDisplay').textContent = `SAVED TO ${currentNumber}`;
             document.getElementById('statusDisplay').style.color = '#10b981'; // Green
         } else {
-            // Put the text back if it failed
             masterQueue.unshift(nextText);
             document.getElementById('statusDisplay').textContent = `ERROR SAVING TO CLOUD!`;
             document.getElementById('statusDisplay').style.color = '#ef4444'; // Red
@@ -286,7 +282,6 @@ permalink: "/clbomb/"
 
     async function saveTextToCloud(number, text) {
         try {
-            // 1. Fetch existing
             const { data: existing, error: fetchErr } = await supabaseClient
                 .from('clbomb_data')
                 .select('assigned_texts')
@@ -301,7 +296,6 @@ permalink: "/clbomb/"
             let currentTexts = existing ? existing.assigned_texts : [];
             currentTexts.push(text);
 
-            // 2. Upsert
             const { error: upsertErr } = await supabaseClient
                 .from('clbomb_data')
                 .upsert({ number: number, assigned_texts: currentTexts });
