@@ -23,16 +23,20 @@ permalink: "/clbomb/"
     
     .status-text { flex-grow: 1; font-weight: bold; font-size: 14px; color: #aaa; text-align: right; }
 
-    /* Made the green box clickable with a pointer cursor */
+    /* Main Text Area */
+    .main-text-container { display: flex; gap: 10px; margin-bottom: 15px; }
     .main-text-box { 
-        background-color: #2e8555; border: 2px solid #236b43; border-radius: 8px; 
+        flex-grow: 1; background-color: #2e8555; border: 2px solid #236b43; border-radius: 8px; 
         padding: 15px; text-align: center; font-size: 18px; font-weight: bold; 
-        color: white; transition: 0.2s; margin-bottom: 15px; min-height: 24px;
-        cursor: pointer; user-select: none;
+        color: white; transition: 0.2s; min-height: 24px;
+        user-select: text; cursor: pointer;
     }
     .main-text-box:hover { background-color: #236b43; }
     .main-text-box.active { border-color: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
     .main-text-box.void-state { background-color: #4a0000; border-color: #ff0000; color: #ffaaaa; cursor: not-allowed; }
+    
+    .btn-copy-main { padding: 15px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 20px; transition: 0.2s;}
+    .btn-copy-main:hover { background: #2563eb; }
 
     .tabs-container { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
     .tab-btn { padding: 8px 12px; background: #222; color: #ccc; border: 1px solid #444; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; flex-grow: 1; text-align: center; font-size: 14px;}
@@ -72,9 +76,11 @@ permalink: "/clbomb/"
         <div class="status-text" id="statusDisplay">Ready</div>
     </div>
 
-    <!-- GREEN BOX (Clicking it now copies) -->
-    <div class="main-text-box" id="mainTextDisplay" style="display: none;" onclick="copyMainText()">
-        Waiting for number...
+    <div class="main-text-container" id="mainTextContainer" style="display: none;">
+        <div class="main-text-box" id="mainTextDisplay" onclick="handleMainTextClick()">
+            Waiting for number...
+        </div>
+        <button class="btn-copy-main" onclick="copyMainText()">📋</button>
     </div>
 
     <div class="tabs-container">
@@ -163,6 +169,7 @@ permalink: "/clbomb/"
     let currentMode = null; 
     let currentTab = { type: 'pca', category: 'standard' };
     let cloudTextsForNumber = [];
+    let searchIndex = 0; // Tracks where we are in Search Mode
 
     // --- ACTIONS ---
 
@@ -173,14 +180,79 @@ permalink: "/clbomb/"
         currentNumber = num;
         currentMode = 'add';
         
+        const textContainer = document.getElementById('mainTextContainer');
         const displayBox = document.getElementById('mainTextDisplay');
-        displayBox.style.display = 'block';
+        
+        textContainer.style.display = 'flex';
         displayBox.classList.add('active');
         displayBox.classList.remove('void-state');
         
         document.getElementById('statusDisplay').textContent = `ADD MODE: ${num}`;
         document.getElementById('statusDisplay').style.color = '#f59e0b';
 
+        await assignNextFromQueue();
+    }
+
+    async function actionSearch() {
+        const num = document.getElementById('mainNumberInput').value.trim();
+        if (!num) return alert("Please enter a number first!");
+
+        currentNumber = num;
+        currentMode = 'search';
+        searchIndex = 0; // Reset index to start from the first saved text
+
+        document.getElementById('statusDisplay').textContent = `SEARCHING ${num}...`;
+        document.getElementById('statusDisplay').style.color = '#3b82f6';
+        
+        const textContainer = document.getElementById('mainTextContainer');
+        const displayBox = document.getElementById('mainTextDisplay');
+        
+        textContainer.style.display = 'flex';
+        displayBox.classList.add('active');
+        displayBox.classList.remove('void-state');
+        
+        cloudTextsForNumber = await fetchTextsFromCloud(num);
+
+        if (cloudTextsForNumber.length === 0) {
+            displayBox.textContent = "VOID - No history found";
+            displayBox.classList.add('void-state');
+            document.getElementById('statusDisplay').textContent = `NO TEXTS FOR ${num}`;
+        } else {
+            displayBox.textContent = cloudTextsForNumber[searchIndex]; 
+            document.getElementById('statusDisplay').textContent = `FOUND ${cloudTextsForNumber.length} TEXTS`;
+        }
+
+        renderCopyBoxes(currentTab.type, currentTab.category);
+    }
+
+    // --- THE CAROUSEL LOGIC ---
+
+    async function handleMainTextClick() {
+        if (currentMode === 'add') {
+            // Copy first
+            copyMainText();
+            // Then assign next
+            await assignNextFromQueue();
+        } 
+        else if (currentMode === 'search') {
+            // Copy first
+            copyMainText();
+            // Then rotate through search history
+            if (searchIndex < cloudTextsForNumber.length - 1) {
+                searchIndex++;
+                document.getElementById('mainTextDisplay').textContent = cloudTextsForNumber[searchIndex];
+                document.getElementById('statusDisplay').textContent = `VIEWING ${searchIndex + 1} OF ${cloudTextsForNumber.length}`;
+            } else {
+                document.getElementById('mainTextDisplay').textContent = "VOID - End of history";
+                document.getElementById('mainTextDisplay').classList.add('void-state');
+                document.getElementById('statusDisplay').textContent = `END OF HISTORY`;
+            }
+            renderCopyBoxes(currentTab.type, currentTab.category);
+        }
+    }
+
+    async function assignNextFromQueue() {
+        const displayBox = document.getElementById('mainTextDisplay');
         let masterQueue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
         
         if (masterQueue.length === 0) {
@@ -190,47 +262,19 @@ permalink: "/clbomb/"
             return;
         }
 
-        // Grab and display instantly
         const nextText = masterQueue.shift(); 
         localStorage.setItem('clbomb_queue', JSON.stringify(masterQueue));
         displayBox.textContent = nextText;
         
-        // Save to cloud
-        cloudTextsForNumber = await fetchTextsFromCloud(num);
+        cloudTextsForNumber = await fetchTextsFromCloud(currentNumber);
         cloudTextsForNumber.push(nextText);
-        await saveTextToCloud(num, nextText);
+        await saveTextToCloud(currentNumber, nextText);
 
-        document.getElementById('statusDisplay').textContent = `SAVED TO ${num}`;
+        document.getElementById('statusDisplay').textContent = `SAVED TO ${currentNumber}`;
         renderCopyBoxes(currentTab.type, currentTab.category);
     }
 
-    async function actionSearch() {
-        const num = document.getElementById('mainNumberInput').value.trim();
-        if (!num) return alert("Please enter a number first!");
-
-        currentNumber = num;
-        currentMode = 'search';
-
-        document.getElementById('statusDisplay').textContent = `SEARCHING ${num}...`;
-        document.getElementById('statusDisplay').style.color = '#3b82f6';
-        
-        const displayBox = document.getElementById('mainTextDisplay');
-        displayBox.style.display = 'block';
-        displayBox.classList.add('active');
-        
-        cloudTextsForNumber = await fetchTextsFromCloud(num);
-
-        if (cloudTextsForNumber.length === 0) {
-            displayBox.textContent = "VOID - No history found";
-            displayBox.classList.add('void-state');
-            document.getElementById('statusDisplay').textContent = `NO TEXTS FOR ${num}`;
-        } else {
-            displayBox.textContent = cloudTextsForNumber[0]; 
-            document.getElementById('statusDisplay').textContent = `FOUND ${cloudTextsForNumber.length} TEXTS`;
-        }
-
-        renderCopyBoxes(currentTab.type, currentTab.category);
-    }
+    // --- CLOUD FUNCTIONS ---
 
     async function saveTextToCloud(number, text) {
         const { data: existing } = await supabaseClient.from('clbomb_data').select('assigned_texts').eq('number', number).single();
@@ -244,19 +288,30 @@ permalink: "/clbomb/"
         return existing ? existing.assigned_texts : [];
     }
 
-    // --- NEW: COPY MAIN TEXT ---
+    // --- COPY FUNCTIONS ---
+
     function copyMainText() {
         const text = document.getElementById('mainTextDisplay').textContent;
-        
         if (text.includes("VOID") || text.includes("Waiting") || text === "") return;
 
         navigator.clipboard.writeText(text);
         
-        // Flash the box green to show it was copied
+        // Visual feedback flash
         const box = document.getElementById('mainTextDisplay');
         const originalBg = box.style.backgroundColor;
         box.style.backgroundColor = "#10b981"; 
         setTimeout(() => { box.style.backgroundColor = originalBg; }, 300);
+    }
+
+    function copyToClipboard(displayId, btnId) {
+        const text = document.getElementById(displayId).textContent;
+        if (text.includes("VOID") || text === "Empty...") return; 
+        
+        navigator.clipboard.writeText(text);
+        const btn = document.getElementById(btnId);
+        const originalText = btn.textContent;
+        btn.textContent = "✅";
+        setTimeout(() => { btn.textContent = originalText; }, 1000);
     }
 
     // --- UI RENDERING ---
@@ -281,7 +336,7 @@ permalink: "/clbomb/"
         let masterQueue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
         let isVoid = false;
 
-        if (currentMode === 'search' && cloudTextsForNumber.length === 0) isVoid = true;
+        if (currentMode === 'search' && searchIndex >= cloudTextsForNumber.length) isVoid = true;
         if (currentMode === 'add' && masterQueue.length === 0 && cloudTextsForNumber.length === 0) isVoid = true;
 
         const disp1 = document.getElementById(type + '-display-1');
@@ -318,17 +373,6 @@ permalink: "/clbomb/"
         if (type === 'pca') {
             document.getElementById(type + '-display-2').textContent = list[Math.floor(Math.random() * list.length)];
         }
-    }
-
-    function copyToClipboard(displayId, btnId) {
-        const text = document.getElementById(displayId).textContent;
-        if (text.includes("VOID") || text === "Empty...") return; 
-        
-        navigator.clipboard.writeText(text);
-        const btn = document.getElementById(btnId);
-        const originalText = btn.textContent;
-        btn.textContent = "✅";
-        setTimeout(() => { btn.textContent = originalText; }, 1000);
     }
 
     // --- MANAGE SECTION ---
