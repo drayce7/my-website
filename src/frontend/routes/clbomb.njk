@@ -3,7 +3,6 @@ layout: "base.njk"
 title: "CLbomb"
 permalink: "/clbomb/"
 ---
-<!-- Load Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
@@ -32,19 +31,16 @@ permalink: "/clbomb/"
 <style>
     body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; }
     .bomb-container { max-width: 1000px; margin: 0 auto; padding: 10px 20px; }
-
     .top-line { display: flex; gap: 10px; align-items: center; background: #1e1e1e; border: 1px solid #333; border-radius: 10px; padding: 10px 15px; margin-bottom: 15px; }
     .input-group { display: flex; align-items: center; gap: 8px; }
     .input-group label { font-weight: bold; color: #888; font-size: 13px; text-transform: uppercase; }
     
     .number-input { width: 80px; padding: 8px; font-size: 16px; font-weight: bold; text-align: center; background: #111; border: 2px solid #444; color: white; border-radius: 6px; outline: none; }
     .number-input:focus { border-color: #3b82f6; }
-
     .go-btn { padding: 8px 15px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; }
     .go-btn:hover { background: #2563eb; }
     .btn-search { background: #8b5cf6; }
     .btn-search:hover { background: #7c3aed; }
-    
     .status-text { flex-grow: 1; font-weight: bold; font-size: 14px; color: #aaa; text-align: right; }
 
     .main-text-container { display: flex; gap: 10px; margin-bottom: 15px; }
@@ -57,7 +53,6 @@ permalink: "/clbomb/"
     .main-text-box:hover { background-color: #236b43; }
     .main-text-box.active { border-color: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
     .main-text-box.void-state { background-color: #4a0000; border-color: #ff0000; color: #ffaaaa; cursor: not-allowed; }
-    
     .btn-copy-main { padding: 15px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 20px; transition: 0.2s;}
     .btn-copy-main:hover { background: #2563eb; }
 
@@ -87,7 +82,6 @@ permalink: "/clbomb/"
 
 <main class="bomb-container">
     <h1 style="margin-top: 10px; margin-bottom: 10px;">CLbomb</h1>
-    
     <div class="top-line">
         <div class="input-group">
             <label>Number:</label>
@@ -95,28 +89,20 @@ permalink: "/clbomb/"
         </div>
         <button class="go-btn" onclick="actionAdd()">➔</button>
         <button class="go-btn btn-search" onclick="actionSearch()">🔍</button>
-        
         <div class="status-text" id="statusDisplay">Loading Database...</div>
     </div>
-
     <div class="main-text-container" id="mainTextContainer" style="display: none;">
-        <!-- Clicking this ONLY copies, it does not rotate in Add mode -->
-        <div class="main-text-box" id="mainTextDisplay" onclick="handleMainTextClick()">
-            Waiting for number...
-        </div>
+        <div class="main-text-box" id="mainTextDisplay" onclick="handleMainTextClick()">Waiting for number...</div>
         <button class="btn-copy-main" onclick="copyMainText()">📋</button>
     </div>
-
     <div class="tabs-container">
         <button class="tab-btn active" id="tab-pca-standard" onclick="switchTab('pca', 'standard')">Standard PCA</button>
         <button class="tab-btn" id="tab-pca-followup1" onclick="switchTab('pca', 'followup1')">Standard PCA 1</button>
         <button class="tab-btn" id="tab-pca-followup2" onclick="switchTab('pca', 'followup2')">Standard PCA 2</button>
-        
         <button class="tab-btn" id="tab-pva-standard" onclick="switchTab('pva', 'standard')">Standard PVA</button>
         <button class="tab-btn" id="tab-pva-followup1" onclick="switchTab('pva', 'followup1')">Standard PVA 1</button>
         <button class="tab-btn" id="tab-pva-followup2" onclick="switchTab('pva', 'followup2')">Standard PVA 2</button>
     </div>
-
     <div class="copy-panel" id="copyPanel">
         <div id="panel-pca">
             <div class="copy-row">
@@ -128,7 +114,6 @@ permalink: "/clbomb/"
                 <button class="btn-icon" id="pca-btn-2" onclick="copyToClipboard('pca-display-2', 'pca-btn-2')">📋</button>
             </div>
         </div>
-
         <div id="panel-pva" style="display: none;">
             <div class="copy-row">
                 <div class="copy-text-display" id="pva-display-1">Loading...</div>
@@ -136,44 +121,18 @@ permalink: "/clbomb/"
             </div>
         </div>
     </div>
-
     <div class="manage-section">
         <h2>Manage Your Texts</h2>
         <div class="manage-grid">
             <div>
-                <div class="manage-category">
-                    <h3>Standard PCA</h3>
-                    <div id="pca-standard-list"></div>
-                    <button class="btn-add" onclick="addNewText('pca', 'standard')">+ Add</button>
-                </div>
-                <div class="manage-category" style="margin-top:15px;">
-                    <h3>Standard PCA 1</h3>
-                    <div id="pca-followup1-list"></div>
-                    <button class="btn-add" onclick="addNewText('pca', 'followup1')">+ Add</button>
-                </div>
-                <div class="manage-category" style="margin-top:15px;">
-                    <h3>Standard PCA 2</h3>
-                    <div id="pca-followup2-list"></div>
-                    <button class="btn-add" onclick="addNewText('pca', 'followup2')">+ Add</button>
-                </div>
+                <div class="manage-category"><h3>Standard PCA</h3><div id="pca-standard-list"></div><button class="btn-add" onclick="addNewText('pca', 'standard')">+ Add</button></div>
+                <div class="manage-category" style="margin-top:15px;"><h3>Standard PCA 1</h3><div id="pca-followup1-list"></div><button class="btn-add" onclick="addNewText('pca', 'followup1')">+ Add</button></div>
+                <div class="manage-category" style="margin-top:15px;"><h3>Standard PCA 2</h3><div id="pca-followup2-list"></div><button class="btn-add" onclick="addNewText('pca', 'followup2')">+ Add</button></div>
             </div>
-
             <div>
-                <div class="manage-category">
-                    <h3>Standard PVA</h3>
-                    <div id="pva-standard-list"></div>
-                    <button class="btn-add" onclick="addNewText('pva', 'standard')">+ Add</button>
-                </div>
-                <div class="manage-category" style="margin-top:15px;">
-                    <h3>Standard PVA 1</h3>
-                    <div id="pva-followup1-list"></div>
-                    <button class="btn-add" onclick="addNewText('pva', 'followup1')">+ Add</button>
-                </div>
-                <div class="manage-category" style="margin-top:15px;">
-                    <h3>Standard PVA 2</h3>
-                    <div id="pva-followup2-list"></div>
-                    <button class="btn-add" onclick="addNewText('pva', 'followup2')">+ Add</button>
-                </div>
+                <div class="manage-category"><h3>Standard PVA</h3><div id="pva-standard-list"></div><button class="btn-add" onclick="addNewText('pva', 'standard')">+ Add</button></div>
+                <div class="manage-category" style="margin-top:15px;"><h3>Standard PVA 1</h3><div id="pva-followup1-list"></div><button class="btn-add" onclick="addNewText('pva', 'followup1')">+ Add</button></div>
+                <div class="manage-category" style="margin-top:15px;"><h3>Standard PVA 2</h3><div id="pva-followup2-list"></div><button class="btn-add" onclick="addNewText('pva', 'followup2')">+ Add</button></div>
             </div>
         </div>
     </div>
@@ -190,10 +149,28 @@ permalink: "/clbomb/"
     let currentTab = { type: 'pca', category: 'standard' };
     let cloudTextsForNumber = [];
     let searchIndex = 0; 
+    
+    // This holds the texts pulled from the cloud queue
+    let masterQueue = []; 
 
-    window.addEventListener('firebaseLoaded', () => {
+    window.addEventListener('firebaseLoaded', async () => {
         document.getElementById('statusDisplay').textContent = "Ready";
+        // Pre-fetch the cloud queue as soon as the page loads
+        await fetchCloudQueue();
     });
+
+    // --- FETCH THE QUEUE FROM FIREBASE ---
+    async function fetchCloudQueue() {
+        try {
+            const docRef = window.doc(window.db, "clbomb_queue", "current_queue");
+            const docSnap = await window.getDoc(docRef);
+            if (docSnap.exists()) {
+                masterQueue = docSnap.data().texts || [];
+            }
+        } catch (e) {
+            console.error("Could not load queue", e);
+        }
+    }
 
     // --- ACTIONS ---
 
@@ -215,7 +192,6 @@ permalink: "/clbomb/"
         document.getElementById('statusDisplay').textContent = `ADD MODE: ${num}`;
         document.getElementById('statusDisplay').style.color = '#f59e0b';
 
-        // Grab ONE text and stop
         await assignNextFromQueue();
     }
 
@@ -253,11 +229,9 @@ permalink: "/clbomb/"
     }
 
     async function handleMainTextClick() {
-        // If in Add Mode, clicking the green box ONLY copies the text. It doesn't rotate.
         if (currentMode === 'add') {
             copyMainText();
         } 
-        // If in Search Mode, clicking rotates through history.
         else if (currentMode === 'search') {
             copyMainText();
             if (searchIndex < cloudTextsForNumber.length - 1) {
@@ -275,7 +249,6 @@ permalink: "/clbomb/"
 
     async function assignNextFromQueue() {
         const displayBox = document.getElementById('mainTextDisplay');
-        let masterQueue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
         
         if (masterQueue.length === 0) {
             displayBox.textContent = "VOID - No texts left in Page 1 Queue!";
@@ -291,14 +264,16 @@ permalink: "/clbomb/"
         const success = await saveTextToCloud(currentNumber, nextText);
 
         if (success) {
-            localStorage.setItem('clbomb_queue', JSON.stringify(masterQueue));
+            // Update Firebase Queue (remove the text we just used)
+            await updateCloudQueue();
+            
             cloudTextsForNumber.push(nextText);
             document.getElementById('statusDisplay').textContent = `SAVED TO ${currentNumber}`;
-            document.getElementById('statusDisplay').style.color = '#10b981'; // Green
+            document.getElementById('statusDisplay').style.color = '#10b981'; 
         } else {
             masterQueue.unshift(nextText);
             document.getElementById('statusDisplay').textContent = `ERROR SAVING TO CLOUD!`;
-            document.getElementById('statusDisplay').style.color = '#ef4444'; // Red
+            document.getElementById('statusDisplay').style.color = '#ef4444'; 
             displayBox.textContent = "Error saving to database. Check console (F12).";
             displayBox.classList.add('void-state');
         }
@@ -307,6 +282,15 @@ permalink: "/clbomb/"
     }
 
     // --- CLOUD FUNCTIONS (FIREBASE) ---
+
+    async function updateCloudQueue() {
+        try {
+            const docRef = window.doc(window.db, "clbomb_queue", "current_queue");
+            await window.setDoc(docRef, { texts: masterQueue });
+        } catch (e) {
+            console.error("Failed to update queue", e);
+        }
+    }
 
     async function saveTextToCloud(number, text) {
         try {
@@ -319,7 +303,6 @@ permalink: "/clbomb/"
             }
             
             currentTexts.push(text);
-            
             await window.setDoc(docRef, { assigned_texts: currentTexts });
             return true;
         } catch (err) {
@@ -341,8 +324,6 @@ permalink: "/clbomb/"
             return [];
         }
     }
-
-    // --- COPY FUNCTIONS ---
 
     function copyMainText() {
         const text = document.getElementById('mainTextDisplay').textContent;
@@ -367,8 +348,6 @@ permalink: "/clbomb/"
         setTimeout(() => { btn.textContent = originalText; }, 1000);
     }
 
-    // --- UI RENDERING ---
-
     function switchTab(type, category) {
         currentTab = { type, category };
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -386,7 +365,6 @@ permalink: "/clbomb/"
 
     function renderCopyBoxes(type, category) {
         const list = data[type][category];
-        let masterQueue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
         let isVoid = false;
 
         if (currentMode === 'search' && searchIndex >= cloudTextsForNumber.length) isVoid = true;
@@ -428,7 +406,6 @@ permalink: "/clbomb/"
         }
     }
 
-    // --- MANAGE SECTION ---
     function renderLists() {
         ['pca', 'pva'].forEach(type => {
             ['standard', 'followup1', 'followup2'].forEach(category => {
