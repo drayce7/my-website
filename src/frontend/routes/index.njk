@@ -8,11 +8,12 @@ permalink: "/"
     .home-content { max-width: 800px; margin: 20px auto; padding: 20px; }
     .main-title { text-align: center; margin-bottom: 20px; }
 
-    /* --- TOGGLE IMAGES CSS --- */
+    /* --- TOGGLE CONTAINER --- */
     .toggle-container {
         display: flex;
         justify-content: center;
-        gap: 40px; 
+        align-items: center;
+        gap: 30px; 
         margin-bottom: 30px;
         padding: 20px;
         background: #1e1e1e;
@@ -24,36 +25,48 @@ permalink: "/"
         width: 70px;
         height: 70px;
         cursor: pointer;
-        transition: background-color 0.3s, box-shadow 0.3s;
+        transition: all 0.3s ease;
         border: 3px solid #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 24px;
+        color: white;
+        user-select: none;
     }
     
-    .toggle-shape:hover {
-        opacity: 0.8;
+    .toggle-shape:hover { opacity: 0.8; }
+
+    /* Shapes */
+    .shape-circle { border-radius: 50%; }
+    .shape-square { border-radius: 12px; }
+    .shape-triangle {
+        width: 0;
+        height: 0;
+        background-color: transparent !important;
+        border-left: 40px solid transparent;
+        border-right: 40px solid transparent;
+        border-bottom: 70px solid #ef4444; 
+        border-radius: 0;
+        position: relative;
     }
 
-    /* The Circle */
-    .shape-circle {
-        border-radius: 50%; 
-    }
-
-    /* The Square */
-    .shape-square {
-        border-radius: 12px; 
+    .triangle-text {
+        position: absolute;
+        top: 25px;
+        left: -10px;
+        font-size: 18px;
+        color: white;
     }
 
     /* Colors */
-    .toggle-shape.is-green {
-        background-color: #10b981; 
-        box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
-    }
+    .is-green.toggle-shape:not(.shape-triangle) { background-color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+    .is-green.shape-triangle { border-bottom-color: #10b981; box-shadow: 0 15px 15px -10px rgba(16, 185, 129, 0.5); }
+    .is-red.toggle-shape:not(.shape-triangle) { background-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+    .is-red.shape-triangle { border-bottom-color: #ef4444; box-shadow: 0 15px 15px -10px rgba(239, 68, 68, 0.5); }
 
-    .toggle-shape.is-red {
-        background-color: #ef4444;
-        box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
-    }
-
-    /* --- EXISTING INPUT AREA CSS --- */
+    /* --- INPUT AREA --- */
     .input-area { background: #1e1e1e; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
     textarea {
         width: 100%; height: 150px; padding: 15px; font-size: 16px; background: #111; 
@@ -106,51 +119,69 @@ permalink: "/"
 <main class="home-content">
     <h1 class="main-title">clinput <span class="count-badge" id="countBadge">0 Confirmed</span></h1>
     
-    <!-- TOGGLE IMAGES -->
     <div class="toggle-container">
-        <!-- Circle Toggle (Starts Red) -->
         <div class="toggle-shape shape-circle is-red" id="circleToggle" onclick="toggleShape('circle')"></div>
-        <!-- Square Toggle (Starts Green) -->
-        <div class="toggle-shape shape-square is-green" id="squareToggle" onclick="toggleShape('square')"></div>
+        <div class="toggle-shape shape-triangle is-red" id="triangleToggle" onclick="clickTriangle()">
+            <span class="triangle-text" id="triangleCount">7</span>
+        </div>
+        <div class="toggle-shape shape-square is-red" id="squareToggle" onclick="toggleShape('square')"></div>
     </div>
 
-    <!-- Paste Area -->
     <div class="input-area">
         <textarea id="bulkInput" placeholder="Paste or type multiple lines of text here. Click 'Split into Items' below."></textarea>
         <button class="btn btn-add" onclick="splitText()">Split into Items ⬇️</button>
     </div>
 
-    <!-- Generated List -->
     <div class="list-container" id="listContainer"></div>
 
-    <!-- Apply Button -->
     <button class="btn btn-apply" onclick="applyAndGo()">Apply & Go to CLbomb ➔</button>
 </main>
 
 <script>
-    // --- TOGGLE LOGIC (EXCLUSIVE) ---
+    let triangleClicks = 7;
+
     function toggleShape(shape) {
         const circle = document.getElementById('circleToggle');
         const square = document.getElementById('squareToggle');
+        const triangle = document.getElementById('triangleToggle');
 
         if (shape === 'circle') {
-            // If circle is clicked, make it green and square red
-            circle.classList.remove('is-red');
-            circle.classList.add('is-green');
-            
-            square.classList.remove('is-green');
-            square.classList.add('is-red');
-        } else if (shape === 'square') {
-            // If square is clicked, make it green and circle red
-            square.classList.remove('is-red');
-            square.classList.add('is-green');
-            
-            circle.classList.remove('is-green');
-            circle.classList.add('is-red');
+            circle.classList.remove('is-red'); circle.classList.add('is-green');
+            square.classList.remove('is-green'); square.classList.add('is-red');
+            triangle.classList.remove('is-green'); triangle.classList.add('is-red');
+            triangleClicks = 7; document.getElementById('triangleCount').textContent = triangleClicks;
+        } 
+        else if (shape === 'square') {
+            square.classList.remove('is-red'); square.classList.add('is-green');
+            circle.classList.remove('is-green'); circle.classList.add('is-red');
+            triangle.classList.remove('is-green'); triangle.classList.add('is-red');
+            triangleClicks = 7; document.getElementById('triangleCount').textContent = triangleClicks;
         }
     }
 
-    // --- EXISTING LOGIC ---
+    function clickTriangle() {
+        const triangle = document.getElementById('triangleToggle');
+        const circle = document.getElementById('circleToggle');
+        const square = document.getElementById('squareToggle');
+        const countText = document.getElementById('triangleCount');
+
+        if (triangle.classList.contains('is-green')) {
+            triangleClicks = 7; countText.textContent = triangleClicks;
+            triangle.classList.remove('is-green'); triangle.classList.add('is-red');
+            return;
+        }
+
+        triangleClicks--;
+        countText.textContent = triangleClicks;
+
+        if (triangleClicks <= 0) {
+            triangle.classList.remove('is-red'); triangle.classList.add('is-green');
+            countText.textContent = "✓";
+            circle.classList.remove('is-green'); circle.classList.add('is-red');
+            square.classList.remove('is-green'); square.classList.add('is-red');
+        }
+    }
+
     let items = [];
     let idCounter = 0;
 
@@ -162,14 +193,8 @@ permalink: "/"
         
         lines.forEach(line => {
             const isDuplicate = items.some(item => item.text === line);
-            
             if (!isDuplicate) {
-                items.push({
-                    id: idCounter++,
-                    text: line,
-                    confirmed: false,
-                    isEditing: false
-                });
+                items.push({ id: idCounter++, text: line, confirmed: false, isEditing: false });
             }
         });
 
@@ -180,15 +205,12 @@ permalink: "/"
     function renderList() {
         const container = document.getElementById('listContainer');
         container.innerHTML = '';
-        
         let confirmedCount = 0;
 
         items.forEach(item => {
             if (item.confirmed) confirmedCount++;
-
             const div = document.createElement('div');
             div.className = `list-item ${item.confirmed ? 'confirmed' : ''}`;
-            
             const safeText = item.text.replace(/'/g, "\\'");
             
             let textHtml = '';
@@ -196,11 +218,7 @@ permalink: "/"
 
             if (item.isEditing) {
                 textHtml = `<input type="text" class="edit-input" id="edit-input-${item.id}" value="${item.text.replace(/"/g, '&quot;')}" onkeypress="handleEditEnter(event, ${item.id})">`;
-                actionHtml = `
-                    <div class="item-actions">
-                        <button class="btn-save" onclick="saveEdit(${item.id})">💾 Save</button>
-                    </div>
-                `;
+                actionHtml = `<div class="item-actions"><button class="btn-save" onclick="saveEdit(${item.id})">💾 Save</button></div>`;
             } else {
                 textHtml = `<p>${item.text}</p>`;
                 actionHtml = `
@@ -222,10 +240,7 @@ permalink: "/"
 
     function confirmItem(id) {
         const item = items.find(i => i.id === id);
-        if (item) {
-            item.confirmed = true;
-            renderList();
-        }
+        if (item) { item.confirmed = true; renderList(); }
     }
 
     function deleteItem(id) {
@@ -233,12 +248,22 @@ permalink: "/"
         renderList();
     }
 
+    // --- THE SPLIT-WINDOW SEARCH ---
     function searchInternet(text) {
         const query = encodeURIComponent(text);
-        const newTab = window.open(`https://www.google.com/search?q=${query}`, '_blank');
-        if (newTab) {
-            newTab.blur(); 
-            window.focus(); 
+        const url = `https://www.google.com/search?q=${query}`;
+        
+        // This forces a wide, separate pop-up window 
+        const newWindow = window.open(url, '_blank', 'width=1200,height=900,menubar=yes,toolbar=yes,location=yes,status=yes');
+        
+        if (newWindow) {
+            // Try to force it to the right side of the screen (may be blocked by browser)
+            newWindow.moveTo(screen.width / 2, 0);
+            newWindow.resizeTo(screen.width / 2, screen.height);
+            
+            // Keep your main page focused
+            newWindow.blur();
+            window.focus();
         }
     }
 
@@ -257,20 +282,13 @@ permalink: "/"
     function saveEdit(id) {
         const input = document.getElementById(`edit-input-${id}`);
         if (!input) return;
-        
         const newText = input.value.trim();
-        if (newText === "") {
-            alert("Text cannot be empty.");
-            return;
-        }
+        if (newText === "") { alert("Text cannot be empty."); return; }
 
         const item = items.find(i => i.id === id);
         if (item) {
             const isDuplicate = items.some(i => i.id !== id && i.text === newText);
-            if (isDuplicate) {
-                alert("This text already exists in your list!");
-                return;
-            }
+            if (isDuplicate) { alert("This text already exists in your list!"); return; }
 
             item.text = newText;
             item.isEditing = false;
@@ -279,18 +297,12 @@ permalink: "/"
     }
 
     function handleEditEnter(event, id) {
-        if (event.key === 'Enter') {
-            saveEdit(id);
-        }
+        if (event.key === 'Enter') { saveEdit(id); }
     }
 
     function applyAndGo() {
         const confirmedTexts = items.filter(i => i.confirmed).map(i => i.text);
-
-        if (confirmedTexts.length === 0) {
-            alert("Please click 'GO' on at least one item before applying!");
-            return;
-        }
+        if (confirmedTexts.length === 0) { alert("Please click 'GO' on at least one item before applying!"); return; }
 
         let queue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
         queue = [...confirmedTexts, ...queue];
