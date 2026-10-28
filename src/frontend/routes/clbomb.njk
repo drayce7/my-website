@@ -3,7 +3,34 @@ layout: "base.njk"
 title: "CLbomb"
 permalink: "/clbomb/"
 ---
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Load Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+  // Your Firebase Keys
+  const firebaseConfig = {
+    apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
+    authDomain: "clbomb.firebaseapp.com",
+    projectId: "clbomb",
+    storageBucket: "clbomb.firebasestorage.app",
+    messagingSenderId: "515939060816",
+    appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Expose Firebase functions to the global window so the regular script can use them
+  window.db = db;
+  window.doc = doc;
+  window.getDoc = getDoc;
+  window.setDoc = setDoc;
+  
+  // Signal that Firebase is ready
+  window.firebaseReady = true;
+  window.dispatchEvent(new Event('firebaseLoaded'));
+</script>
 
 <style>
     body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; }
@@ -72,7 +99,7 @@ permalink: "/clbomb/"
         <button class="go-btn" onclick="actionAdd()">➔</button>
         <button class="go-btn btn-search" onclick="actionSearch()">🔍</button>
         
-        <div class="status-text" id="statusDisplay">Ready</div>
+        <div class="status-text" id="statusDisplay">Loading Database...</div>
     </div>
 
     <div class="main-text-container" id="mainTextContainer" style="display: none;">
@@ -155,11 +182,6 @@ permalink: "/clbomb/"
 </main>
 
 <script>
-    // --- CHANGED .CO TO .IN HERE TO BYPASS NETWORK BLOCK ---
-    const SUPABASE_URL = 'https://kbdyicxkldqyceorqjcf.supabase.in'; 
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtiZGl5Y3hrbGRxeWNlb3JxamNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwNTE2OTYsImV4cCI6MjEwODYyNzY5Nn0.97Tb6jTu6K-Fdk2IR8pFjyRhWNfkull_ls9unGLiuw8';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
     let data = JSON.parse(localStorage.getItem('clbomb_data')) || {
         pca: { standard: ["PCA Main 1", "PCA Main 2"], followup1: ["PCA 1 Sub A"], followup2: ["PCA 2 Sub A"] },
         pva: { standard: ["PVA Main"], followup1: ["PVA 1 Sub"], followup2: ["PVA 2 Sub"] }
@@ -171,11 +193,17 @@ permalink: "/clbomb/"
     let cloudTextsForNumber = [];
     let searchIndex = 0; 
 
+    // Wait for Firebase to load before enabling buttons
+    window.addEventListener('firebaseLoaded', () => {
+        document.getElementById('statusDisplay').textContent = "Ready";
+    });
+
     // --- ACTIONS ---
 
     async function actionAdd() {
         const num = document.getElementById('mainNumberInput').value.trim();
         if (!num) return alert("Please enter a number first!");
+        if (!window.firebaseReady) return alert("Database still loading, please wait...");
 
         currentNumber = num;
         currentMode = 'add';
@@ -196,6 +224,7 @@ permalink: "/clbomb/"
     async function actionSearch() {
         const num = document.getElementById('mainNumberInput').value.trim();
         if (!num) return alert("Please enter a number first!");
+        if (!window.firebaseReady) return alert("Database still loading, please wait...");
 
         currentNumber = num;
         currentMode = 'search';
@@ -278,51 +307,40 @@ permalink: "/clbomb/"
         renderCopyBoxes(currentTab.type, currentTab.category);
     }
 
-    // --- CLOUD FUNCTIONS ---
+    // --- CLOUD FUNCTIONS (FIREBASE) ---
 
     async function saveTextToCloud(number, text) {
         try {
-            const { data: existing, error: fetchErr } = await supabaseClient
-                .from('clbomb_data')
-                .select('assigned_texts')
-                .eq('number', number)
-                .single();
-
-            if (fetchErr && fetchErr.code !== 'PGRST116') {
-                console.error("Fetch Error:", fetchErr);
-                return false;
+            const docRef = window.doc(window.db, "clbomb_data", number);
+            const docSnap = await window.getDoc(docRef);
+            
+            let currentTexts = [];
+            if (docSnap.exists()) {
+                currentTexts = docSnap.data().assigned_texts || [];
             }
-
-            let currentTexts = existing ? existing.assigned_texts : [];
+            
             currentTexts.push(text);
-
-            const { error: upsertErr } = await supabaseClient
-                .from('clbomb_data')
-                .upsert({ number: number, assigned_texts: currentTexts });
-
-            if (upsertErr) {
-                console.error("Upsert Error:", upsertErr);
-                return false;
-            }
+            
+            await window.setDoc(docRef, { assigned_texts: currentTexts });
             return true;
-
         } catch (err) {
-            console.error("Unexpected Error:", err);
+            console.error("Firebase Save Error:", err);
             return false;
         }
     }
 
     async function fetchTextsFromCloud(number) {
-        const { data: existing, error } = await supabaseClient
-            .from('clbomb_data')
-            .select('assigned_texts')
-            .eq('number', number)
-            .single();
-
-        if (error && error.code !== 'PGRST116') {
-            console.error("Fetch error:", error);
+        try {
+            const docRef = window.doc(window.db, "clbomb_data", number);
+            const docSnap = await window.getDoc(docRef);
+            if (docSnap.exists()) {
+                return docSnap.data().assigned_texts || [];
+            }
+            return [];
+        } catch (err) {
+            console.error("Firebase Fetch Error:", err);
+            return [];
         }
-        return existing ? existing.assigned_texts : [];
     }
 
     // --- COPY FUNCTIONS ---
