@@ -10,33 +10,34 @@ permalink: "/clbomb/"
     body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; }
     .bomb-container { max-width: 1000px; margin: 20px auto; padding: 20px; }
 
-    .top-line { display: flex; gap: 15px; align-items: center; background: #1e1e1e; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-    
-    .input-group { display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+    /* Top Control Area */
+    .top-line { display: flex; gap: 15px; align-items: center; background: #1e1e1e; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+    .input-group { display: flex; align-items: center; gap: 8px; }
     .input-group label { font-weight: bold; color: #888; font-size: 14px; text-transform: uppercase; }
     
-    .number-input, .search-input { padding: 10px; font-size: 16px; font-weight: bold; background: #111; border: 2px solid #444; color: white; border-radius: 8px; outline: none; }
-    .number-input { width: 70px; text-align: center; }
-    .search-input { width: 100px; }
-    .number-input:focus, .search-input:focus { border-color: #3b82f6; }
+    .number-input { width: 100px; padding: 12px; font-size: 18px; font-weight: bold; text-align: center; background: #111; border: 2px solid #444; color: white; border-radius: 8px; outline: none; }
+    .number-input:focus { border-color: #3b82f6; }
 
-    .number-input.locked { background: #222; color: #888; border-color: #333; cursor: not-allowed; }
-
-    .go-btn { padding: 10px 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .go-btn { padding: 12px 18px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; }
     .go-btn:hover { background: #2563eb; }
-    .btn-exit { background: #ef4444; }
-    .btn-exit:hover { background: #dc2626; }
+    .btn-search { background: #8b5cf6; }
+    .btn-search:hover { background: #7c3aed; }
+    
+    .status-text { flex-grow: 1; font-weight: bold; font-size: 16px; color: #ccc; text-align: center; }
 
-    .main-text-box { flex-grow: 1; background-color: #2e8555; border: 2px solid #236b43; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; font-size: 16px; font-weight: bold; color: white; transition: 0.2s; }
+    /* Main Text Box */
+    .main-text-box { background-color: #2e8555; border: 2px solid #236b43; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; font-size: 18px; font-weight: bold; color: white; transition: 0.2s; margin-bottom: 20px;}
     .main-text-box:hover { background-color: #236b43; }
     .main-text-box.active { border-color: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
     .main-text-box.void-state { background-color: #4a0000; border-color: #ff0000; cursor: not-allowed; color: #ffaaaa; }
 
+    /* Tabs */
     .tabs-container { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
     .tab-btn { padding: 10px 15px; background: #222; color: #ccc; border: 1px solid #444; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; flex-grow: 1; text-align: center; }
     .tab-btn:hover { background: #333; color: white; }
     .tab-btn.active { background: #3b82f6; color: white; border-color: #2563eb; }
 
+    /* Copy Panel */
     .copy-panel { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 20px; margin-bottom: 30px; }
     .copy-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
     .copy-text-display { flex-grow: 1; padding: 12px; background: #111; border: 1px solid #444; border-radius: 6px; min-height: 20px; color: #ccc; font-size: 14px; }
@@ -46,6 +47,7 @@ permalink: "/clbomb/"
     .btn-icon:hover { background-color: #2563eb; }
     .btn-icon:disabled { background-color: #444; cursor: not-allowed; }
 
+    /* Manage Section */
     .manage-section { background: #181818; border-radius: 12px; border: 1px solid #333; padding: 20px; }
     .manage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
     .manage-category h3 { color: #888; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 10px;}
@@ -53,39 +55,29 @@ permalink: "/clbomb/"
     .manage-item input { flex-grow: 1; padding: 8px; background-color: #222; border: 1px solid #444; color: white; border-radius: 6px; }
     .btn-delete { background-color: #ef4444; padding: 6px 10px; color: white; border: none; border-radius: 6px; cursor: pointer;}
     .btn-add { background-color: #2e8555; width: 100%; margin-top: 5px; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;}
-
-    .danger-zone { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #444; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
-    .btn-danger { background-color: #ef4444; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-    .btn-danger:hover { background-color: #dc2626; }
-    
-    .status-badge { background: #333; color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-right: 10px; display: none; }
-    .status-badge.search-mode { display: inline-block; background: #f59e0b; color: #000; }
-    .status-badge.syncing { display: inline-block; background: #3b82f6; color: #fff; }
 </style>
 
 <main class="bomb-container">
-    <h1>CLbomb <span id="modeIndicator" class="status-badge">SEARCH MODE</span> <span id="syncIndicator" class="status-badge syncing">Cloud</span></h1>
+    <h1>CLbomb</h1>
     
+    <!-- TOP SINGLE BOX -->
     <div class="top-line">
-        <!-- Number Input -->
-        <div class="input-group" id="numberInputGroup">
-            <label>Number:</label>
-            <input type="text" id="activeNumber" class="number-input" maxlength="3" placeholder="000">
-            <button id="actionBtn" class="go-btn" onclick="handleNumberAction()">➔</button>
-        </div>
-        
-        <!-- Search Input -->
         <div class="input-group">
-            <label>Search:</label>
-            <input type="text" id="searchNumber" class="search-input" placeholder="Search #" onkeypress="handleSearchEnter(event)">
-            <button class="go-btn" onclick="searchNumber()">🔍</button>
+            <label>Number:</label>
+            <input type="text" id="mainNumberInput" class="number-input" maxlength="3" placeholder="000">
         </div>
-
-        <div class="main-text-box" id="mainTextDisplay" onclick="clickMainText()">
-            Enter number to start
-        </div>
+        <button class="go-btn" onclick="actionAdd()">➔</button>
+        <button class="go-btn btn-search" onclick="actionSearch()">🔍</button>
+        
+        <div class="status-text" id="statusDisplay">Enter a number and click ➔ or 🔍</div>
     </div>
 
+    <!-- MAIN TEXT (Only used in Add Mode) -->
+    <div class="main-text-box" id="mainTextDisplay" onclick="clickMainText()" style="display: none;">
+        Click to assign next text
+    </div>
+
+    <!-- TABS & COPY BOXES -->
     <div class="tabs-container">
         <button class="tab-btn active" id="tab-pca-standard" onclick="switchTab('pca', 'standard')">Standard PCA</button>
         <button class="tab-btn" id="tab-pca-followup1" onclick="switchTab('pca', 'followup1')">Standard PCA 1</button>
@@ -116,9 +108,9 @@ permalink: "/clbomb/"
         </div>
     </div>
 
+    <!-- MANAGE SECTION -->
     <div class="manage-section">
         <h2>Manage Your Texts</h2>
-        
         <div class="manage-grid">
             <div>
                 <div class="manage-category">
@@ -156,69 +148,138 @@ permalink: "/clbomb/"
                 </div>
             </div>
         </div>
-
-        <div class="danger-zone">
-            <button class="btn-danger" onclick="clearQueue()">Clear Unassigned Queue</button>
-            <button class="btn-danger" onclick="clearCurrentNumber()">Clear Current Number History</button>
-            <button class="btn-danger" onclick="clearEverything()">🗑️ Clear Local Data</button>
-        </div>
     </div>
 </main>
 
 <script>
-    // --- SUPABASE CLOUD SETUP ---
-    const SUPABASE_URL = 'https://sb_publishable_uoSULCy1-PGGfd3E9dcfww__PxdPjDb';
-    // 🔴 PASTE YOUR API KEY IN THE QUOTES BELOW:
-    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE'; 
+    // --- SUPABASE SETUP ---
+    const SUPABASE_URL = 'https://kbdyicxkldqyceorqjcf.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_uoSULCy1-PGGfd3E9dcfww__PxdPjDb';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // --- DATA STORAGE ---
-    const defaultData = {
-        pca: { standard: ["PCA Main 1", "PCA Main 2"], followup1: ["PCA 1 Sub A", "PCA 1 Sub B"], followup2: ["PCA 2 Sub A"] },
+    // --- STATIC LOCAL DATA (For copy boxes) ---
+    let data = JSON.parse(localStorage.getItem('clbomb_data')) || {
+        pca: { standard: ["PCA Main 1", "PCA Main 2"], followup1: ["PCA 1 Sub A"], followup2: ["PCA 2 Sub A"] },
         pva: { standard: ["PVA Main"], followup1: ["PVA 1 Sub"], followup2: ["PVA 2 Sub"] }
     };
 
-    let data = JSON.parse(localStorage.getItem('clbomb_data')) || defaultData;
-    let masterQueue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
-    let database = {}; // We will load numbers from the cloud as needed
+    // --- GLOBAL STATE ---
+    let currentNumber = null;
+    let currentMode = null; // 'add' or 'search'
+    let currentTab = { type: 'pca', category: 'standard' };
     
-    let currentActiveNumber = null;
-    let currentDisplayIndex = 0;
-    let currentTab = { type: 'pca', category: 'standard' }; 
-    let isSearchMode = false; 
+    let cloudTextsForNumber = [];
 
-    // --- CLOUD FUNCTIONS ---
-
-    // Save or update a number's texts in the cloud
-    async function syncNumberToCloud(number, assignedTexts) {
-        const { error } = await supabaseClient
-            .from('clbomb_data')
-            .upsert({ number: number, assigned_texts: assignedTexts });
-            
-        if (error) console.error("Error saving to cloud:", error);
-    }
-
-    // Fetch a number's texts from the cloud
-    async function loadNumberFromCloud(number) {
-        const { data, error } = await supabaseClient
+    // --- CLOUD SYNC ---
+    async function saveTextToCloud(number, text) {
+        // 1. Get existing texts for this number
+        const { data: existing, error: fetchErr } = await supabaseClient
             .from('clbomb_data')
             .select('assigned_texts')
             .eq('number', number)
             .single();
-            
-        if (error && error.code !== 'PGRST116') { // PGRST116 means empty (no history)
-            console.error("Error loading from cloud:", error);
+
+        let currentTexts = existing ? existing.assigned_texts : [];
+        currentTexts.push(text);
+
+        // 2. Upsert the updated list
+        const { error: upsertErr } = await supabaseClient
+            .from('clbomb_data')
+            .upsert({ number: number, assigned_texts: currentTexts });
+
+        if (upsertErr) {
+            console.error("Save error:", upsertErr);
+            document.getElementById('statusDisplay').textContent = "Error saving to cloud! Check console.";
+            return false;
         }
-        return data ? data.assigned_texts : null;
+        return true;
     }
 
-    // Save local queue (unassigned texts from Page 1)
-    function saveQueueToLocal() {
-        localStorage.setItem('clbomb_data', JSON.stringify(data));
+    async function fetchTextsFromCloud(number) {
+        const { data: existing, error } = await supabaseClient
+            .from('clbomb_data')
+            .select('assigned_texts')
+            .eq('number', number)
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error("Fetch error:", error);
+        }
+        return existing ? existing.assigned_texts : [];
+    }
+
+    // --- ACTIONS ---
+
+    async function actionAdd() {
+        const num = document.getElementById('mainNumberInput').value.trim();
+        if (!num) return alert("Please enter a number first!");
+
+        currentNumber = num;
+        currentMode = 'add';
+
+        cloudTextsForNumber = await fetchTextsForCloud(num);
+
+        document.getElementById('statusDisplay').textContent = `ADD MODE: Assigning to ${num}`;
+        document.getElementById('statusDisplay').style.color = '#f59e0b';
+        
+        document.getElementById('mainTextDisplay').style.display = 'block';
+        document.getElementById('mainTextDisplay').classList.add('active');
+        document.getElementById('mainTextDisplay').classList.remove('void-state');
+        document.getElementById('mainTextDisplay').textContent = "Click to add a text to " + num;
+        
+        renderCopyBoxes(currentTab.type, currentTab.category);
+    }
+
+    async function actionSearch() {
+        const num = document.getElementById('mainNumberInput').value.trim();
+        if (!num) return alert("Please enter a number first!");
+
+        currentNumber = num;
+        currentMode = 'search';
+
+        document.getElementById('statusDisplay').textContent = `SEARCH MODE: Viewing ${num}`;
+        document.getElementById('statusDisplay').style.color = '#3b82f6';
+        
+        document.getElementById('mainTextDisplay').style.display = 'none'; 
+
+        cloudTextsForNumber = await fetchTextsFromCloud(num);
+
+        if (cloudTextsForNumber.length === 0) {
+            document.getElementById('statusDisplay').textContent = `No texts found for ${num}`;
+        } else {
+            document.getElementById('statusDisplay').textContent = `Found ${cloudTextsForNumber.length} texts for ${num}`;
+        }
+
+        renderCopyBoxes(currentTab.type, currentTab.category);
+    }
+
+    async function clickMainText() {
+        if (currentMode !== 'add' || !currentNumber) return;
+
+        document.getElementById('mainTextDisplay').textContent = "Saving...";
+
+        let masterQueue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
+        
+        if (masterQueue.length === 0) {
+            document.getElementById('mainTextDisplay').textContent = "VOID - No texts left in queue!";
+            document.getElementById('mainTextDisplay').classList.add('void-state');
+            return;
+        }
+
+        const nextText = masterQueue.shift(); 
         localStorage.setItem('clbomb_queue', JSON.stringify(masterQueue));
+
+        const success = await saveTextToCloud(currentNumber, nextText);
+        
+        if (success) {
+            cloudTextsForNumber.push(nextText);
+            document.getElementById('mainTextDisplay').textContent = `Saved: "${nextText}" - Click to add another!`;
+            document.getElementById('statusDisplay').textContent = `ADD MODE: ${cloudTextsForNumber.length} texts saved to ${currentNumber}`;
+            renderCopyBoxes(currentTab.type, currentTab.category);
+        }
     }
 
-    // --- UI FUNCTIONS ---
+    // --- UI RENDERING ---
 
     function switchTab(type, category) {
         currentTab = { type, category };
@@ -235,146 +296,14 @@ permalink: "/clbomb/"
         renderCopyBoxes(type, category);
     }
 
-    function handleNumberAction() {
-        if (isSearchMode) {
-            exitSearchMode();
-        } else {
-            setActiveNumber();
-        }
-    }
-
-    function exitSearchMode() {
-        isSearchMode = false;
-        document.getElementById('modeIndicator').classList.remove('search-mode');
-        
-        const numInput = document.getElementById('activeNumber');
-        numInput.classList.remove('locked');
-        numInput.disabled = false;
-        numInput.value = ""; 
-        
-        const actionBtn = document.getElementById('actionBtn');
-        actionBtn.textContent = "➔";
-        actionBtn.classList.remove('btn-exit');
-
-        document.getElementById('mainTextDisplay').textContent = "Enter number to start";
-        document.getElementById('mainTextDisplay').classList.remove('active', 'void-state');
-        currentActiveNumber = null;
-        
-        renderCopyBoxes(currentTab.type, currentTab.category);
-    }
-
-    async function setActiveNumber() {
-        const numInput = document.getElementById('activeNumber').value;
-        if(!numInput) return;
-        
-        isSearchMode = false;
-        currentActiveNumber = numInput;
-        currentDisplayIndex = 0; 
-        
-        document.getElementById('mainTextDisplay').classList.add('active');
-        document.getElementById('mainTextDisplay').textContent = "Syncing with cloud...";
-
-        // Fetch from Supabase
-        const cloudTexts = await loadNumberFromCloud(currentActiveNumber);
-        
-        if (!database[currentActiveNumber]) database[currentActiveNumber] = { assignedTexts: [] };
-        if (cloudTexts) database[currentActiveNumber].assignedTexts = cloudTexts;
-
-        if (database[currentActiveNumber].assignedTexts.length === 0 && masterQueue.length > 0) {
-            clickMainText(); 
-        } else {
-            updateMainTextDisplay();
-        }
-        renderCopyBoxes(currentTab.type, currentTab.category);
-    }
-
-    async function clickMainText() {
-        if (!currentActiveNumber) return;
-        
-        if (!database[currentActiveNumber]) database[currentActiveNumber] = { assignedTexts: [] };
-        const assignedList = database[currentActiveNumber].assignedTexts;
-
-        if (currentDisplayIndex >= assignedList.length - 1) {
-            if (!isSearchMode && masterQueue.length > 0) {
-                const newText = masterQueue.shift(); 
-                assignedList.push(newText);          
-                currentDisplayIndex = assignedList.length - 1; 
-                
-                saveQueueToLocal();
-                // Push to Supabase Cloud!
-                await syncNumberToCloud(currentActiveNumber, assignedList);
-            } else {
-                currentDisplayIndex = assignedList.length; 
-            }
-        } else {
-            currentDisplayIndex++;
-        }
-        
-        updateMainTextDisplay();
-        renderCopyBoxes(currentTab.type, currentTab.category);
-    }
-
-    function updateMainTextDisplay() {
-        if (!currentActiveNumber) return;
-        const assignedList = database[currentActiveNumber] ? database[currentActiveNumber].assignedTexts : [];
-        const displayBox = document.getElementById('mainTextDisplay');
-        
-        displayBox.classList.remove('void-state');
-
-        if (currentDisplayIndex < assignedList.length) {
-            displayBox.textContent = assignedList[currentDisplayIndex];
-        } else {
-            displayBox.textContent = "VOID - End of history";
-            displayBox.classList.add('void-state');
-        }
-    }
-
-    async function searchNumber() {
-        const searchVal = document.getElementById('searchNumber').value;
-        if (!searchVal) return;
-
-        document.getElementById('mainTextDisplay').textContent = "Searching cloud...";
-
-        const cloudTexts = await loadNumberFromCloud(searchVal);
-
-        if (cloudTexts && cloudTexts.length > 0) {
-            isSearchMode = true; 
-            
-            const numInput = document.getElementById('activeNumber');
-            numInput.value = searchVal;
-            numInput.classList.add('locked');
-            numInput.disabled = true;
-
-            const actionBtn = document.getElementById('actionBtn');
-            actionBtn.textContent = "❌";
-            actionBtn.classList.add('btn-exit');
-
-            document.getElementById('modeIndicator').classList.add('search-mode');
-
-            currentActiveNumber = searchVal;
-            currentDisplayIndex = 0; 
-            
-            if (!database[currentActiveNumber]) database[currentActiveNumber] = { assignedTexts: [] };
-            database[currentActiveNumber].assignedTexts = cloudTexts;
-
-            document.getElementById('mainTextDisplay').classList.add('active');
-            updateMainTextDisplay();
-            renderCopyBoxes(currentTab.type, currentTab.category);
-        } else {
-            document.getElementById('mainTextDisplay').textContent = "No history found in cloud";
-            document.getElementById('mainTextDisplay').classList.add('void-state');
-        }
-    }
-
-    function handleSearchEnter(event) {
-        if (event.key === 'Enter') searchNumber();
-    }
-
     function renderCopyBoxes(type, category) {
         const list = data[type][category];
         
-        const assignedList = currentActiveNumber && database[currentActiveNumber] ? database[currentActiveNumber].assignedTexts : [];
-        const isVoid = (currentActiveNumber && currentDisplayIndex >= assignedList.length && (isSearchMode || masterQueue.length === 0));
+        let masterQueue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
+        let isVoid = false;
+
+        if (currentMode === 'search' && cloudTextsForNumber.length === 0) isVoid = true;
+        if (currentMode === 'add' && masterQueue.length === 0 && cloudTextsForNumber.length === 0) isVoid = true;
 
         const disp1 = document.getElementById(type + '-display-1');
         const btn1 = document.getElementById(type + '-btn-1');
@@ -424,42 +353,7 @@ permalink: "/clbomb/"
         setTimeout(() => { btn.textContent = originalText; }, 1000);
     }
 
-    // --- CLEAR FUNCTIONS ---
-
-    function clearQueue() {
-        if(confirm("Clear all texts waiting in the queue?")) {
-            masterQueue = [];
-            saveQueueToLocal();
-            updateMainTextDisplay();
-            renderCopyBoxes(currentTab.type, currentTab.category);
-        }
-    }
-
-    async function clearCurrentNumber() {
-        if(!currentActiveNumber) {
-            alert("Please select a number first.");
-            return;
-        }
-        if(confirm(`Clear all history saved under Number ${currentActiveNumber}?`)) {
-            database[currentActiveNumber].assignedTexts = [];
-            currentDisplayIndex = 0;
-            
-            // Delete from cloud
-            await supabaseClient.from('clbomb_data').delete().eq('number', currentActiveNumber);
-
-            updateMainTextDisplay();
-            renderCopyBoxes(currentTab.type, currentTab.category);
-        }
-    }
-
-    function clearEverything() {
-        if(confirm("WARNING: This will clear your local unassigned queue. (Cloud history must be deleted manually from Supabase). Are you sure?")) {
-            localStorage.removeItem('clbomb_data');
-            localStorage.removeItem('clbomb_queue');
-            window.location.reload();
-        }
-    }
-
+    // --- MANAGE SECTION ---
     function renderLists() {
         ['pca', 'pva'].forEach(type => {
             ['standard', 'followup1', 'followup2'].forEach(category => {
@@ -480,20 +374,21 @@ permalink: "/clbomb/"
 
     function addNewText(type, category) {
         data[type][category].push("New text...");
-        saveQueueToLocal(); 
+        localStorage.setItem('clbomb_data', JSON.stringify(data));
         renderLists();
     }
     function deleteText(type, category, index) {
         data[type][category].splice(index, 1);
-        saveQueueToLocal(); 
+        localStorage.setItem('clbomb_data', JSON.stringify(data));
         renderLists();
     }
     function updateText(type, category, index, value) {
         data[type][category][index] = value;
-        saveQueueToLocal(); 
+        localStorage.setItem('clbomb_data', JSON.stringify(data));
         renderCopyBoxes(currentTab.type, currentTab.category);
     }
 
+    // Init
     renderLists();
     switchTab('pca', 'standard'); 
 </script>
