@@ -149,30 +149,32 @@ permalink: "/clbomb/"
     let currentTab = { type: 'pca', category: 'standard' };
     let cloudTextsForNumber = [];
     let searchIndex = 0; 
-    
-    // This holds the texts pulled from the cloud queue
     let masterQueue = []; 
 
     window.addEventListener('firebaseLoaded', async () => {
-        document.getElementById('statusDisplay').textContent = "Ready";
-        // Pre-fetch the cloud queue as soon as the page loads
+        document.getElementById('statusDisplay').textContent = "Loading Queue...";
         await fetchCloudQueue();
+        
+        if (masterQueue.length > 0) {
+            document.getElementById('statusDisplay').textContent = `Ready (${masterQueue.length} texts in queue)`;
+        } else {
+            document.getElementById('statusDisplay').textContent = "Ready (Queue is empty)";
+        }
     });
 
-    // --- FETCH THE QUEUE FROM FIREBASE ---
     async function fetchCloudQueue() {
         try {
             const docRef = window.doc(window.db, "clbomb_queue", "current_queue");
             const docSnap = await window.getDoc(docRef);
             if (docSnap.exists()) {
                 masterQueue = docSnap.data().texts || [];
+            } else {
+                masterQueue = [];
             }
         } catch (e) {
             console.error("Could not load queue", e);
         }
     }
-
-    // --- ACTIONS ---
 
     async function actionAdd() {
         const num = document.getElementById('mainNumberInput').value.trim();
@@ -189,9 +191,13 @@ permalink: "/clbomb/"
         displayBox.classList.add('active');
         displayBox.classList.remove('void-state');
         
-        document.getElementById('statusDisplay').textContent = `ADD MODE: ${num}`;
+        document.getElementById('statusDisplay').textContent = `Checking queue...`;
         document.getElementById('statusDisplay').style.color = '#f59e0b';
 
+        // Always fetch fresh queue from the cloud right before clicking
+        await fetchCloudQueue();
+
+        document.getElementById('statusDisplay').textContent = `ADD MODE: ${num}`;
         await assignNextFromQueue();
     }
 
@@ -264,7 +270,6 @@ permalink: "/clbomb/"
         const success = await saveTextToCloud(currentNumber, nextText);
 
         if (success) {
-            // Update Firebase Queue (remove the text we just used)
             await updateCloudQueue();
             
             cloudTextsForNumber.push(nextText);
@@ -280,8 +285,6 @@ permalink: "/clbomb/"
 
         renderCopyBoxes(currentTab.type, currentTab.category);
     }
-
-    // --- CLOUD FUNCTIONS (FIREBASE) ---
 
     async function updateCloudQueue() {
         try {
@@ -328,9 +331,7 @@ permalink: "/clbomb/"
     function copyMainText() {
         const text = document.getElementById('mainTextDisplay').textContent;
         if (text.includes("VOID") || text.includes("Waiting") || text === "") return;
-
         navigator.clipboard.writeText(text);
-        
         const box = document.getElementById('mainTextDisplay');
         const originalBg = box.style.backgroundColor;
         box.style.backgroundColor = "#10b981"; 
@@ -340,7 +341,6 @@ permalink: "/clbomb/"
     function copyToClipboard(displayId, btnId) {
         const text = document.getElementById(displayId).textContent;
         if (text.includes("VOID") || text === "Empty...") return; 
-        
         navigator.clipboard.writeText(text);
         const btn = document.getElementById(btnId);
         const originalText = btn.textContent;
