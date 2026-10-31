@@ -29,7 +29,6 @@ permalink: "/clbomb/"
 </script>
 
 <style>
-    /* COMPACT CSS - Keeps everything at the top */
     body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; margin: 0; }
     .bomb-container { max-width: 1000px; margin: 0 auto; padding: 10px 20px; }
     
@@ -70,11 +69,13 @@ permalink: "/clbomb/"
 
     /* COMPACT INPUT SECTION */
     .compact-input-area { background: #181818; border-radius: 8px; padding: 10px; margin-bottom: 10px; border: 1px solid #333; }
-    .compact-input-title { font-size: 12px; color: #888; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
+    .compact-input-title { font-size: 13px; color: #f59e0b; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
     .compact-input-row { display: flex; gap: 8px; margin-bottom: 6px; }
     .compact-input-row input { flex-grow: 1; padding: 6px; background: #111; border: 1px solid #444; color: white; border-radius: 6px; outline: none; font-size: 13px;}
     .compact-input-row input:focus { border-color: #3b82f6; }
-    .btn-small-add { background: #2e8555; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px;}
+    
+    /* NEW BUTTONS */
+    .btn-small-add { background: #2e8555; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; width: 100%; margin-top: 5px;}
     .btn-small-add:hover { background: #236b43; }
     .btn-small-del { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px;}
 </style>
@@ -106,39 +107,40 @@ permalink: "/clbomb/"
         <button class="tab-btn" id="tab-pva-followup2" onclick="switchTab('pva', 'followup2')">PVA 2</button>
     </div>
 
-    <!-- COPY AREA -->
     <div class="copy-panel" id="copyPanel">
         <div id="panel-pca">
             <div class="copy-row">
-                <div class="copy-text-display" id="pca-display-1">Loading...</div>
-                <button class="btn-icon" id="pca-btn-1" onclick="copyToClipboard('pca-display-1', 'pca-btn-1')">📋</button>
+                <div class="copy-text-display" id="pca-display-1">PCA Main 1</div>
+                <button class="btn-icon" id="pca-btn-1" onclick="nextAndCopy('pca', 1)">📋</button>
             </div>
             <div class="copy-row">
-                <div class="copy-text-display" id="pca-display-2">Loading...</div>
-                <button class="btn-icon" id="pca-btn-2" onclick="copyToClipboard('pca-display-2', 'pca-btn-2')">📋</button>
+                <div class="copy-text-display" id="pca-display-2">PCA Main 2</div>
+                <button class="btn-icon" id="pca-btn-2" onclick="nextAndCopy('pca', 2)">📋</button>
             </div>
         </div>
         <div id="panel-pva" style="display: none;">
             <div class="copy-row">
-                <div class="copy-text-display" id="pva-display-1">Loading...</div>
-                <button class="btn-icon" id="pva-btn-1" onclick="copyToClipboard('pva-display-1', 'pva-btn-1')">📋</button>
+                <div class="copy-text-display" id="pva-display-1">PVA Main</div>
+                <button class="btn-icon" id="pva-btn-1" onclick="nextAndCopy('pva', 1)">📋</button>
             </div>
         </div>
     </div>
 
-    <!-- MANAGE AREA -->
     <div class="compact-input-area">
-        <div class="compact-input-title" id="manageTitle">Manage Texts for Standard PCA</div>
+        <div class="compact-input-title" id="manageTitle">Manage Texts for PCA Standard</div>
         <div id="manageInputs"></div>
-        <button class="btn-small-add" onclick="addTextToList()" style="width: 100%; margin-top: 8px;">+ Add Text to this Category</button>
+        <button class="btn-small-add" onclick="addTextToList()">+ Add Text to this Category</button>
     </div>
 </main>
 
 <script>
     let data = JSON.parse(localStorage.getItem('clbomb_data')) || {
-        pca: { standard: ["PCA Main 1", "PCA Main 2"], followup1: ["PCA 1 Sub A"], followup2: ["PCA 2 Sub A"] },
-        pva: { standard: ["PVA Main"], followup1: ["PVA 1 Sub"], followup2: ["PVA 2 Sub"] }
+        pca: { standard: [], followup1: [], followup2: [] },
+        pva: { standard: [], followup1: [], followup2: [] }
     };
+
+    let pointer1 = 0; 
+    let pointer2 = 0; 
 
     let currentNumber = null;
     let currentMode = null; 
@@ -213,7 +215,6 @@ permalink: "/clbomb/"
             displayBox.textContent = cloudTextsForNumber[searchIndex]; 
             document.getElementById('statusDisplay').textContent = `FOUND ${cloudTextsForNumber.length} TEXTS`;
         }
-        renderCopyBoxes(currentTab.type, currentTab.category);
     }
 
     async function handleMainTextClick() {
@@ -229,7 +230,6 @@ permalink: "/clbomb/"
                 document.getElementById('mainTextDisplay').classList.add('void-state');
                 document.getElementById('statusDisplay').textContent = `END OF HISTORY`;
             }
-            renderCopyBoxes(currentTab.type, currentTab.category);
         }
     }
 
@@ -238,7 +238,6 @@ permalink: "/clbomb/"
         if (masterQueue.length === 0) {
             displayBox.textContent = "VOID - No texts left in Page 1 Queue!";
             displayBox.classList.add('void-state');
-            renderCopyBoxes(currentTab.type, currentTab.category);
             return;
         }
 
@@ -260,7 +259,6 @@ permalink: "/clbomb/"
             displayBox.textContent = "Error saving to database.";
             displayBox.classList.add('void-state');
         }
-        renderCopyBoxes(currentTab.type, currentTab.category);
     }
 
     async function updateCloudQueue() {
@@ -299,14 +297,27 @@ permalink: "/clbomb/"
         setTimeout(() => { box.style.backgroundColor = originalBg; }, 300);
     }
 
-    function copyToClipboard(displayId, btnId) {
-        const text = document.getElementById(displayId).textContent;
-        if (text.includes("VOID") || text === "Empty...") return; 
-        navigator.clipboard.writeText(text);
-        const btn = document.getElementById(btnId);
-        const originalText = btn.textContent;
-        btn.textContent = "✅";
-        setTimeout(() => { btn.textContent = originalText; }, 1000);
+    // --- SEQUENTIAL COPY LOGIC ---
+    function nextAndCopy(type, boxNum) {
+        const list = data[type][currentTab.category];
+        if (!list || list.length === 0) {
+            alert("No texts saved in this category yet. Add one below!");
+            return;
+        }
+
+        let currentPointer = (boxNum === 1) ? pointer1 : pointer2;
+        const textToCopy = list[currentPointer % list.length];
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const btnId = type + '-btn-' + boxNum;
+            const btn = document.getElementById(btnId);
+            const originalText = btn.textContent;
+            btn.textContent = "✅";
+            setTimeout(() => { btn.textContent = originalText; }, 1000);
+
+            if (boxNum === 1) pointer1 = (pointer1 + 1) % list.length;
+            else pointer2 = (pointer2 + 1) % list.length;
+        });
     }
 
     function switchTab(type, category) {
@@ -321,54 +332,14 @@ permalink: "/clbomb/"
             document.getElementById('panel-pca').style.display = 'none';
             document.getElementById('panel-pva').style.display = 'block';
         }
-        renderCopyBoxes(type, category);
+        
+        pointer1 = 0;
+        pointer2 = 0;
+
         renderCompactInputs(type, category); 
     }
 
-    function renderCopyBoxes(type, category) {
-        const list = data[type][category];
-        let isVoid = false;
-
-        if (currentMode === 'search' && searchIndex >= cloudTextsForNumber.length) isVoid = true;
-        if (currentMode === 'add' && masterQueue.length === 0 && cloudTextsForNumber.length === 0) isVoid = true;
-
-        const disp1 = document.getElementById(type + '-display-1');
-        const btn1 = document.getElementById(type + '-btn-1');
-        
-        if (isVoid) {
-            disp1.textContent = "VOID 🔴";
-            disp1.classList.add('void-state');
-            btn1.disabled = true;
-            if (type === 'pca') {
-                const disp2 = document.getElementById(type + '-display-2');
-                const btn2 = document.getElementById(type + '-btn-2');
-                disp2.textContent = "VOID 🔴";
-                disp2.classList.add('void-state');
-                btn2.disabled = true;
-            }
-            return;
-        } else {
-            disp1.classList.remove('void-state');
-            btn1.disabled = false;
-            if (type === 'pca') {
-                document.getElementById(type + '-display-2').classList.remove('void-state');
-                document.getElementById(type + '-btn-2').disabled = false;
-            }
-        }
-
-        if (!list || list.length === 0) {
-            disp1.textContent = "Empty...";
-            if (type === 'pca') document.getElementById(type + '-display-2').textContent = "Empty...";
-            return;
-        }
-
-        disp1.textContent = list[Math.floor(Math.random() * list.length)];
-        if (type === 'pca') {
-            document.getElementById(type + '-display-2').textContent = list[Math.floor(Math.random() * list.length)];
-        }
-    }
-
-    // --- COMPACT INPUT LOGIC ---
+    // --- MANAGE INPUTS (NOW WITH CLEAR VISIBILITY) ---
     function renderCompactInputs(type, category) {
         const title = document.getElementById('manageTitle');
         const container = document.getElementById('manageInputs');
@@ -381,13 +352,14 @@ permalink: "/clbomb/"
         const list = data[type][category];
 
         if (list.length === 0) {
-            container.innerHTML = `<p style="color: #666; font-size: 12px; margin: 5px 0;">No texts added yet for this category.</p>`;
+            container.innerHTML = `<p style="color: #666; font-size: 12px; margin: 5px 0;">No texts added yet. Click the add button below.</p>`;
             return;
         }
 
         list.forEach((text, index) => {
             const row = document.createElement('div');
             row.className = 'compact-input-row';
+            // Shows the input AND the Delete button right next to it
             row.innerHTML = `
                 <input type="text" value="${text.replace(/"/g, '&quot;')}" onchange="updateCompactText('${type}', '${category}', ${index}, this.value)">
                 <button class="btn-small-del" onclick="deleteCompactText('${type}', '${category}', ${index})">X</button>
@@ -400,20 +372,17 @@ permalink: "/clbomb/"
         data[currentTab.type][currentTab.category].push("New text...");
         localStorage.setItem('clbomb_data', JSON.stringify(data));
         renderCompactInputs(currentTab.type, currentTab.category);
-        renderCopyBoxes(currentTab.type, currentTab.category);
     }
 
     function updateCompactText(type, category, index, value) {
         data[type][category][index] = value;
         localStorage.setItem('clbomb_data', JSON.stringify(data));
-        renderCopyBoxes(type, category);
     }
 
     function deleteCompactText(type, category, index) {
         data[type][category].splice(index, 1);
         localStorage.setItem('clbomb_data', JSON.stringify(data));
         renderCompactInputs(type, category);
-        renderCopyBoxes(type, category);
     }
 
     switchTab('pca', 'standard'); 
