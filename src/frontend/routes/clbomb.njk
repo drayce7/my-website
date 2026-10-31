@@ -158,9 +158,10 @@ permalink: "/clbomb/"
 </div>
 
 <script>
+    // NEW DATA STRUCTURE: Separated by category AND box number (1 or 2)
     let data = JSON.parse(localStorage.getItem('clbomb_data')) || {
-        pca: { standard: [], followup1: [], followup2: [] },
-        pva: { standard: [], followup1: [], followup2: [] }
+        pca: { standard: { 1: [], 2: [] }, followup1: { 1: [], 2: [] }, followup2: { 1: [], 2: [] } },
+        pva: { standard: { 1: [] }, followup1: { 1: [] }, followup2: { 1: [] } }
     };
 
     let pointer1 = 0; 
@@ -174,7 +175,7 @@ permalink: "/clbomb/"
     let masterQueue = []; 
     
     let modalTarget = { type: 'pca', box: 1 };
-    let editingIndex = -1; // Tracks if we are editing an existing text in the modal
+    let editingIndex = -1; 
 
     window.addEventListener('firebaseLoaded', async () => {
         document.getElementById('statusDisplay').textContent = "Loading Queue...";
@@ -324,16 +325,13 @@ permalink: "/clbomb/"
         setTimeout(() => { box.style.backgroundColor = originalBg; }, 300);
     }
 
+    // --- SEQUENTIAL COPY LOGIC (NOW ISOLATED PER BOX) ---
     function nextAndCopy(type, boxNum) {
-        let list = [];
-        if (type === 'pca') {
-            list = data.pca[currentTab.category];
-        } else {
-            list = data.pva[currentTab.category];
-        }
+        // Pull from the specific box list (1 or 2)
+        const list = data[type][currentTab.category][boxNum];
 
         if (!list || list.length === 0) {
-            alert("No texts saved in this category yet. Click the + button to add one!");
+            alert("No texts saved in this specific line yet. Click the + button to add one!");
             return;
         }
 
@@ -375,11 +373,10 @@ permalink: "/clbomb/"
         
         const categoryNames = { standard: "Standard", followup1: "1", followup2: "2" };
         const title = document.getElementById('modalTitle');
-        title.textContent = `Manage Texts for ${type.toUpperCase()} ${categoryNames[currentTab.category]}`;
+        title.textContent = `Manage Texts for ${type.toUpperCase()} ${categoryNames[currentTab.category]} - Line ${boxNum}`;
         
         document.getElementById('addModal').classList.add('active');
         
-        // Reset editing state
         editingIndex = -1;
         document.getElementById('modalInput').value = "";
         document.getElementById('modalAddBtn').textContent = "+ Add";
@@ -396,7 +393,8 @@ permalink: "/clbomb/"
     function renderModalList() {
         const container = document.getElementById('modalList');
         container.innerHTML = '';
-        const list = data[modalTarget.type][currentTab.category];
+        // Access the specific box list
+        const list = data[modalTarget.type][currentTab.category][modalTarget.box];
 
         if (list.length === 0) {
             container.innerHTML = `<p style="color:#888; font-size:12px; text-align:center;">No texts yet.</p>`;
@@ -417,18 +415,18 @@ permalink: "/clbomb/"
         });
     }
 
-    // Handles Adding OR Saving an Edit
     function saveModalText() {
         const text = document.getElementById('modalInput').value.trim();
         if (!text) return;
+        
+        // Access the specific box list
+        const list = data[modalTarget.type][currentTab.category][modalTarget.box];
 
         if (editingIndex === -1) {
-            // We are adding a new text
-            data[modalTarget.type][currentTab.category].push(text);
+            list.push(text);
         } else {
-            // We are saving an edited text
-            data[modalTarget.type][currentTab.category][editingIndex] = text;
-            editingIndex = -1; // Reset edit mode
+            list[editingIndex] = text;
+            editingIndex = -1; 
             document.getElementById('modalAddBtn').textContent = "+ Add";
             document.getElementById('modalAddBtn').onclick = saveModalText;
         }
@@ -440,23 +438,22 @@ permalink: "/clbomb/"
     }
 
     function editFromModal(index) {
-        const list = data[modalTarget.type][currentTab.category];
+        const list = data[modalTarget.type][currentTab.category][modalTarget.box];
         document.getElementById('modalInput').value = list[index];
         document.getElementById('modalInput').focus();
         
         editingIndex = index;
         
-        // Change button to "Save Edit"
         const btn = document.getElementById('modalAddBtn');
         btn.textContent = "Save Edit";
         btn.onclick = saveModalText;
     }
 
     function deleteFromModal(index) {
-        data[modalTarget.type][currentTab.category].splice(index, 1);
+        const list = data[modalTarget.type][currentTab.category][modalTarget.box];
+        list.splice(index, 1);
         localStorage.setItem('clbomb_data', JSON.stringify(data));
         
-        // If we delete the item we were editing, reset the input
         if (editingIndex === index) {
             editingIndex = -1;
             document.getElementById('modalInput').value = "";
