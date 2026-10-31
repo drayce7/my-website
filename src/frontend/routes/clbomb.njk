@@ -89,7 +89,7 @@ permalink: "/clbomb/"
 </style>
 
 <main class="bomb-container">
-    <h1 style="margin-top: 5px; margin-bottom: 10px; font-size: 20px;">CLbomb <span style="font-size: 12px; color: #f59e0b; background: #333; padding: 2px 8px; border-radius: 4px; vertical-align: middle;">LIMITED</span></h1>
+    <h1 style="margin-top: 5px; margin-bottom: 10px; font-size: 20px;">CLbomb <span style="font-size: 12px; color: #f59e0b; background: #333; padding: 2px 8px; border-radius: 4px; vertical-align: middle;">LIMITED V2</span></h1>
     
     <div class="top-line">
         <div class="input-group">
@@ -153,7 +153,8 @@ permalink: "/clbomb/"
 </div>
 
 <script>
-    let data = JSON.parse(localStorage.getItem('clbomb_data_v7')) || {
+    // Changed key to v9
+    let data = JSON.parse(localStorage.getItem('clbomb_data_v9')) || {
         pca: { standard: { 1: [], 2: [] }, followup1: { 1: [], 2: [] }, followup2: { 1: [], 2: [] } },
         pva: { standard: { 1: [] }, followup1: { 1: [] }, followup2: { 1: [] } }
     };
@@ -421,7 +422,7 @@ permalink: "/clbomb/"
             document.getElementById('modalAddBtn').onclick = saveModalText;
         }
 
-        localStorage.setItem('clbomb_data_v7', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v9', JSON.stringify(data));
         
         document.getElementById('modalInput').value = "";
         renderModalList();
@@ -442,7 +443,7 @@ permalink: "/clbomb/"
     function deleteFromModal(index) {
         const list = data[modalTarget.type][modalTarget.category][modalTarget.box];
         list.splice(index, 1);
-        localStorage.setItem('clbomb_data_v7', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v9', JSON.stringify(data));
         
         if (editingIndex === index) {
             editingIndex = -1;
