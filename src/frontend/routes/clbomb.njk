@@ -89,7 +89,7 @@ permalink: "/clbomb/"
 </style>
 
 <main class="bomb-container">
-    <h1 style="margin-top: 5px; margin-bottom: 10px; font-size: 20px;">CLbomb</h1>
+    <h1 style="margin-top: 5px; margin-bottom: 10px; font-size: 20px;">CLbomb <span style="font-size: 12px; color: #f59e0b; background: #333; padding: 2px 8px; border-radius: 4px; vertical-align: middle;">LIMITED</span></h1>
     
     <div class="top-line">
         <div class="input-group">
@@ -153,7 +153,7 @@ permalink: "/clbomb/"
 </div>
 
 <script>
-    let data = JSON.parse(localStorage.getItem('clbomb_data_v6')) || {
+    let data = JSON.parse(localStorage.getItem('clbomb_data_v7')) || {
         pca: { standard: { 1: [], 2: [] }, followup1: { 1: [], 2: [] }, followup2: { 1: [], 2: [] } },
         pva: { standard: { 1: [] }, followup1: { 1: [] }, followup2: { 1: [] } }
     };
@@ -320,7 +320,6 @@ permalink: "/clbomb/"
     }
 
     function nextAndCopy(type, boxNum) {
-        // Access the specific tab category and box number
         const list = data[type][currentTab.category][boxNum];
 
         if (!list || list.length === 0) {
@@ -360,7 +359,6 @@ permalink: "/clbomb/"
         pointer2 = 0;
     }
 
-    // Notice I am now passing 'category' directly into the modal
     function openModal(type, category, boxNum) {
         modalTarget = { type: type, category: category, box: boxNum };
         
@@ -387,7 +385,6 @@ permalink: "/clbomb/"
         const container = document.getElementById('modalList');
         container.innerHTML = '';
         
-        // NOW USES modalTarget.category directly, not currentTab
         const list = data[modalTarget.type][modalTarget.category][modalTarget.box];
 
         if (list.length === 0) {
@@ -413,7 +410,6 @@ permalink: "/clbomb/"
         const text = document.getElementById('modalInput').value.trim();
         if (!text) return;
         
-        // NOW USES modalTarget.category directly, not currentTab
         const list = data[modalTarget.type][modalTarget.category][modalTarget.box];
 
         if (editingIndex === -1) {
@@ -425,7 +421,7 @@ permalink: "/clbomb/"
             document.getElementById('modalAddBtn').onclick = saveModalText;
         }
 
-        localStorage.setItem('clbomb_data_v6', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v7', JSON.stringify(data));
         
         document.getElementById('modalInput').value = "";
         renderModalList();
@@ -446,7 +442,7 @@ permalink: "/clbomb/"
     function deleteFromModal(index) {
         const list = data[modalTarget.type][modalTarget.category][modalTarget.box];
         list.splice(index, 1);
-        localStorage.setItem('clbomb_data_v6', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v7', JSON.stringify(data));
         
         if (editingIndex === index) {
             editingIndex = -1;
