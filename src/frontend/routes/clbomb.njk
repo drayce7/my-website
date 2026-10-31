@@ -68,7 +68,6 @@ permalink: "/clbomb/"
     .btn-add-plus { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; background-color: #10b981; color: white; font-size: 18px; font-weight: bold; transition: 0.2s; }
     .btn-add-plus:hover { background-color: #059669; }
 
-    /* MODAL STYLES */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
     .modal-overlay.active { display: flex; }
     .modal-box { background: #1e1e1e; padding: 20px; border-radius: 12px; width: 400px; border: 1px solid #444; }
@@ -78,7 +77,6 @@ permalink: "/clbomb/"
     .modal-input { flex-grow: 1; padding: 10px; background: #111; border: 2px solid #3b82f6; color: white; border-radius: 6px; box-sizing: border-box; outline: none; }
     
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;}
-    .btn-save { background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .btn-cancel { background: #444; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .btn-add-modal { background: #3b82f6; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     
@@ -143,14 +141,11 @@ permalink: "/clbomb/"
 <div class="modal-overlay" id="addModal">
     <div class="modal-box">
         <h3 id="modalTitle">Manage Texts</h3>
-        
         <div class="modal-list" id="modalList"></div>
-
         <div class="modal-input-row">
             <input type="text" id="modalInput" class="modal-input" placeholder="Type text here...">
             <button class="btn-add-modal" id="modalAddBtn" onclick="saveModalText()">+ Add</button>
         </div>
-        
         <div class="modal-actions">
             <button class="btn-cancel" onclick="closeModal()">Close</button>
         </div>
@@ -158,10 +153,18 @@ permalink: "/clbomb/"
 </div>
 
 <script>
-    // NEW DATA STRUCTURE: Separated by category AND box number (1 or 2)
-    let data = JSON.parse(localStorage.getItem('clbomb_data')) || {
-        pca: { standard: { 1: [], 2: [] }, followup1: { 1: [], 2: [] }, followup2: { 1: [], 2: [] } },
-        pva: { standard: { 1: [] }, followup1: { 1: [] }, followup2: { 1: [] } }
+    // EACH BOX NOW HAS ITS OWN KEY: 'box1' and 'box2'
+    let data = JSON.parse(localStorage.getItem('clbomb_data_v3')) || {
+        pca: { 
+            standard: { box1: [], box2: [] }, 
+            followup1: { box1: [], box2: [] }, 
+            followup2: { box1: [], box2: [] } 
+        },
+        pva: { 
+            standard: { box1: [] }, 
+            followup1: { box1: [] }, 
+            followup2: { box1: [] } 
+        }
     };
 
     let pointer1 = 0; 
@@ -325,10 +328,10 @@ permalink: "/clbomb/"
         setTimeout(() => { box.style.backgroundColor = originalBg; }, 300);
     }
 
-    // --- SEQUENTIAL COPY LOGIC (NOW ISOLATED PER BOX) ---
     function nextAndCopy(type, boxNum) {
-        // Pull from the specific box list (1 or 2)
-        const list = data[type][currentTab.category][boxNum];
+        // Dynamically pull from 'box1' or 'box2'
+        const boxKey = 'box' + boxNum;
+        const list = data[type][currentTab.category][boxKey];
 
         if (!list || list.length === 0) {
             alert("No texts saved in this specific line yet. Click the + button to add one!");
@@ -367,7 +370,6 @@ permalink: "/clbomb/"
         pointer2 = 0;
     }
 
-    // --- MODAL LOGIC ---
     function openModal(type, boxNum) {
         modalTarget = { type: type, box: boxNum };
         
@@ -393,8 +395,9 @@ permalink: "/clbomb/"
     function renderModalList() {
         const container = document.getElementById('modalList');
         container.innerHTML = '';
-        // Access the specific box list
-        const list = data[modalTarget.type][currentTab.category][modalTarget.box];
+        // Dynamically pull from 'box1' or 'box2'
+        const boxKey = 'box' + modalTarget.box;
+        const list = data[modalTarget.type][currentTab.category][boxKey];
 
         if (list.length === 0) {
             container.innerHTML = `<p style="color:#888; font-size:12px; text-align:center;">No texts yet.</p>`;
@@ -419,8 +422,8 @@ permalink: "/clbomb/"
         const text = document.getElementById('modalInput').value.trim();
         if (!text) return;
         
-        // Access the specific box list
-        const list = data[modalTarget.type][currentTab.category][modalTarget.box];
+        const boxKey = 'box' + modalTarget.box;
+        const list = data[modalTarget.type][currentTab.category][boxKey];
 
         if (editingIndex === -1) {
             list.push(text);
@@ -431,14 +434,15 @@ permalink: "/clbomb/"
             document.getElementById('modalAddBtn').onclick = saveModalText;
         }
 
-        localStorage.setItem('clbomb_data', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v3', JSON.stringify(data));
         
         document.getElementById('modalInput').value = "";
         renderModalList();
     }
 
     function editFromModal(index) {
-        const list = data[modalTarget.type][currentTab.category][modalTarget.box];
+        const boxKey = 'box' + modalTarget.box;
+        const list = data[modalTarget.type][currentTab.category][boxKey];
         document.getElementById('modalInput').value = list[index];
         document.getElementById('modalInput').focus();
         
@@ -450,9 +454,10 @@ permalink: "/clbomb/"
     }
 
     function deleteFromModal(index) {
-        const list = data[modalTarget.type][currentTab.category][modalTarget.box];
+        const boxKey = 'box' + modalTarget.box;
+        const list = data[modalTarget.type][currentTab.category][boxKey];
         list.splice(index, 1);
-        localStorage.setItem('clbomb_data', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v3', JSON.stringify(data));
         
         if (editingIndex === index) {
             editingIndex = -1;
