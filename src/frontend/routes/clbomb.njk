@@ -120,19 +120,20 @@ permalink: "/clbomb/"
             <div class="copy-row">
                 <div class="copy-text-display">PCA Main 1</div>
                 <button class="btn-icon" id="pca-btn-1" onclick="nextAndCopy('pca', 1)">📋</button>
-                <button class="btn-add-plus" onclick="openModal('pca-standard-1', 'PCA Main 1')">+</button>
+                <!-- Notice the + button no longer passes 'standard' directly. It passes the current active tab instead -->
+                <button class="btn-add-plus" onclick="openModal('pca', 1)">+</button>
             </div>
             <div class="copy-row">
                 <div class="copy-text-display">PCA Main 2</div>
                 <button class="btn-icon" id="pca-btn-2" onclick="nextAndCopy('pca', 2)">📋</button>
-                <button class="btn-add-plus" onclick="openModal('pca-standard-2', 'PCA Main 2')">+</button>
+                <button class="btn-add-plus" onclick="openModal('pca', 2)">+</button>
             </div>
         </div>
         <div id="panel-pva" style="display: none;">
             <div class="copy-row">
                 <div class="copy-text-display">PVA Main</div>
                 <button class="btn-icon" id="pva-btn-1" onclick="nextAndCopy('pva', 1)">📋</button>
-                <button class="btn-add-plus" onclick="openModal('pva-standard-1', 'PVA Main')">+</button>
+                <button class="btn-add-plus" onclick="openModal('pva', 1)">+</button>
             </div>
         </div>
     </div>
@@ -153,8 +154,8 @@ permalink: "/clbomb/"
 </div>
 
 <script>
-    // COMPLETELY FLAT STORAGE. Each button has a unique key.
-    let data = JSON.parse(localStorage.getItem('clbomb_data_v10')) || {
+    // CHANGED TO v11
+    let data = JSON.parse(localStorage.getItem('clbomb_data_v11')) || {
         "pca-standard-1": [],
         "pca-standard-2": [],
         "pca-followup1-1": [],
@@ -370,12 +371,17 @@ permalink: "/clbomb/"
         pointer2 = 0;
     }
 
-    // OPEN MODAL now takes a completely unique key (e.g. "pca-standard-1")
-    function openModal(uniqueKey, displayTitle) {
-        currentModalKey = uniqueKey;
+    // FIXED: It now reads currentTab.category so the + button uses the active tab
+    function openModal(type, boxNum) {
+        // Get the currently active category
+        const activeCategory = currentTab.category;
         
+        // Create the specific key for this exact box
+        currentModalKey = `${type}-${activeCategory}-${boxNum}`;
+        
+        const categoryNames = { standard: "Standard", followup1: "1", followup2: "2" };
         const title = document.getElementById('modalTitle');
-        title.textContent = `Manage Texts for ${displayTitle}`;
+        title.textContent = `Manage Texts for ${type.toUpperCase()} ${categoryNames[activeCategory]} - Line ${boxNum}`;
         
         document.getElementById('addModal').classList.add('active');
         
@@ -432,7 +438,7 @@ permalink: "/clbomb/"
             document.getElementById('modalAddBtn').onclick = saveModalText;
         }
 
-        localStorage.setItem('clbomb_data_v10', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v11', JSON.stringify(data));
         
         document.getElementById('modalInput').value = "";
         renderModalList();
@@ -453,7 +459,7 @@ permalink: "/clbomb/"
     function deleteFromModal(index) {
         const list = data[currentModalKey];
         list.splice(index, 1);
-        localStorage.setItem('clbomb_data_v10', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v11', JSON.stringify(data));
         
         if (editingIndex === index) {
             editingIndex = -1;
