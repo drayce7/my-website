@@ -120,19 +120,19 @@ permalink: "/clbomb/"
             <div class="copy-row">
                 <div class="copy-text-display">PCA Main 1</div>
                 <button class="btn-icon" id="pca-btn-1" onclick="nextAndCopy('pca', 1)">📋</button>
-                <button class="btn-add-plus" onclick="openModal('pca', 'standard', 1)">+</button>
+                <button class="btn-add-plus" onclick="openModal('pca-standard-1', 'PCA Main 1')">+</button>
             </div>
             <div class="copy-row">
                 <div class="copy-text-display">PCA Main 2</div>
                 <button class="btn-icon" id="pca-btn-2" onclick="nextAndCopy('pca', 2)">📋</button>
-                <button class="btn-add-plus" onclick="openModal('pca', 'standard', 2)">+</button>
+                <button class="btn-add-plus" onclick="openModal('pca-standard-2', 'PCA Main 2')">+</button>
             </div>
         </div>
         <div id="panel-pva" style="display: none;">
             <div class="copy-row">
                 <div class="copy-text-display">PVA Main</div>
                 <button class="btn-icon" id="pva-btn-1" onclick="nextAndCopy('pva', 1)">📋</button>
-                <button class="btn-add-plus" onclick="openModal('pva', 'standard', 1)">+</button>
+                <button class="btn-add-plus" onclick="openModal('pva-standard-1', 'PVA Main')">+</button>
             </div>
         </div>
     </div>
@@ -153,10 +153,17 @@ permalink: "/clbomb/"
 </div>
 
 <script>
-    // Changed key to v9
-    let data = JSON.parse(localStorage.getItem('clbomb_data_v9')) || {
-        pca: { standard: { 1: [], 2: [] }, followup1: { 1: [], 2: [] }, followup2: { 1: [], 2: [] } },
-        pva: { standard: { 1: [] }, followup1: { 1: [] }, followup2: { 1: [] } }
+    // COMPLETELY FLAT STORAGE. Each button has a unique key.
+    let data = JSON.parse(localStorage.getItem('clbomb_data_v10')) || {
+        "pca-standard-1": [],
+        "pca-standard-2": [],
+        "pca-followup1-1": [],
+        "pca-followup1-2": [],
+        "pca-followup2-1": [],
+        "pca-followup2-2": [],
+        "pva-standard-1": [],
+        "pva-followup1-1": [],
+        "pva-followup2-1": []
     };
 
     let pointer1 = 0; 
@@ -169,7 +176,7 @@ permalink: "/clbomb/"
     let searchIndex = 0; 
     let masterQueue = []; 
     
-    let modalTarget = { type: 'pca', category: 'standard', box: 1 };
+    let currentModalKey = "";
     let editingIndex = -1; 
 
     window.addEventListener('firebaseLoaded', async () => {
@@ -321,7 +328,10 @@ permalink: "/clbomb/"
     }
 
     function nextAndCopy(type, boxNum) {
-        const list = data[type][currentTab.category][boxNum];
+        // Dynamically determine the flat key based on the active tab and the button clicked
+        const activeCategory = currentTab.category; 
+        const key = `${type}-${activeCategory}-${boxNum}`;
+        const list = data[key];
 
         if (!list || list.length === 0) {
             alert("No texts saved in this specific line yet. Click the + button to add one!");
@@ -360,12 +370,12 @@ permalink: "/clbomb/"
         pointer2 = 0;
     }
 
-    function openModal(type, category, boxNum) {
-        modalTarget = { type: type, category: category, box: boxNum };
+    // OPEN MODAL now takes a completely unique key (e.g. "pca-standard-1")
+    function openModal(uniqueKey, displayTitle) {
+        currentModalKey = uniqueKey;
         
-        const categoryNames = { standard: "Standard", followup1: "1", followup2: "2" };
         const title = document.getElementById('modalTitle');
-        title.textContent = `Manage Texts for ${type.toUpperCase()} ${categoryNames[category]} - Line ${boxNum}`;
+        title.textContent = `Manage Texts for ${displayTitle}`;
         
         document.getElementById('addModal').classList.add('active');
         
@@ -386,7 +396,7 @@ permalink: "/clbomb/"
         const container = document.getElementById('modalList');
         container.innerHTML = '';
         
-        const list = data[modalTarget.type][modalTarget.category][modalTarget.box];
+        const list = data[currentModalKey];
 
         if (list.length === 0) {
             container.innerHTML = `<p style="color:#888; font-size:12px; text-align:center;">No texts yet.</p>`;
@@ -411,7 +421,7 @@ permalink: "/clbomb/"
         const text = document.getElementById('modalInput').value.trim();
         if (!text) return;
         
-        const list = data[modalTarget.type][modalTarget.category][modalTarget.box];
+        const list = data[currentModalKey];
 
         if (editingIndex === -1) {
             list.push(text);
@@ -422,14 +432,14 @@ permalink: "/clbomb/"
             document.getElementById('modalAddBtn').onclick = saveModalText;
         }
 
-        localStorage.setItem('clbomb_data_v9', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v10', JSON.stringify(data));
         
         document.getElementById('modalInput').value = "";
         renderModalList();
     }
 
     function editFromModal(index) {
-        const list = data[modalTarget.type][modalTarget.category][modalTarget.box];
+        const list = data[currentModalKey];
         document.getElementById('modalInput').value = list[index];
         document.getElementById('modalInput').focus();
         
@@ -441,9 +451,9 @@ permalink: "/clbomb/"
     }
 
     function deleteFromModal(index) {
-        const list = data[modalTarget.type][modalTarget.category][modalTarget.box];
+        const list = data[currentModalKey];
         list.splice(index, 1);
-        localStorage.setItem('clbomb_data_v9', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v10', JSON.stringify(data));
         
         if (editingIndex === index) {
             editingIndex = -1;
