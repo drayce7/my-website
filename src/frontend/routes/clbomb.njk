@@ -120,19 +120,19 @@ permalink: "/clbomb/"
             <div class="copy-row">
                 <div class="copy-text-display">PCA Main 1</div>
                 <button class="btn-icon" id="pca-btn-1" onclick="nextAndCopy('pca', 1)">📋</button>
-                <button class="btn-add-plus" onclick="openModal('pca', 1)">+</button>
+                <button class="btn-add-plus" onclick="openModal('pca', 'standard', 1)">+</button>
             </div>
             <div class="copy-row">
                 <div class="copy-text-display">PCA Main 2</div>
                 <button class="btn-icon" id="pca-btn-2" onclick="nextAndCopy('pca', 2)">📋</button>
-                <button class="btn-add-plus" onclick="openModal('pca', 2)">+</button>
+                <button class="btn-add-plus" onclick="openModal('pca', 'standard', 2)">+</button>
             </div>
         </div>
         <div id="panel-pva" style="display: none;">
             <div class="copy-row">
                 <div class="copy-text-display">PVA Main</div>
                 <button class="btn-icon" id="pva-btn-1" onclick="nextAndCopy('pva', 1)">📋</button>
-                <button class="btn-add-plus" onclick="openModal('pva', 1)">+</button>
+                <button class="btn-add-plus" onclick="openModal('pva', 'standard', 1)">+</button>
             </div>
         </div>
     </div>
@@ -153,18 +153,9 @@ permalink: "/clbomb/"
 </div>
 
 <script>
-    // COMPLETELY FRESH STORAGE (v5) - NO OLD DATA WILL LEAK IN
-    let data = JSON.parse(localStorage.getItem('clbomb_data_v5')) || {
-        pca: { 
-            standard: { 1: [], 2: [] }, 
-            followup1: { 1: [], 2: [] }, 
-            followup2: { 1: [], 2: [] } 
-        },
-        pva: { 
-            standard: { 1: [] }, 
-            followup1: { 1: [] }, 
-            followup2: { 1: [] } 
-        }
+    let data = JSON.parse(localStorage.getItem('clbomb_data_v6')) || {
+        pca: { standard: { 1: [], 2: [] }, followup1: { 1: [], 2: [] }, followup2: { 1: [], 2: [] } },
+        pva: { standard: { 1: [] }, followup1: { 1: [] }, followup2: { 1: [] } }
     };
 
     let pointer1 = 0; 
@@ -177,7 +168,7 @@ permalink: "/clbomb/"
     let searchIndex = 0; 
     let masterQueue = []; 
     
-    let modalTarget = { type: 'pca', box: 1 };
+    let modalTarget = { type: 'pca', category: 'standard', box: 1 };
     let editingIndex = -1; 
 
     window.addEventListener('firebaseLoaded', async () => {
@@ -329,6 +320,7 @@ permalink: "/clbomb/"
     }
 
     function nextAndCopy(type, boxNum) {
+        // Access the specific tab category and box number
         const list = data[type][currentTab.category][boxNum];
 
         if (!list || list.length === 0) {
@@ -368,12 +360,13 @@ permalink: "/clbomb/"
         pointer2 = 0;
     }
 
-    function openModal(type, boxNum) {
-        modalTarget = { type: type, box: boxNum };
+    // Notice I am now passing 'category' directly into the modal
+    function openModal(type, category, boxNum) {
+        modalTarget = { type: type, category: category, box: boxNum };
         
         const categoryNames = { standard: "Standard", followup1: "1", followup2: "2" };
         const title = document.getElementById('modalTitle');
-        title.textContent = `Manage Texts for ${type.toUpperCase()} ${categoryNames[currentTab.category]} - Line ${boxNum}`;
+        title.textContent = `Manage Texts for ${type.toUpperCase()} ${categoryNames[category]} - Line ${boxNum}`;
         
         document.getElementById('addModal').classList.add('active');
         
@@ -393,7 +386,9 @@ permalink: "/clbomb/"
     function renderModalList() {
         const container = document.getElementById('modalList');
         container.innerHTML = '';
-        const list = data[modalTarget.type][currentTab.category][modalTarget.box];
+        
+        // NOW USES modalTarget.category directly, not currentTab
+        const list = data[modalTarget.type][modalTarget.category][modalTarget.box];
 
         if (list.length === 0) {
             container.innerHTML = `<p style="color:#888; font-size:12px; text-align:center;">No texts yet.</p>`;
@@ -418,7 +413,8 @@ permalink: "/clbomb/"
         const text = document.getElementById('modalInput').value.trim();
         if (!text) return;
         
-        const list = data[modalTarget.type][currentTab.category][modalTarget.box];
+        // NOW USES modalTarget.category directly, not currentTab
+        const list = data[modalTarget.type][modalTarget.category][modalTarget.box];
 
         if (editingIndex === -1) {
             list.push(text);
@@ -429,14 +425,14 @@ permalink: "/clbomb/"
             document.getElementById('modalAddBtn').onclick = saveModalText;
         }
 
-        localStorage.setItem('clbomb_data_v5', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v6', JSON.stringify(data));
         
         document.getElementById('modalInput').value = "";
         renderModalList();
     }
 
     function editFromModal(index) {
-        const list = data[modalTarget.type][currentTab.category][modalTarget.box];
+        const list = data[modalTarget.type][modalTarget.category][modalTarget.box];
         document.getElementById('modalInput').value = list[index];
         document.getElementById('modalInput').focus();
         
@@ -448,9 +444,9 @@ permalink: "/clbomb/"
     }
 
     function deleteFromModal(index) {
-        const list = data[modalTarget.type][currentTab.category][modalTarget.box];
+        const list = data[modalTarget.type][modalTarget.category][modalTarget.box];
         list.splice(index, 1);
-        localStorage.setItem('clbomb_data_v5', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v6', JSON.stringify(data));
         
         if (editingIndex === index) {
             editingIndex = -1;
