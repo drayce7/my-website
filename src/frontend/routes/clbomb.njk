@@ -58,26 +58,36 @@ permalink: "/clbomb/"
     .tab-btn.active { background: #3b82f6; color: white; border-color: #2563eb; }
 
     .copy-panel { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
-    .copy-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: center; }
+    .copy-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
     .copy-row:last-child { margin-bottom: 0; }
     .copy-text-display { flex-grow: 1; padding: 8px; background: #111; border: 1px solid #444; border-radius: 6px; min-height: 20px; color: #ccc; font-size: 13px; }
-    .copy-text-display.void-state { background-color: #330000; border-color: #ff0000; color: #ff5555; font-weight: bold; text-align: center; }
     
     .btn-icon { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; background-color: #3b82f6; color: white; font-size: 16px; transition: 0.2s; }
     .btn-icon:hover { background-color: #2563eb; }
-    .btn-icon:disabled { background-color: #444; cursor: not-allowed; }
-
-    /* COMPACT INPUT SECTION */
-    .compact-input-area { background: #181818; border-radius: 8px; padding: 10px; margin-bottom: 10px; border: 1px solid #333; }
-    .compact-input-title { font-size: 13px; color: #f59e0b; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
-    .compact-input-row { display: flex; gap: 8px; margin-bottom: 6px; }
-    .compact-input-row input { flex-grow: 1; padding: 6px; background: #111; border: 1px solid #444; color: white; border-radius: 6px; outline: none; font-size: 13px;}
-    .compact-input-row input:focus { border-color: #3b82f6; }
     
-    /* NEW BUTTONS */
-    .btn-small-add { background: #2e8555; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; width: 100%; margin-top: 5px;}
-    .btn-small-add:hover { background: #236b43; }
-    .btn-small-del { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px;}
+    .btn-add-plus { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; background-color: #10b981; color: white; font-size: 18px; font-weight: bold; transition: 0.2s; }
+    .btn-add-plus:hover { background-color: #059669; }
+
+    /* MODAL STYLES */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-overlay.active { display: flex; }
+    .modal-box { background: #1e1e1e; padding: 20px; border-radius: 12px; width: 400px; border: 1px solid #444; }
+    .modal-box h3 { margin-top: 0; color: #f59e0b; font-size: 16px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;}
+    
+    .modal-input-row { display: flex; gap: 10px; margin-bottom: 15px; }
+    .modal-input { flex-grow: 1; padding: 10px; background: #111; border: 2px solid #3b82f6; color: white; border-radius: 6px; box-sizing: border-box; outline: none; }
+    
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;}
+    .btn-save { background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-cancel { background: #444; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-add-modal { background: #3b82f6; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    
+    .modal-list { max-height: 200px; overflow-y: auto; margin-bottom: 15px; }
+    .modal-list-item { display: flex; justify-content: space-between; background: #222; padding: 8px 10px; border-radius: 6px; margin-bottom: 5px; font-size: 13px; align-items: center; gap: 10px;}
+    .modal-list-item span { flex-grow: 1; word-break: break-word;}
+    
+    .modal-btn-edit { background: #eab308; color: #000; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;}
+    .modal-btn-del { background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;}
 </style>
 
 <main class="bomb-container">
@@ -110,28 +120,42 @@ permalink: "/clbomb/"
     <div class="copy-panel" id="copyPanel">
         <div id="panel-pca">
             <div class="copy-row">
-                <div class="copy-text-display" id="pca-display-1">PCA Main 1</div>
+                <div class="copy-text-display">PCA Main 1</div>
                 <button class="btn-icon" id="pca-btn-1" onclick="nextAndCopy('pca', 1)">📋</button>
+                <button class="btn-add-plus" onclick="openModal('pca', 1)">+</button>
             </div>
             <div class="copy-row">
-                <div class="copy-text-display" id="pca-display-2">PCA Main 2</div>
+                <div class="copy-text-display">PCA Main 2</div>
                 <button class="btn-icon" id="pca-btn-2" onclick="nextAndCopy('pca', 2)">📋</button>
+                <button class="btn-add-plus" onclick="openModal('pca', 2)">+</button>
             </div>
         </div>
         <div id="panel-pva" style="display: none;">
             <div class="copy-row">
-                <div class="copy-text-display" id="pva-display-1">PVA Main</div>
+                <div class="copy-text-display">PVA Main</div>
                 <button class="btn-icon" id="pva-btn-1" onclick="nextAndCopy('pva', 1)">📋</button>
+                <button class="btn-add-plus" onclick="openModal('pva', 1)">+</button>
             </div>
         </div>
     </div>
-
-    <div class="compact-input-area">
-        <div class="compact-input-title" id="manageTitle">Manage Texts for PCA Standard</div>
-        <div id="manageInputs"></div>
-        <button class="btn-small-add" onclick="addTextToList()">+ Add Text to this Category</button>
-    </div>
 </main>
+
+<div class="modal-overlay" id="addModal">
+    <div class="modal-box">
+        <h3 id="modalTitle">Manage Texts</h3>
+        
+        <div class="modal-list" id="modalList"></div>
+
+        <div class="modal-input-row">
+            <input type="text" id="modalInput" class="modal-input" placeholder="Type text here...">
+            <button class="btn-add-modal" id="modalAddBtn" onclick="saveModalText()">+ Add</button>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
 
 <script>
     let data = JSON.parse(localStorage.getItem('clbomb_data')) || {
@@ -148,6 +172,9 @@ permalink: "/clbomb/"
     let cloudTextsForNumber = [];
     let searchIndex = 0; 
     let masterQueue = []; 
+    
+    let modalTarget = { type: 'pca', box: 1 };
+    let editingIndex = -1; // Tracks if we are editing an existing text in the modal
 
     window.addEventListener('firebaseLoaded', async () => {
         document.getElementById('statusDisplay').textContent = "Loading Queue...";
@@ -297,11 +324,16 @@ permalink: "/clbomb/"
         setTimeout(() => { box.style.backgroundColor = originalBg; }, 300);
     }
 
-    // --- SEQUENTIAL COPY LOGIC ---
     function nextAndCopy(type, boxNum) {
-        const list = data[type][currentTab.category];
+        let list = [];
+        if (type === 'pca') {
+            list = data.pca[currentTab.category];
+        } else {
+            list = data.pva[currentTab.category];
+        }
+
         if (!list || list.length === 0) {
-            alert("No texts saved in this category yet. Add one below!");
+            alert("No texts saved in this category yet. Click the + button to add one!");
             return;
         }
 
@@ -335,54 +367,103 @@ permalink: "/clbomb/"
         
         pointer1 = 0;
         pointer2 = 0;
-
-        renderCompactInputs(type, category); 
     }
 
-    // --- MANAGE INPUTS (NOW WITH CLEAR VISIBILITY) ---
-    function renderCompactInputs(type, category) {
-        const title = document.getElementById('manageTitle');
-        const container = document.getElementById('manageInputs');
+    // --- MODAL LOGIC ---
+    function openModal(type, boxNum) {
+        modalTarget = { type: type, box: boxNum };
         
         const categoryNames = { standard: "Standard", followup1: "1", followup2: "2" };
-        const categoryName = categoryNames[category] || category;
-        title.textContent = `Manage Texts for ${type.toUpperCase()} ${categoryName}`;
+        const title = document.getElementById('modalTitle');
+        title.textContent = `Manage Texts for ${type.toUpperCase()} ${categoryNames[currentTab.category]}`;
+        
+        document.getElementById('addModal').classList.add('active');
+        
+        // Reset editing state
+        editingIndex = -1;
+        document.getElementById('modalInput').value = "";
+        document.getElementById('modalAddBtn').textContent = "+ Add";
+        document.getElementById('modalAddBtn').onclick = saveModalText;
+        
+        renderModalList();
+        setTimeout(() => document.getElementById('modalInput').focus(), 100);
+    }
 
+    function closeModal() {
+        document.getElementById('addModal').classList.remove('active');
+    }
+
+    function renderModalList() {
+        const container = document.getElementById('modalList');
         container.innerHTML = '';
-        const list = data[type][category];
+        const list = data[modalTarget.type][currentTab.category];
 
         if (list.length === 0) {
-            container.innerHTML = `<p style="color: #666; font-size: 12px; margin: 5px 0;">No texts added yet. Click the add button below.</p>`;
+            container.innerHTML = `<p style="color:#888; font-size:12px; text-align:center;">No texts yet.</p>`;
             return;
         }
 
         list.forEach((text, index) => {
-            const row = document.createElement('div');
-            row.className = 'compact-input-row';
-            // Shows the input AND the Delete button right next to it
-            row.innerHTML = `
-                <input type="text" value="${text.replace(/"/g, '&quot;')}" onchange="updateCompactText('${type}', '${category}', ${index}, this.value)">
-                <button class="btn-small-del" onclick="deleteCompactText('${type}', '${category}', ${index})">X</button>
+            const item = document.createElement('div');
+            item.className = 'modal-list-item';
+            item.innerHTML = `
+                <span>${text}</span>
+                <div style="display:flex; gap:5px;">
+                    <button class="modal-btn-edit" onclick="editFromModal(${index})">✏️</button>
+                    <button class="modal-btn-del" onclick="deleteFromModal(${index})">X</button>
+                </div>
             `;
-            container.appendChild(row);
+            container.appendChild(item);
         });
     }
 
-    function addTextToList() {
-        data[currentTab.type][currentTab.category].push("New text...");
+    // Handles Adding OR Saving an Edit
+    function saveModalText() {
+        const text = document.getElementById('modalInput').value.trim();
+        if (!text) return;
+
+        if (editingIndex === -1) {
+            // We are adding a new text
+            data[modalTarget.type][currentTab.category].push(text);
+        } else {
+            // We are saving an edited text
+            data[modalTarget.type][currentTab.category][editingIndex] = text;
+            editingIndex = -1; // Reset edit mode
+            document.getElementById('modalAddBtn').textContent = "+ Add";
+            document.getElementById('modalAddBtn').onclick = saveModalText;
+        }
+
         localStorage.setItem('clbomb_data', JSON.stringify(data));
-        renderCompactInputs(currentTab.type, currentTab.category);
+        
+        document.getElementById('modalInput').value = "";
+        renderModalList();
     }
 
-    function updateCompactText(type, category, index, value) {
-        data[type][category][index] = value;
-        localStorage.setItem('clbomb_data', JSON.stringify(data));
+    function editFromModal(index) {
+        const list = data[modalTarget.type][currentTab.category];
+        document.getElementById('modalInput').value = list[index];
+        document.getElementById('modalInput').focus();
+        
+        editingIndex = index;
+        
+        // Change button to "Save Edit"
+        const btn = document.getElementById('modalAddBtn');
+        btn.textContent = "Save Edit";
+        btn.onclick = saveModalText;
     }
 
-    function deleteCompactText(type, category, index) {
-        data[type][category].splice(index, 1);
+    function deleteFromModal(index) {
+        data[modalTarget.type][currentTab.category].splice(index, 1);
         localStorage.setItem('clbomb_data', JSON.stringify(data));
-        renderCompactInputs(type, category);
+        
+        // If we delete the item we were editing, reset the input
+        if (editingIndex === index) {
+            editingIndex = -1;
+            document.getElementById('modalInput').value = "";
+            document.getElementById('modalAddBtn').textContent = "+ Add";
+        }
+        
+        renderModalList();
     }
 
     switchTab('pca', 'standard'); 
