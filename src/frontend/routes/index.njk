@@ -18,19 +18,11 @@ permalink: "/"
     .counter { font-size: 14px; color: #ccc; font-weight: bold; }
     .counter span { color: #3b82f6; font-size: 16px; }
     
-    .btn-group { display: flex; gap: 10px; }
-    
     .btn-clear-all { 
         background-color: #ef4444; color: white; border: none; padding: 8px 15px; 
         border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;
     }
     .btn-clear-all:hover { background-color: #dc2626; }
-
-    .btn-go-all {
-        background-color: #10b981; color: white; border: none; padding: 8px 15px; 
-        border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;
-    }
-    .btn-go-all:hover { background-color: #059669; }
 
     /* --- TOGGLE CONTAINER --- */
     .toggle-container {
@@ -106,16 +98,39 @@ permalink: "/"
     .btn-delete:hover { background-color: #dc2626; }
 </style>
 
+<!-- Load Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
+    authDomain: "clbomb.firebaseapp.com",
+    projectId: "clbomb",
+    storageBucket: "clbomb.firebasestorage.app",
+    messagingSenderId: "515939060816",
+    appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.db = db;
+  window.doc = doc;
+  window.getDoc = getDoc;
+  window.setDoc = setDoc;
+  
+  window.firebaseReady = true;
+  window.dispatchEvent(new Event('firebaseLoaded'));
+</script>
+
 <main class="home-content">
     <div class="top-bar">
         <div class="counters">
             <div class="counter">Total: <span id="totalCount">0</span></div>
             <div class="counter">Confirmed: <span id="confirmedCount">0</span></div>
         </div>
-        <div class="btn-group">
-            <button class="btn-go-all" onclick="goAll()">✅ GO ALL</button>
-            <button class="btn-clear-all" onclick="clearAllText()">🗑️ Clear All</button>
-        </div>
+        <button class="btn-clear-all" onclick="clearAllText()">🗑️ Clear All</button>
     </div>
 
     <div class="toggle-container">
@@ -133,7 +148,7 @@ permalink: "/"
 
     <div class="list-container" id="listContainer"></div>
 
-    <button class="btn btn-apply" onclick="applyAndGo()">Apply & Go to CLbomb ➔</button>
+    <button class="btn btn-apply" id="applyBtn" onclick="applyAndGo()">Apply & Go to CLbomb ➔</button>
 </main>
 
 <script>
@@ -198,27 +213,15 @@ permalink: "/"
         
         lines.forEach(line => {
             const isValid = /^[a-z0-9._]+$/.test(line);
-
-            if (!isValid) {
-                return; 
-            }
+            if (!isValid) return; 
 
             const isDuplicate = items.some(item => item.text === line);
-            
             if (!isDuplicate) {
                 items.push({ id: idCounter++, text: line, confirmed: false, isEditing: false });
             }
         });
 
         document.getElementById('bulkInput').value = "";
-        renderList();
-    }
-
-    // NEW: GO ALL FUNCTION
-    function goAll() {
-        items.forEach(item => {
-            item.confirmed = true;
-        });
         renderList();
     }
 
@@ -325,16 +328,47 @@ permalink: "/"
         if (event.key === 'Enter') { saveEdit(id); }
     }
 
+    // --- FIXED APPLY FUNCTION ---
     async function applyAndGo() {
         const confirmedTexts = items.filter(i => i.confirmed).map(i => i.text);
         if (confirmedTexts.length === 0) { alert("Please click 'GO' on at least one item before applying!"); return; }
+        
+        if (!window.firebaseReady) {
+            alert("Firebase is still loading, please try again in a second.");
+            return;
+        }
 
-        let queue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
-        queue = [...confirmedTexts, ...queue];
-        localStorage.setItem('clbomb_queue', JSON.stringify(queue));
+        const applyBtn = document.getElementById('applyBtn');
+        applyBtn.textContent = "Saving to Cloud...";
+        applyBtn.disabled = true;
 
-        items = [];
-        renderList();
-        window.location.href = '/my-website/clbomb/';
+        try {
+            // Push directly to Firebase cloud
+            const docRef = window.doc(window.db, "clbomb_queue", "current_queue");
+            const docSnap = await window.getDoc(docRef);
+            
+            let existingQueue = [];
+            if (docSnap.exists()) {
+                existingQueue = docSnap.data().texts || [];
+            }
+
+            // Combine new texts with existing ones in the cloud
+            let newQueue = [...confirmedTexts, ...existingQueue];
+            await window.setDoc(docRef, { texts: newQueue });
+
+            // Also save to local storage just in case
+            localStorage.setItem('clbomb_queue', JSON.stringify(newQueue));
+
+            // Clear UI and redirect ONLY after successful save
+            items = [];
+            renderList();
+            window.location.href = '/my-website/clbomb/';
+
+        } catch (error) {
+            console.error("Error saving to Firebase:", error);
+            alert("Failed to save to the database. Please check your internet connection.");
+            applyBtn.textContent = "Apply & Go to CLbomb ➔";
+            applyBtn.disabled = false;
+        }
     }
 </script>
