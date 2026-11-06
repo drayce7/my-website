@@ -1,171 +1,178 @@
-
 ---
-layout: "base.njk"
 title: "Chat App Login"
 permalink: "/login/"
+layout: false
 ---
-<!-- Load Firebase Auth -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect - Chat App</title>
+    
+    <!-- Load Firebase Auth -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
-    authDomain: "clbomb.firebaseapp.com",
-    projectId: "clbomb",
-    storageBucket: "clbomb.firebasestorage.app",
-    messagingSenderId: "515939060816",
-    appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
-  };
+      const firebaseConfig = {
+        apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
+        authDomain: "clbomb.firebaseapp.com",
+        projectId: "clbomb",
+        storageBucket: "clbomb.firebasestorage.app",
+        messagingSenderId: "515939060816",
+        appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
+      };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
 
-  window.auth = auth;
-  window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-  window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-  window.onAuthStateChanged = onAuthStateChanged;
-  window.signOut = signOut;
+      window.auth = auth;
+      window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+      window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+      window.onAuthStateChanged = onAuthStateChanged;
+      window.signOut = signOut;
 
-  window.firebaseReady = true;
-  window.dispatchEvent(new Event('firebaseLoaded'));
-</script>
+      window.firebaseReady = true;
+      window.dispatchEvent(new Event('firebaseLoaded'));
+    </script>
 
-<style>
-    /* --- APP-LIKE RESET --- */
-    html, body {
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        width: 100vw;
-        overflow: hidden; /* Prevents scrolling, makes it feel like a native app */
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #0f0c29;
-        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); 
-        color: white;
-    }
+    <style>
+        /* --- APP-LIKE RESET (Removes all Nibula styles) --- */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0c29; 
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); 
+            color: white;
+        }
 
-    /* --- CENTERING WRAPPER --- */
-    .app-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        width: 100%;
-    }
+        /* --- CENTERING WRAPPER --- */
+        .app-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+        }
 
-    /* --- GLASSMORPHISM CARD --- */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
-        padding: 40px;
-        width: 100%;
-        max-width: 400px;
-        box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
-        text-align: center;
-        animation: fadeIn 0.6s ease-out;
-        transition: transform 0.3s ease;
-    }
+        /* --- GLASSMORPHISM CARD --- */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+        }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    h1 {
-        font-size: 32px;
-        margin-top: 0;
-        margin-bottom: 10px;
-        background: -webkit-linear-gradient(45deg, #00d2ff, #3a7bd5);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+        h1 {
+            font-size: 32px;
+            margin-top: 0;
+            margin-bottom: 10px;
+            background: -webkit-linear-gradient(45deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-    p.subtitle {
-        color: #a0a0b0;
-        font-size: 15px;
-        margin-bottom: 30px;
-    }
+        p.subtitle {
+            color: #a0a0b0;
+            font-size: 15px;
+            margin-bottom: 30px;
+        }
 
-    /* --- INPUT FIELDS --- */
-    .input-group {
-        position: relative;
-        margin-bottom: 20px;
-        text-align: left;
-    }
+        /* --- INPUT FIELDS --- */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+            text-align: left;
+        }
 
-    .input-group label {
-        display: block;
-        font-size: 12px;
-        text-transform: uppercase;
-        color: #a0a0b0;
-        margin-bottom: 8px;
-        letter-spacing: 1px;
-    }
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #a0a0b0;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
 
-    .input-group input {
-        width: 100%;
-        padding: 15px;
-        background: rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        color: white;
-        font-size: 16px;
-        outline: none;
-        transition: all 0.3s ease;
-        box-sizing: border-box;
-    }
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
 
-    .input-group input:focus {
-        border-color: #00d2ff;
-        background: rgba(0, 0, 0, 0.4);
-        box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
-    }
+        .input-group input:focus {
+            border-color: #00d2ff;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+        }
 
-    /* --- BUTTONS --- */
-    .btn {
-        width: 100%;
-        padding: 15px;
-        font-size: 16px;
-        font-weight: 600;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 10px;
-    }
+        /* --- BUTTONS --- */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
 
-    .btn-primary {
-        background: linear-gradient(45deg, #00d2ff, #3a7bd5);
-        color: white;
-        box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
-    }
+        .btn-primary {
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+        }
 
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 210, 255, 0.5);
-    }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 210, 255, 0.5);
+        }
 
-    .btn-secondary {
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-    }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
 
-    .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.1);
-    }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
 
-    /* --- UTILITY CLASSES --- */
-    .hidden { display: none !important; }
-    .error-msg { color: #ff4b4b; font-size: 14px; margin-top: 15px; min-height: 20px; }
-    .link-text { color: #00d2ff; cursor: pointer; font-weight: 600; text-decoration: none; }
-    .link-text:hover { text-decoration: underline; }
-    .user-email { color: #00d2ff; font-weight: bold; }
-</style>
+        /* --- UTILITY CLASSES --- */
+        .hidden { display: none !important; }
+        .error-msg { color: #ff4b4b; font-size: 14px; margin-top: 15px; min-height: 20px; }
+        .link-text { color: #00d2ff; cursor: pointer; font-weight: 600; text-decoration: none; }
+        .link-text:hover { text-decoration: underline; }
+        .user-email { color: #00d2ff; font-weight: bold; }
+    </style>
+</head>
+<body>
 
 <main class="app-container">
     
@@ -231,7 +238,7 @@ permalink: "/login/"
             </p>
         </div>
 
-        <!-- SCREEN 4: LOGGED IN (Temporary) -->
+        <!-- SCREEN 4: LOGGED IN -->
         <div id="loggedInScreen" class="hidden">
             <h1>Success!</h1>
             <p class="subtitle">You are logged in as:</p>
@@ -263,22 +270,9 @@ permalink: "/login/"
         document.getElementById('loggedInScreen').classList.add('hidden');
     }
 
-    function showLanding() {
-        hideAllScreens();
-        document.getElementById('landingScreen').classList.remove('hidden');
-    }
-
-    function showLogin() {
-        hideAllScreens();
-        document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('loginError').textContent = "";
-    }
-
-    function showSignup() {
-        hideAllScreens();
-        document.getElementById('signupScreen').classList.remove('hidden');
-        document.getElementById('signupError').textContent = "";
-    }
+    function showLanding() { hideAllScreens(); document.getElementById('landingScreen').classList.remove('hidden'); }
+    function showLogin() { hideAllScreens(); document.getElementById('loginScreen').classList.remove('hidden'); document.getElementById('loginError').textContent = ""; }
+    function showSignup() { hideAllScreens(); document.getElementById('signupScreen').classList.remove('hidden'); document.getElementById('signupError').textContent = ""; }
 
     async function handleLogin() {
         const email = document.getElementById('loginEmail').value.trim();
@@ -323,3 +317,5 @@ permalink: "/login/"
         await window.signOut(window.auth);
     }
 </script>
+</body>
+</html>
