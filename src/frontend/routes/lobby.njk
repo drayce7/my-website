@@ -1,0 +1,323 @@
+---
+title: "Lobby"
+permalink: "/lobby/"
+layout: false
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect - Lobby</title>
+    
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      import { getFirestore, doc, getDoc, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
+        authDomain: "clbomb.firebaseapp.com",
+        projectId: "clbomb",
+        storageBucket: "clbomb.firebasestorage.app",
+        messagingSenderId: "515939060816",
+        appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      window.auth = getAuth(app);
+      window.db = getFirestore(app);
+      
+      window.onAuthStateChanged = onAuthStateChanged;
+      window.signOut = signOut;
+      window.doc = doc;
+      window.getDoc = getDoc;
+      window.collection = collection;
+      window.getDocs = getDocs;
+      window.addDoc = addDoc;
+
+      window.firebaseReady = true;
+      window.dispatchEvent(new Event('firebaseLoaded'));
+    </script>
+
+    <style>
+        :root {
+            --bg-dark: #0f0c29;
+            --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            --sidebar-bg: rgba(15, 12, 41, 0.7);
+            --glass: rgba(255, 255, 255, 0.05);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --primary: #00d2ff;
+            --text-main: #ffffff;
+            --text-muted: #a0a0b0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-glass);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .brand { font-size: 24px; font-weight: bold; color: var(--primary); margin-bottom: 30px; letter-spacing: 1px; }
+        
+        .user-profile {
+            display: flex; align-items: center; gap: 12px; padding: 10px;
+            background: var(--glass); border-radius: 12px; border: 1px solid var(--border-glass);
+            margin-bottom: 30px; cursor: pointer; transition: 0.2s;
+        }
+        .user-profile:hover { background: rgba(255,255,255,0.1); }
+        .avatar {
+            width: 40px; height: 40px; border-radius: 50%; display: flex;
+            justify-content: center; align-items: center; font-weight: bold; font-size: 18px;
+        }
+        .user-info h4 { font-size: 14px; margin-bottom: 2px; }
+        .user-info p { font-size: 12px; color: var(--text-muted); }
+
+        .nav-links { display: flex; flex-direction: column; gap: 5px; }
+        .nav-item {
+            padding: 12px 15px; border-radius: 8px; cursor: pointer; color: var(--text-muted);
+            font-weight: 600; transition: 0.2s; display: flex; align-items: center; gap: 10px;
+        }
+        .nav-item:hover, .nav-item.active { background: var(--glass); color: var(--text-main); }
+        .nav-item.active { border-left: 3px solid var(--primary); }
+
+        .spacer { flex-grow: 1; }
+
+        .btn-logout {
+            background: transparent; border: 1px solid rgba(255, 75, 75, 0.3); color: #ff4b4b;
+            padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
+        .btn-logout:hover { background: rgba(255, 75, 75, 0.1); }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            flex-grow: 1; padding: 40px; display: flex; flex-direction: column;
+            overflow-y: auto; /* Allow scrolling here */
+        }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h1 { font-size: 28px; }
+        
+        .btn-create {
+            background: var(--primary); color: #000; border: none; padding: 10px 20px;
+            border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .btn-create:hover { background: #00b8e6; transform: translateY(-2px); }
+
+        /* --- ROOM GRID --- */
+        .room-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .room-card {
+            background: var(--glass); border: 1px solid var(--border-glass);
+            border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.3s ease;
+            position: relative; overflow: hidden;
+        }
+        .room-card:hover {
+            background: rgba(255,255,255,0.1); transform: translateY(-5px);
+            border-color: var(--primary); box-shadow: 0 10px 20px rgba(0, 210, 255, 0.1);
+        }
+
+        .room-icon {
+            width: 50px; height: 50px; border-radius: 12px; background: rgba(0, 210, 255, 0.1);
+            display: flex; justify-content: center; align-items: center; font-size: 24px; margin-bottom: 15px;
+        }
+        .room-card h3 { font-size: 18px; margin-bottom: 5px; }
+        .room-card p { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+        
+        .tag {
+            display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 10px; 
+            font-weight: bold; text-transform: uppercase; margin-top: 15px; background: rgba(0, 210, 255, 0.2);
+            color: var(--primary);
+        }
+
+        /* CREATE ROOM MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: #1e1e2f; padding: 30px; border-radius: 16px; width: 100%; max-width: 400px;
+            border: 1px solid var(--border-glass);
+        }
+        .modal-box h2 { margin-bottom: 20px; color: var(--primary); }
+        .modal-box input, .modal-box textarea {
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass);
+            border-radius: 8px; color: white; margin-bottom: 15px; font-family: inherit;
+        }
+        .modal-box textarea { resize: vertical; height: 80px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .btn-cancel { background: transparent; color: white; border: none; cursor: pointer; padding: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="brand">Connect</div>
+        
+        <div class="user-profile" id="sidebarProfile">
+            <div class="avatar" id="sidebarAvatar">?</div>
+            <div class="user-info">
+                <h4 id="sidebarName">Loading...</h4>
+                <p id="sidebarHandle">@...</p>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <div class="nav-item active">🌍 Discover Rooms</div>
+            <div class="nav-item">💬 Direct Messages</div>
+            <div class="nav-item">👥 Friends</div>
+            <div class="nav-item">⚙️ Settings</div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <button class="btn-logout" onclick="handleLogout()">Log Out</button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <div class="header">
+            <h1>Discover Rooms</h1>
+            <button class="btn-create" onclick="openCreateModal()">+ Create Room</button>
+        </div>
+
+        <div class="room-grid" id="roomGrid">
+            <!-- Rooms will be loaded here dynamically -->
+            <div style="color: var(--text-muted);">Loading rooms...</div>
+        </div>
+    </main>
+
+    <!-- CREATE ROOM MODAL -->
+    <div class="modal-overlay" id="createModal">
+        <div class="modal-box">
+            <h2>Create a Room</h2>
+            <input type="text" id="roomName" placeholder="Room Name (e.g. Late Night Vibes)">
+            <textarea id="roomDesc" placeholder="What is this room about?"></textarea>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeCreateModal()">Cancel</button>
+                <button class="btn-create" onclick="createRoom()">Create</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let currentUserData = null;
+
+    window.addEventListener('firebaseLoaded', () => {
+        window.onAuthStateChanged(window.auth, async (user) => {
+            if (user) {
+                // Load User Profile
+                const docRef = window.doc(window.db, "users", user.uid);
+                const docSnap = await window.getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    currentUserData = docSnap.data();
+                    
+                    // Update Sidebar
+                    const avatar = document.getElementById('sidebarAvatar');
+                    avatar.textContent = currentUserData.name.charAt(0).toUpperCase();
+                    avatar.style.background = currentUserData.avatarColor || '#3a7bd5';
+                    
+                    document.getElementById('sidebarName').textContent = currentUserData.nickname || currentUserData.name;
+                    document.getElementById('sidebarHandle').textContent = "@" + currentUserData.username;
+                }
+
+                // Load Rooms
+                loadRooms();
+            } else {
+                // Not logged in, kick to login
+                window.location.href = '/my-website/login/';
+            }
+        });
+    });
+
+    async function loadRooms() {
+        const grid = document.getElementById('roomGrid');
+        grid.innerHTML = '<div style="color: var(--text-muted);">Loading rooms...</div>';
+
+        try {
+            const querySnapshot = await window.getDocs(window.collection(window.db, "rooms"));
+            grid.innerHTML = ''; // Clear loading
+
+            if (querySnapshot.empty) {
+                grid.innerHTML = '<div style="color: var(--text-muted);">No rooms yet. Be the first to create one!</div>';
+                return;
+            }
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const div = document.createElement('div');
+                div.className = 'room-card';
+                div.onclick = () => { window.location.href = `/my-website/room/?id=${doc.id}`; };
+                
+                div.innerHTML = `
+                    <div class="room-icon">${data.name.charAt(0).toUpperCase()}</div>
+                    <h3>${data.name}</h3>
+                    <p>${data.description || "No description provided."}</p>
+                    <span class="tag">Public Room</span>
+                `;
+                grid.appendChild(div);
+            });
+
+        } catch (e) {
+            console.error("Error loading rooms: ", e);
+            grid.innerHTML = '<div style="color: #ff4b4b;">Failed to load rooms.</div>';
+        }
+    }
+
+    function openCreateModal() { document.getElementById('createModal').classList.add('active'); }
+    function closeCreateModal() { document.getElementById('createModal').classList.remove('active'); }
+
+    async function createRoom() {
+        const name = document.getElementById('roomName').value.trim();
+        const desc = document.getElementById('roomDesc').value.trim();
+
+        if (!name) return alert("Please enter a room name.");
+
+        try {
+            await window.addDoc(window.collection(window.db, "rooms"), {
+                name: name,
+                description: desc,
+                createdBy: currentUserData ? currentUserData.username : "Unknown",
+                createdAt: new Date().toISOString()
+            });
+            closeCreateModal();
+            loadRooms(); // Reload the grid
+        } catch (e) {
+            console.error("Error creating room: ", e);
+            alert("Failed to create room.");
+        }
+    }
+
+    async function handleLogout() {
+        await window.signOut(window.auth);
+        window.location.href = '/my-website/login/';
+    }
+</script>
+</body>
+</html>
