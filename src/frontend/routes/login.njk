@@ -1,5 +1,5 @@
 ---
-title: "Chat App Login"
+title: "Chat App - Join the Vibe"
 permalink: "/login/"
 layout: false
 ---
@@ -8,12 +8,12 @@ layout: false
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect - Chat App</title>
+    <title>Join the Vibe</title>
     
-    <!-- Load Firebase Auth -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
       import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
@@ -26,237 +26,270 @@ layout: false
 
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
+      const db = getFirestore(app);
 
       window.auth = auth;
+      window.db = db;
       window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
       window.signInWithEmailAndPassword = signInWithEmailAndPassword;
       window.onAuthStateChanged = onAuthStateChanged;
       window.signOut = signOut;
+      window.setDoc = setDoc;
+      window.doc = doc;
+      window.getDoc = getDoc;
+      window.collection = collection;
+      window.query = query;
+      window.where = where;
+      window.getDocs = getDocs;
 
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
     </script>
 
     <style>
-        /* --- APP-LIKE RESET (Removes all Nibula styles) --- */
+        :root {
+            --primary: #00d2ff;
+            --primary-dark: #3a7bd5;
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --border-glass: rgba(255, 255, 255, 0.1);
+        }
+
         html, body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f0c29; 
+            margin: 0; padding: 0; height: 100vh; width: 100vw;
+            overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0c29;
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); 
             color: white;
         }
 
-        /* --- CENTERING WRAPPER --- */
-        .app-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            width: 100%;
-        }
+        .app-container { display: flex; justify-content: center; align-items: center; height: 100%; width: 100%; }
 
-        /* --- GLASSMORPHISM CARD --- */
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px; padding: 40px; width: 100%; max-width: 450px;
             box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
             text-align: center;
             animation: fadeIn 0.6s ease-out;
+            position: relative;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         h1 {
-            font-size: 32px;
-            margin-top: 0;
-            margin-bottom: 10px;
-            background: -webkit-linear-gradient(45deg, #00d2ff, #3a7bd5);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 32px; margin-top: 0; margin-bottom: 10px;
+            background: -webkit-linear-gradient(45deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        p.subtitle {
-            color: #a0a0b0;
-            font-size: 15px;
-            margin-bottom: 30px;
-        }
+        p.subtitle { color: #a0a0b0; font-size: 15px; margin-bottom: 30px; }
 
-        /* --- INPUT FIELDS --- */
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
-            text-align: left;
+        /* --- INPUTS --- */
+        .input-group { position: relative; margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 11px; text-transform: uppercase; color: #a0a0b0; margin-bottom: 5px; letter-spacing: 1px; }
+        .input-group input, .input-group select {
+            width: 100%; padding: 14px; background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-glass); border-radius: 12px;
+            color: white; font-size: 15px; outline: none; transition: all 0.3s ease; box-sizing: border-box;
         }
+        .input-group select { cursor: pointer; }
+        .input-group select option { background: #1e1e1e; color: white; }
+        .input-group input:focus, .input-group select:focus { border-color: var(--primary); background: rgba(0, 0, 0, 0.4); box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); }
 
-        .input-group label {
-            display: block;
-            font-size: 12px;
-            text-transform: uppercase;
-            color: #a0a0b0;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            outline: none;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        .input-group input:focus {
-            border-color: #00d2ff;
-            background: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
-        }
+        .input-row { display: flex; gap: 15px; }
+        .input-row .input-group { flex: 1; }
 
         /* --- BUTTONS --- */
-        .btn {
-            width: 100%;
-            padding: 15px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
+        .btn { width: 100%; padding: 15px; font-size: 16px; font-weight: 600; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
+        .btn-primary { background: linear-gradient(45deg, var(--primary), var(--primary-dark)); color: white; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 210, 255, 0.5); }
+        .btn-secondary { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: white; }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
 
-        .btn-primary {
-            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 210, 255, 0.5);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* --- UTILITY CLASSES --- */
+        /* --- UTILS --- */
         .hidden { display: none !important; }
-        .error-msg { color: #ff4b4b; font-size: 14px; margin-top: 15px; min-height: 20px; }
-        .link-text { color: #00d2ff; cursor: pointer; font-weight: 600; text-decoration: none; }
+        .error-msg { color: #ff4b4b; font-size: 13px; margin-top: 10px; min-height: 18px; }
+        .success-msg { color: #10b981; font-size: 13px; margin-top: 10px; }
+        .link-text { color: var(--primary); cursor: pointer; font-weight: 600; }
         .link-text:hover { text-decoration: underline; }
-        .user-email { color: #00d2ff; font-weight: bold; }
+
+        /* --- PROGRESS BAR --- */
+        .progress-bar-container { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 25px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 50%; background: linear-gradient(90deg, var(--primary), var(--primary-dark)); transition: width 0.3s ease; }
+
+        /* --- PASSWORD STRENGTH --- */
+        .strength-meter { height: 4px; width: 100%; background: #333; border-radius: 2px; margin-top: 5px; overflow: hidden; }
+        .strength-meter div { height: 100%; width: 0%; transition: width 0.3s, background-color 0.3s; }
+        .strength-text { font-size: 11px; color: #a0a0b0; margin-top: 4px; text-align: right; }
+
+        /* --- PROFILE PREVIEW --- */
+        .profile-preview { display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: left; border: 1px solid var(--border-glass); }
+        .avatar-circle { width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; transition: background 0.3s; }
+        .preview-info h3 { margin: 0; font-size: 16px; color: white; }
+        .preview-info p { margin: 2px 0 0 0; font-size: 12px; color: #a0a0b0; }
+
+        /* --- COLOR PICKER --- */
+        .color-picker { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
+        .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+        .color-swatch:hover { transform: scale(1.1); }
+        .color-swatch.selected { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
+        /* --- CHAT PLACEHOLDER --- */
+        .chat-preview { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 20px; margin-top: 20px; text-align: left; }
+        .chat-bubble { background: #2b2b2b; padding: 10px 15px; border-radius: 15px; margin-bottom: 10px; font-size: 14px; display: inline-block; max-width: 80%; }
+        .chat-bubble.you { background: var(--primary-dark); margin-left: auto; display: block; text-align: right; }
     </style>
 </head>
 <body>
 
 <main class="app-container">
-    
     <div class="glass-card" id="mainCard">
         
-        <!-- SCREEN 1: LANDING PAGE -->
+        <!-- SCREEN 1: LANDING -->
         <div id="landingScreen">
             <h1>Connect</h1>
-            <p class="subtitle">Welcome to the web chat experience.</p>
-            
+            <p class="subtitle">The internet feels different here.</p>
             <button class="btn btn-primary" onclick="showLogin()">Log In</button>
             <div style="margin-top: 15px;"></div>
-            <button class="btn btn-secondary" onclick="showSignup()">Create an Account</button>
+            <button class="btn btn-secondary" onclick="startSignup()">Create an Account</button>
         </div>
 
-        <!-- SCREEN 2: LOGIN FORM -->
+        <!-- SCREEN 2: LOGIN -->
         <div id="loginScreen" class="hidden">
             <h1>Welcome Back</h1>
-            <p class="subtitle">Log in to continue chatting.</p>
-            
-            <div class="input-group">
-                <label>Email</label>
-                <input type="email" id="loginEmail" placeholder="you@example.com">
-            </div>
-            <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="loginPassword" placeholder="••••••••">
-            </div>
-
+            <p class="subtitle">Your people are waiting.</p>
+            <div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com"></div>
+            <div class="input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
             <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">Log In</button>
             <div class="error-msg" id="loginError"></div>
-            
-            <p style="margin-top: 20px; font-size: 14px; color: #a0a0b0;">
-                Don't have an account? <span class="link-text" onclick="showSignup()">Sign Up</span>
-            </p>
-            <p style="margin-top: 10px; font-size: 14px;">
-                <span class="link-text" onclick="showLanding()">← Back to Start</span>
-            </p>
+            <p style="margin-top: 20px; font-size: 14px; color: #a0a0b0;">Don't have an account? <span class="link-text" onclick="startSignup()">Sign Up</span></p>
+            <p style="margin-top: 10px; font-size: 14px;"><span class="link-text" onclick="showLanding()">← Back</span></p>
         </div>
 
-        <!-- SCREEN 3: SIGNUP FORM -->
+        <!-- SCREEN 3: SIGNUP -->
         <div id="signupScreen" class="hidden">
-            <h1>Create Account</h1>
-            <p class="subtitle">Join the conversation today.</p>
+            <h1>Create Identity</h1>
+            <p class="subtitle">Tell us who you are.</p>
             
-            <div class="input-group">
-                <label>Email</label>
-                <input type="email" id="signupEmail" placeholder="you@example.com">
-            </div>
-            <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="signupPassword" placeholder="Min 6 characters">
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
             </div>
 
-            <button class="btn btn-primary" id="signupBtn" onclick="handleSignup()">Sign Up</button>
+            <div class="profile-preview">
+                <div class="avatar-circle" id="avatarPreview" style="background: #3a7bd5;">?</div>
+                <div class="preview-info">
+                    <h3 id="namePreview">Your Name</h3>
+                    <p id="handlePreview">@username</p>
+                </div>
+            </div>
+
+            <!-- STEP 1: Identity -->
+            <div id="step1">
+                <div class="input-row">
+                    <div class="input-group"><label>Full Name</label><input type="text" id="signupName" placeholder="John Doe" oninput="updatePreview()"></div>
+                    <div class="input-group"><label>Nickname</label><input type="text" id="signupNickname" placeholder="Johnny"></div>
+                </div>
+                <div class="input-group">
+                    <label>Username (Unique)</label>
+                    <input type="text" id="signupUsername" placeholder="johndoe" oninput="checkUsername(this)">
+                    <div id="usernameStatus" style="font-size: 11px; margin-top: 4px;"></div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group"><label>Date of Birth</label><input type="date" id="signupDob"></div>
+                    <div class="input-group">
+                        <label>Country</label>
+                        <select id="signupCountry">
+                            <option value="">Select Country...</option>
+                            <option value="NG">Nigeria</option>
+                            <option value="US">United States</option>
+                            <option value="UK">United Kingdom</option>
+                            <option value="CA">Canada</option>
+                            <option value="ZA">South Africa</option>
+                            <option value="GH">Ghana</option>
+                            <option value="KE">Kenya</option>
+                            <option value="IN">India</option>
+                            <!-- Add more countries as needed -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label style="font-size: 11px; text-transform: uppercase; color: #a0a0b0; display: block; margin-bottom: 5px;">Profile Color</label>
+                    <div class="color-picker">
+                        <div class="color-swatch" style="background: #3a7bd5;" onclick="selectColor(this, '#3a7bd5')"></div>
+                        <div class="color-swatch" style="background: #ff00cc;" onclick="selectColor(this, '#ff00cc')"></div>
+                        <div class="color-swatch" style="background: #10b981;" onclick="selectColor(this, '#10b981')"></div>
+                        <div class="color-swatch" style="background: #f59e0b;" onclick="selectColor(this, '#f59e0b')"></div>
+                        <div class="color-swatch" style="background: #ef4444;" onclick="selectColor(this, '#ef4444')"></div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="nextStep(2)">Next Step →</button>
+            </div>
+
+            <!-- STEP 2: Credentials -->
+            <div id="step2" class="hidden">
+                <div class="input-group"><label>Email</label><input type="email" id="signupEmail" placeholder="you@example.com"></div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" placeholder="Min 6 characters" oninput="checkPasswordStrength()">
+                    <div class="strength-meter"><div id="strengthBar"></div></div>
+                    <div class="strength-text" id="strengthText"></div>
+                </div>
+                <button class="btn btn-primary" id="signupBtn" onclick="handleSignup()">Create Account</button>
+                <button class="btn btn-secondary" onclick="nextStep(1)" style="margin-top: 10px;">← Back</button>
+            </div>
+
             <div class="error-msg" id="signupError"></div>
-            
-            <p style="margin-top: 20px; font-size: 14px; color: #a0a0b0;">
-                Already have an account? <span class="link-text" onclick="showLogin()">Log In</span>
-            </p>
-            <p style="margin-top: 10px; font-size: 14px;">
-                <span class="link-text" onclick="showLanding()">← Back to Start</span>
-            </p>
         </div>
 
         <!-- SCREEN 4: LOGGED IN -->
         <div id="loggedInScreen" class="hidden">
             <h1>Success!</h1>
-            <p class="subtitle">You are logged in as:</p>
-            <p class="user-email" id="displayEmail"></p>
+            <p class="subtitle">Welcome to the vibe.</p>
             
-            <button class="btn btn-secondary" style="margin-top: 30px;" onclick="handleLogout()">Log Out</button>
+            <div class="profile-preview" style="justify-content: center;">
+                <div class="avatar-circle" id="loggedAvatar">?</div>
+                <div class="preview-info">
+                    <h3 id="loggedName">Name</h3>
+                    <p id="loggedHandle">@handle</p>
+                    <p id="loggedCountry" style="margin-top: 5px; font-size: 11px; color: #00d2ff;"></p>
+                </div>
+            </div>
+
+            <p style="color:#a0a0b0; font-size:14px; margin-bottom: 10px;">Here is a taste of the chat UI:</p>
+            <div class="chat-preview">
+                <div class="chat-bubble">Hey! Welcome to the room.</div>
+                <div class="chat-bubble">This is going to be sick.</div>
+                <div class="chat-bubble you">Glad to be here.</div>
+            </div>
+            
+            <button class="btn btn-secondary" style="margin-top: 20px;" onclick="handleLogout()">Log Out</button>
         </div>
 
     </div>
 </main>
 
 <script>
+    let currentStep = 1;
+    let currentUserData = null;
+    let selectedColor = '#3a7bd5';
+
     window.addEventListener('firebaseLoaded', () => {
-        window.onAuthStateChanged(window.auth, (user) => {
+        window.onAuthStateChanged(window.auth, async (user) => {
             if (user) {
-                document.getElementById('displayEmail').textContent = user.email;
-                hideAllScreens();
-                document.getElementById('loggedInScreen').classList.remove('hidden');
+                const docRef = window.doc(window.db, "users", user.uid);
+                const docSnap = await window.getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    currentUserData = docSnap.data();
+                    showLoggedIn(currentUserData);
+                } else {
+                    document.getElementById('loggedName').textContent = user.email;
+                    hideAllScreens();
+                    document.getElementById('loggedInScreen').classList.remove('hidden');
+                }
             } else {
                 showLanding();
             }
@@ -272,7 +305,103 @@ layout: false
 
     function showLanding() { hideAllScreens(); document.getElementById('landingScreen').classList.remove('hidden'); }
     function showLogin() { hideAllScreens(); document.getElementById('loginScreen').classList.remove('hidden'); document.getElementById('loginError').textContent = ""; }
-    function showSignup() { hideAllScreens(); document.getElementById('signupScreen').classList.remove('hidden'); document.getElementById('signupError').textContent = ""; }
+    
+    function startSignup() {
+        hideAllScreens();
+        document.getElementById('signupScreen').classList.remove('hidden');
+        document.getElementById('signupError').textContent = "";
+        nextStep(1);
+    }
+
+    function nextStep(step) {
+        currentStep = step;
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step' + step).classList.remove('hidden');
+        
+        const progress = document.getElementById('progressBar');
+        if (step === 1) progress.style.width = "50%";
+        if (step === 2) progress.style.width = "100%";
+    }
+
+    function updatePreview() {
+        const name = document.getElementById('signupName').value || "Your Name";
+        const handle = document.getElementById('signupUsername').value || "username";
+        
+        document.getElementById('namePreview').textContent = name;
+        document.getElementById('handlePreview').textContent = "@" + handle.replace('@', '');
+        document.getElementById('avatarPreview').textContent = name.charAt(0).toUpperCase();
+    }
+
+    function selectColor(el, color) {
+        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedColor = color;
+        document.getElementById('avatarPreview').style.background = color;
+    }
+
+    // Check Username Availability
+    async function checkUsername(input) {
+        const username = input.value.trim().toLowerCase();
+        const statusDiv = document.getElementById('usernameStatus');
+        
+        if (username.length < 3) {
+            statusDiv.textContent = "Too short (min 3 chars)";
+            statusDiv.style.color = "#ff4b4b";
+            return;
+        }
+
+        statusDiv.textContent = "Checking...";
+        statusDiv.style.color = "#a0a0b0";
+
+        try {
+            const q = window.query(window.collection(window.db, "users"), window.where("username", "==", username));
+            const querySnapshot = await window.getDocs(q);
+            
+            if (!querySnapshot.empty) {
+                statusDiv.textContent = "Username is already taken!";
+                statusDiv.style.color = "#ff4b4b";
+            } else {
+                statusDiv.textContent = "Username is available!";
+                statusDiv.style.color = "#10b981";
+            }
+        } catch (e) {
+            console.error("Error checking username: ", e);
+        }
+    }
+
+    function checkPasswordStrength() {
+        const val = document.getElementById('signupPassword').value;
+        const bar = document.getElementById('strengthBar');
+        const text = document.getElementById('strengthText');
+        
+        let strength = 0;
+        if (val.length >= 6) strength += 1;
+        if (val.length >= 10) strength += 1;
+        if (/[A-Z]/.test(val)) strength += 1;
+        if (/[0-9]/.test(val)) strength += 1;
+        if (/[^A-Za-z0-9]/.test(val)) strength += 1;
+
+        if (val.length === 0) {
+            bar.style.width = "0%";
+            text.textContent = "";
+        } else if (strength <= 2) {
+            bar.style.width = "33%";
+            bar.style.backgroundColor = "#ff4b4b";
+            text.textContent = "Weak";
+            text.style.color = "#ff4b4b";
+        } else if (strength <= 4) {
+            bar.style.width = "66%";
+            bar.style.backgroundColor = "#ffb84d";
+            text.textContent = "Medium";
+            text.style.color = "#ffb84d";
+        } else {
+            bar.style.width = "100%";
+            bar.style.backgroundColor = "#10b981";
+            text.textContent = "Strong";
+            text.style.color = "#10b981";
+        }
+    }
 
     async function handleLogin() {
         const email = document.getElementById('loginEmail').value.trim();
@@ -294,28 +423,78 @@ layout: false
     }
 
     async function handleSignup() {
+        const name = document.getElementById('signupName').value.trim();
+        const username = document.getElementById('signupUsername').value.trim().toLowerCase();
+        const dob = document.getElementById('signupDob').value;
+        const country = document.getElementById('signupCountry').value;
         const email = document.getElementById('signupEmail').value.trim();
         const password = document.getElementById('signupPassword').value;
         const errDiv = document.getElementById('signupError');
         const btn = document.getElementById('signupBtn');
 
-        if (!email || !password) { errDiv.textContent = "Please fill in all fields."; return; }
+        if (!name || !username || !email || !password) { errDiv.textContent = "Please fill in all required fields."; return; }
         if (password.length < 6) { errDiv.textContent = "Password must be at least 6 characters."; return; }
+        
+        // Final check if username is taken before creating
+        const q = window.query(window.collection(window.db, "users"), window.where("username", "==", username));
+        const querySnapshot = await window.getDocs(q);
+        if (!querySnapshot.empty) {
+            errDiv.textContent = "Username was just taken. Please choose another.";
+            return;
+        }
 
         try {
-            btn.textContent = "Creating...";
+            btn.textContent = "Creating account...";
             btn.disabled = true;
-            await window.createUserWithEmailAndPassword(window.auth, email, password);
+
+            const userCredential = await window.createUserWithEmailAndPassword(window.auth, email, password);
+            const user = userCredential.user;
+
+            const userData = {
+                uid: user.uid,
+                email: email,
+                name: name,
+                username: username,
+                nickname: document.getElementById('signupNickname').value.trim(),
+                dob: dob,
+                country: country,
+                avatarColor: selectedColor,
+                createdAt: new Date().toISOString()
+            };
+
+            await window.setDoc(window.doc(window.db, "users", user.uid), userData);
+
         } catch (error) {
             errDiv.textContent = error.message;
-            btn.textContent = "Sign Up";
+            btn.textContent = "Create Account";
             btn.disabled = false;
         }
     }
 
+    function showLoggedIn(data) {
+        const avatar = document.getElementById('loggedAvatar');
+        avatar.textContent = data.name ? data.name.charAt(0).toUpperCase() : "?";
+        avatar.style.background = data.avatarColor || '#3a7bd5';
+        
+        document.getElementById('loggedName').textContent = data.nickname || data.name;
+        document.getElementById('loggedHandle').textContent = "@" + data.username;
+        
+        if(data.country) {
+            document.getElementById('loggedCountry').textContent = "📍 " + data.country;
+        }
+        
+        hideAllScreens();
+        document.getElementById('loggedInScreen').classList.remove('hidden');
+    }
+
     async function handleLogout() {
         await window.signOut(window.auth);
+        document.getElementById('loginEmail').value = "";
+        document.getElementById('loginPassword').value = "";
     }
+    
+    // Set default selected color on load
+    document.querySelector('.color-swatch').classList.add('selected');
 </script>
 </body>
 </html>
