@@ -18,11 +18,19 @@ permalink: "/"
     .counter { font-size: 14px; color: #ccc; font-weight: bold; }
     .counter span { color: #3b82f6; font-size: 16px; }
     
+    .btn-group { display: flex; gap: 10px; }
+    
     .btn-clear-all { 
         background-color: #ef4444; color: white; border: none; padding: 8px 15px; 
         border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;
     }
     .btn-clear-all:hover { background-color: #dc2626; }
+
+    .btn-go-all {
+        background-color: #10b981; color: white; border: none; padding: 8px 15px; 
+        border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;
+    }
+    .btn-go-all:hover { background-color: #059669; }
 
     /* --- TOGGLE CONTAINER --- */
     .toggle-container {
@@ -104,7 +112,10 @@ permalink: "/"
             <div class="counter">Total: <span id="totalCount">0</span></div>
             <div class="counter">Confirmed: <span id="confirmedCount">0</span></div>
         </div>
-        <button class="btn-clear-all" onclick="clearAllText()">🗑️ Clear All</button>
+        <div class="btn-group">
+            <button class="btn-go-all" onclick="goAll()">✅ GO ALL</button>
+            <button class="btn-clear-all" onclick="clearAllText()">🗑️ Clear All</button>
+        </div>
     </div>
 
     <div class="toggle-container">
@@ -186,16 +197,12 @@ permalink: "/"
         const lines = rawText.split('\n');
         
         lines.forEach(line => {
-            // STRICT FILTER:
-            // Only allow: a-z (lowercase), 0-9 (numbers), . (dot), _ (underscore)
-            // If the line contains ANYTHING else (capital letters, spaces, emojis, etc.), reject it.
             const isValid = /^[a-z0-9._]+$/.test(line);
 
             if (!isValid) {
-                return; // Skip this line entirely
+                return; 
             }
 
-            // Check for duplicates
             const isDuplicate = items.some(item => item.text === line);
             
             if (!isDuplicate) {
@@ -204,6 +211,14 @@ permalink: "/"
         });
 
         document.getElementById('bulkInput').value = "";
+        renderList();
+    }
+
+    // NEW: GO ALL FUNCTION
+    function goAll() {
+        items.forEach(item => {
+            item.confirmed = true;
+        });
         renderList();
     }
 
@@ -289,7 +304,6 @@ permalink: "/"
         if (!input) return;
         const newText = input.value.trim();
 
-        // Apply the same strict filter to edited text
         const isValid = /^[a-z0-9._]+$/.test(newText);
         if (!isValid) {
             alert("Invalid characters! Only lowercase letters, numbers, dots, and underscores are allowed.");
