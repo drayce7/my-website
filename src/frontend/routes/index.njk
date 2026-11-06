@@ -18,10 +18,15 @@ permalink: "/"
     .counter { font-size: 14px; color: #ccc; font-weight: bold; }
     .counter span { color: #3b82f6; font-size: 16px; }
     
-    .btn-clear-all { 
-        background-color: #ef4444; color: white; border: none; padding: 8px 15px; 
-        border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;
+    /* Action buttons at the top */
+    .top-actions { display: flex; gap: 10px; }
+    .btn-top { 
+        border: none; padding: 8px 15px; border-radius: 6px; 
+        font-weight: bold; cursor: pointer; transition: 0.2s; color: white;
     }
+    .btn-confirm-all { background-color: #10b981; }
+    .btn-confirm-all:hover { background-color: #059669; }
+    .btn-clear-all { background-color: #ef4444; }
     .btn-clear-all:hover { background-color: #dc2626; }
 
     /* --- TOGGLE CONTAINER --- */
@@ -130,7 +135,11 @@ permalink: "/"
             <div class="counter">Total: <span id="totalCount">0</span></div>
             <div class="counter">Confirmed: <span id="confirmedCount">0</span></div>
         </div>
-        <button class="btn-clear-all" onclick="clearAllText()">🗑️ Clear All</button>
+        <div class="top-actions">
+            <!-- NEW CONFIRM ALL BUTTON -->
+            <button class="btn-top btn-confirm-all" onclick="confirmAllItems()">✅ Confirm All</button>
+            <button class="btn-top btn-clear-all" onclick="clearAllText()">🗑️ Clear All</button>
+        </div>
     </div>
 
     <div class="toggle-container">
@@ -225,6 +234,14 @@ permalink: "/"
         renderList();
     }
 
+    // NEW FUNCTION: Confirm all items at once
+    function confirmAllItems() {
+        items.forEach(item => {
+            item.confirmed = true;
+        });
+        renderList();
+    }
+
     function clearAllText() {
         if(confirm("Are you sure you want to delete ALL texts in this list?")) {
             items = [];
@@ -269,7 +286,10 @@ permalink: "/"
 
     function confirmItem(id) {
         const item = items.find(i => i.id === id);
-        if (item) { item.confirmed = true; renderList(); }
+        if (item) { 
+            item.confirmed = true; 
+            renderList(); 
+        }
     }
 
     function deleteItem(id) {
@@ -328,7 +348,6 @@ permalink: "/"
         if (event.key === 'Enter') { saveEdit(id); }
     }
 
-    // --- FIXED APPLY FUNCTION ---
     async function applyAndGo() {
         const confirmedTexts = items.filter(i => i.confirmed).map(i => i.text);
         if (confirmedTexts.length === 0) { alert("Please click 'GO' on at least one item before applying!"); return; }
@@ -343,7 +362,6 @@ permalink: "/"
         applyBtn.disabled = true;
 
         try {
-            // Push directly to Firebase cloud
             const docRef = window.doc(window.db, "clbomb_queue", "current_queue");
             const docSnap = await window.getDoc(docRef);
             
@@ -352,14 +370,11 @@ permalink: "/"
                 existingQueue = docSnap.data().texts || [];
             }
 
-            // Combine new texts with existing ones in the cloud
             let newQueue = [...confirmedTexts, ...existingQueue];
             await window.setDoc(docRef, { texts: newQueue });
 
-            // Also save to local storage just in case
             localStorage.setItem('clbomb_queue', JSON.stringify(newQueue));
 
-            // Clear UI and redirect ONLY after successful save
             items = [];
             renderList();
             window.location.href = '/my-website/clbomb/';
