@@ -56,8 +56,9 @@ permalink: "/clbomb/"
     .queue-title { font-size: 12px; color: #888; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
     .queue-item {
         background: #111; border: 1px solid #444; padding: 6px 10px; border-radius: 4px;
-        font-size: 13px; margin-bottom: 5px; color: #ccc; display: flex; justify-content: space-between;
+        font-size: 13px; margin-bottom: 5px; color: #ccc; display: flex; justify-content: space-between; align-items: center;
     }
+    .queue-delete { background: #ef4444; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
     .queue-empty { color: #666; font-size: 12px; font-style: italic; }
 
     .main-text-container { display: flex; gap: 10px; margin-bottom: 10px; }
@@ -121,7 +122,6 @@ permalink: "/clbomb/"
         </div>
     </div>
     
-    <!-- NEW PENDING TEXTS LIST -->
     <div class="queue-panel">
         <div class="queue-title">Texts Waiting in Queue</div>
         <div id="pendingList"></div>
@@ -218,7 +218,6 @@ permalink: "/clbomb/"
         } catch (e) { console.error("Error loading queue", e); }
     }
 
-    // UPDATED: Now also renders the visible list of pending texts
     function updateCounters() {
         document.getElementById('queueCounter').innerHTML = `Unassigned Left: <span>${masterQueue.length}</span>`;
         
@@ -228,7 +227,7 @@ permalink: "/clbomb/"
             document.getElementById('assignedCounter').innerHTML = `Assigned to Number: <span>0</span>`;
         }
 
-        // Render the actual texts in the queue
+        // Render the pending queue with delete buttons
         const pendingContainer = document.getElementById('pendingList');
         pendingContainer.innerHTML = '';
         
@@ -237,12 +236,24 @@ permalink: "/clbomb/"
             return;
         }
 
-        masterQueue.forEach(text => {
+        masterQueue.forEach((text, index) => {
             const div = document.createElement('div');
             div.className = 'queue-item';
-            div.textContent = text;
+            div.innerHTML = `
+                <span>${text}</span>
+                <button class="queue-delete" onclick="deleteFromQueue(${index})">❌</button>
+            `;
             pendingContainer.appendChild(div);
         });
+    }
+
+    // NEW: Delete function for the queue
+    async function deleteFromQueue(index) {
+        if (!confirm("Are you sure you want to permanently delete this text from the queue?")) return;
+        
+        masterQueue.splice(index, 1);
+        await updateCloudQueue();
+        updateCounters();
     }
 
     async function actionAdd() {
