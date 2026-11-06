@@ -3,32 +3,6 @@ layout: "base.njk"
 title: "Home"
 permalink: "/"
 ---
-<!-- Load Firebase -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
-    authDomain: "clbomb.firebaseapp.com",
-    projectId: "clbomb",
-    storageBucket: "clbomb.firebasestorage.app",
-    messagingSenderId: "515939060816",
-    appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  window.db = db;
-  window.doc = doc;
-  window.getDoc = getDoc;
-  window.setDoc = setDoc;
-  
-  window.firebaseReady = true;
-  window.dispatchEvent(new Event('firebaseLoaded'));
-</script>
-
 <style>
     footer { display: none !important; }
     .home-content { max-width: 800px; margin: 20px auto; padding: 20px; }
@@ -156,6 +130,7 @@ permalink: "/"
     let items = [];
     let idCounter = 0;
 
+    // --- TOGGLE LOGIC ---
     function toggleShape(shape) {
         const circle = document.getElementById('circleToggle');
         const square = document.getElementById('squareToggle');
@@ -198,6 +173,7 @@ permalink: "/"
         }
     }
 
+    // --- LIST LOGIC ---
     function updateCounts() {
         document.getElementById('totalCount').textContent = items.length;
         document.getElementById('confirmedCount').textContent = items.filter(i => i.confirmed).length;
@@ -207,10 +183,21 @@ permalink: "/"
         const rawText = document.getElementById('bulkInput').value;
         if (!rawText.trim()) return;
 
-        const lines = rawText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        const lines = rawText.split('\n');
         
         lines.forEach(line => {
+            // STRICT FILTER:
+            // Only allow: a-z (lowercase), 0-9 (numbers), . (dot), _ (underscore)
+            // If the line contains ANYTHING else (capital letters, spaces, emojis, etc.), reject it.
+            const isValid = /^[a-z0-9._]+$/.test(line);
+
+            if (!isValid) {
+                return; // Skip this line entirely
+            }
+
+            // Check for duplicates
             const isDuplicate = items.some(item => item.text === line);
+            
             if (!isDuplicate) {
                 items.push({ id: idCounter++, text: line, confirmed: false, isEditing: false });
             }
@@ -301,7 +288,13 @@ permalink: "/"
         const input = document.getElementById(`edit-input-${id}`);
         if (!input) return;
         const newText = input.value.trim();
-        if (newText === "") { alert("Text cannot be empty."); return; }
+
+        // Apply the same strict filter to edited text
+        const isValid = /^[a-z0-9._]+$/.test(newText);
+        if (!isValid) {
+            alert("Invalid characters! Only lowercase letters, numbers, dots, and underscores are allowed.");
+            return;
+        }
 
         const item = items.find(i => i.id === id);
         if (item) {
@@ -318,40 +311,16 @@ permalink: "/"
         if (event.key === 'Enter') { saveEdit(id); }
     }
 
-    // --- SAVE TO FIREBASE AND JUMP ---
     async function applyAndGo() {
         const confirmedTexts = items.filter(i => i.confirmed).map(i => i.text);
         if (confirmedTexts.length === 0) { alert("Please click 'GO' on at least one item before applying!"); return; }
-        if (!window.firebaseReady) { alert("Database still loading, please try again."); return; }
 
-        const btn = event.target;
-        btn.textContent = "Saving to Cloud...";
-        btn.disabled = true;
+        let queue = JSON.parse(localStorage.getItem('clbomb_queue')) || [];
+        queue = [...confirmedTexts, ...queue];
+        localStorage.setItem('clbomb_queue', JSON.stringify(queue));
 
-        try {
-            // We save the queue in a special document called "current_queue"
-            const docRef = window.doc(window.db, "clbomb_queue", "current_queue");
-            const docSnap = await window.getDoc(docRef);
-            
-            let existingQueue = [];
-            if (docSnap.exists()) {
-                existingQueue = docSnap.data().texts || [];
-            }
-
-            // Combine the new texts with any old ones, then save
-            let newQueue = [...confirmedTexts, ...existingQueue];
-            await window.setDoc(docRef, { texts: newQueue });
-
-            // Clear local page and jump
-            items = [];
-            renderList();
-            window.location.href = '/my-website/clbomb/';
-
-        } catch (error) {
-            console.error("Error saving queue:", error);
-            alert("Failed to save to database. Check internet connection.");
-            btn.textContent = "Apply & Go to CLbomb ➔";
-            btn.disabled = false;
-        }
+        items = [];
+        renderList();
+        window.location.href = '/my-website/clbomb/';
     }
 </script>
