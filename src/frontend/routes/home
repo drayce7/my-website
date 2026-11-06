@@ -1,0 +1,317 @@
+---
+title: "Home - Connect"
+permalink: "/home/"
+layout: false
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect - Home</title>
+    
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      import { getFirestore, doc, getDoc, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
+        authDomain: "clbomb.firebaseapp.com",
+        projectId: "clbomb",
+        storageBucket: "clbomb.firebasestorage.app",
+        messagingSenderId: "515939060816",
+        appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      window.auth = getAuth(app);
+      window.db = getFirestore(app);
+      
+      window.onAuthStateChanged = onAuthStateChanged;
+      window.signOut = signOut;
+      window.doc = doc;
+      window.getDoc = getDoc;
+      window.collection = collection;
+      window.getDocs = getDocs;
+      window.addDoc = addDoc;
+
+      window.firebaseReady = true;
+      window.dispatchEvent(new Event('firebaseLoaded'));
+    </script>
+
+    <style>
+        :root {
+            --bg-dark: #0f0c29;
+            --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            --sidebar-bg: rgba(15, 12, 41, 0.7);
+            --glass: rgba(255, 255, 255, 0.05);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --primary: #00d2ff;
+            --text-main: #ffffff;
+            --text-muted: #a0a0b0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-gradient); color: var(--text-main); height: 100vh; width: 100vw; display: flex; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 280px; background: var(--sidebar-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-right: 1px solid var(--border-glass); display: flex; flex-direction: column; padding: 20px; }
+        .brand { font-size: 24px; font-weight: bold; color: var(--primary); margin-bottom: 30px; letter-spacing: 1px; }
+        
+        /* PROFILE CARD WITH RAINBOW TEXT */
+        .user-profile { display: flex; align-items: center; gap: 12px; padding: 15px; background: var(--glass); border-radius: 12px; border: 1px solid var(--border-glass); margin-bottom: 30px; cursor: pointer; transition: 0.3s; }
+        .user-profile:hover { background: rgba(255,255,255,0.1); box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 20px; flex-shrink: 0;}
+        .user-info h4 { font-size: 15px; margin-bottom: 3px; }
+        
+        .rainbow-text { background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffff, #33ff33, #ffff33, #ff9933, #ff00cc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; letter-spacing: 0.5px; }
+        
+        .user-info p { font-size: 12px; color: var(--text-muted); }
+
+        .nav-links { display: flex; flex-direction: column; gap: 5px; }
+        .nav-item { padding: 12px 15px; border-radius: 8px; cursor: pointer; color: var(--text-muted); font-weight: 600; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
+        .nav-item:hover, .nav-item.active { background: var(--glass); color: var(--text-main); }
+        .nav-item.active { border-left: 3px solid var(--primary); }
+
+        .spacer { flex-grow: 1; }
+        .btn-logout { background: transparent; border: 1px solid rgba(255, 75, 75, 0.3); color: #ff4b4b; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-logout:hover { background: rgba(255, 75, 75, 0.1); }
+
+        /* --- MAIN CONTENT (SCROLLING HOME) --- */
+        .main-content { flex-grow: 1; padding: 30px; display: flex; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h1 { font-size: 28px; }
+        .btn-create { background: var(--primary); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-create:hover { background: #00b8e6; transform: translateY(-2px); }
+
+        /* FEED GRID */
+        .feed-grid { display: flex; flex-direction: column; gap: 20px; padding-bottom: 50px; }
+        
+        .feed-card { background: var(--glass); border: 1px solid var(--border-glass); border-radius: 16px; padding: 20px; display: flex; gap: 15px; transition: 0.3s; align-items: center; cursor: pointer; }
+        .feed-card:hover { background: rgba(255,255,255,0.08); transform: translateX(5px); border-color: var(--primary); }
+        
+        .feed-icon { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #ff00cc, #333399); display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; flex-shrink: 0;}
+        .feed-info h3 { font-size: 18px; margin-bottom: 5px; color: var(--primary); }
+        .feed-info p { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+        .feed-meta { display: flex; gap: 10px; margin-top: 10px; font-size: 11px; color: #888; }
+        .tag { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; }
+
+        /* --- COMING SOON OVERLAY --- */
+        .coming-soon { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .coming-soon.active { display: flex; }
+        .coming-box { background: #1e1e2f; padding: 40px; border-radius: 20px; text-align: center; border: 1px solid var(--primary); box-shadow: 0 0 30px rgba(0,210,255,0.2); }
+        .coming-box h2 { color: var(--primary); margin-bottom: 10px; }
+        .coming-box p { color: var(--text-muted); margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">Connect</div>
+        
+        <div class="user-profile" onclick="openProfile()">
+            <div class="avatar" id="sidebarAvatar">?</div>
+            <div class="user-info">
+                <h4 id="sidebarName" class="rainbow-text">Loading...</h4>
+                <p id="sidebarHandle">@...</p>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <div class="nav-item active" onclick="location.reload()">🏠 Home Feed</div>
+            <div class="nav-item" onclick="showComingSoon('Friends')">👥 Friends</div>
+            <div class="nav-item" onclick="showComingSoon('Direct Messages')">💬 Direct Messages</div>
+            <div class="nav-item" onclick="showComingSoon('Settings')">⚙️ Settings</div>
+        </div>
+
+        <div class="spacer"></div>
+        <button class="btn-logout" onclick="handleLogout()">Log Out</button>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+        <div class="header">
+            <h1>Discover</h1>
+            <button class="btn-create" onclick="openCreateModal()">+ Create Room</button>
+        </div>
+
+        <div class="feed-grid" id="feedGrid">
+            <!-- Content loads here -->
+        </div>
+    </main>
+
+    <!-- CREATE ROOM MODAL -->
+    <div class="coming-soon" id="createModal">
+        <div class="coming-box">
+            <h2>Create a Room</h2>
+            <p>Start a new public conversation.</p>
+            <input type="text" id="roomName" placeholder="Room Name" style="width:100%; padding:12px; background:rgba(0,0,0,0.3); border:1px solid #444; border-radius:8px; color:white; margin-bottom:10px;">
+            <textarea id="roomDesc" placeholder="Description" style="width:100%; padding:12px; background:rgba(0,0,0,0.3); border:1px solid #444; border-radius:8px; color:white; margin-bottom:20px; resize:none; height:80px;"></textarea>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn-logout" style="border-color:#444; color:white;" onclick="closeCreateModal()">Cancel</button>
+                <button class="btn-create" onclick="createRoom()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMING SOON MODAL -->
+    <div class="coming-soon" id="comingSoonModal">
+        <div class="coming-box">
+            <h2 id="csTitle">Coming Soon</h2>
+            <p>We are building this feature right now. Check back later!</p>
+            <button class="btn-create" onclick="document.getElementById('comingSoonModal').classList.remove('active')">Got it</button>
+        </div>
+    </div>
+
+<script>
+    let currentUserData = null;
+    let autoScrollInterval;
+    let isAutoScrolling = true;
+
+    window.addEventListener('firebaseLoaded', () => {
+        window.onAuthStateChanged(window.auth, async (user) => {
+            if (user) {
+                const docRef = window.doc(window.db, "users", user.uid);
+                const docSnap = await window.getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    currentUserData = docSnap.data();
+                    
+                    const avatar = document.getElementById('sidebarAvatar');
+                    avatar.textContent = currentUserData.name.charAt(0).toUpperCase();
+                    avatar.style.background = currentUserData.avatarColor || '#3a7bd5';
+                    
+                    document.getElementById('sidebarName').textContent = currentUserData.nickname || currentUserData.name;
+                    document.getElementById('sidebarHandle').textContent = "@" + currentUserData.username;
+                }
+
+                loadFeed();
+                startAutoScroll();
+            } else {
+                window.location.href = '/my-website/login/';
+            }
+        });
+    });
+
+    // --- AUTO SCROLL LOGIC ---
+    function startAutoScroll() {
+        const mainContent = document.getElementById('mainContent');
+        
+        function scrollStep() {
+            if (!isAutoScrolling) return;
+            
+            // If we reached the bottom, scroll back to top smoothly
+            if (mainContent.scrollHeight - mainContent.scrollTop - mainContent.clientHeight < 5) {
+                mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                mainContent.scrollBy({ top: 150, behavior: 'smooth' });
+            }
+            
+            // Random wait between 5 and 9 seconds (5000ms to 9000ms)
+            const randomDelay = Math.floor(Math.random() * 4000) + 5000;
+            autoScrollInterval = setTimeout(scrollStep, randomDelay);
+        }
+
+        // Start the first scroll after 5 seconds
+        autoScrollInterval = setTimeout(scrollStep, 5000);
+    }
+
+    // Pause auto-scroll if user hovers over the content
+    document.getElementById('mainContent').addEventListener('mouseenter', () => { isAutoScrolling = false; });
+    document.getElementById('mainContent').addEventListener('mouseleave', () => { isAutoScrolling = true; });
+
+    // --- LOAD FEED ---
+    async function loadFeed() {
+        const grid = document.getElementById('feedGrid');
+        grid.innerHTML = '<div style="color: var(--text-muted); padding: 20px;">Loading public feed...</div>';
+
+        try {
+            const querySnapshot = await window.getDocs(window.collection(window.db, "rooms"));
+            grid.innerHTML = ''; 
+
+            if (querySnapshot.empty) {
+                grid.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding: 40px;">No rooms yet. Create the first one!</div>';
+                return;
+            }
+
+            // Create a mix of rooms and users to show in the feed
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const div = document.createElement('div');
+                div.className = 'feed-card';
+                div.onclick = () => { window.location.href = `/my-website/room/?id=${doc.id}`; };
+                
+                div.innerHTML = `
+                    <div class="feed-icon">${data.name.charAt(0).toUpperCase()}</div>
+                    <div class="feed-info">
+                        <h3>${data.name}</h3>
+                        <p>${data.description || "A public room."}</p>
+                        <div class="feed-meta">
+                            <span class="tag">Public Room</span>
+                            <span>Created by @${data.createdBy}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+
+            // Add a fake user card to show it's a mix of content
+            const userCard = document.createElement('div');
+            userCard.className = 'feed-card';
+            userCard.innerHTML = `
+                <div class="feed-icon" style="background: #ff00cc;">U</div>
+                <div class="feed-info">
+                    <h3>New Users</h3>
+                    <p>Discover people joining the vibe.</p>
+                    <div class="feed-meta"><span class="tag">Community</span></div>
+                </div>
+            `;
+            grid.appendChild(userCard);
+
+        } catch (e) {
+            console.error("Error loading feed: ", e);
+            grid.innerHTML = '<div style="color: #ff4b4b; text-align:center; padding: 40px;">Failed to load feed. Check console.</div>';
+        }
+    }
+
+    function openCreateModal() { document.getElementById('createModal').classList.add('active'); }
+    function closeCreateModal() { document.getElementById('createModal').classList.remove('active'); }
+
+    async function createRoom() {
+        const name = document.getElementById('roomName').value.trim();
+        const desc = document.getElementById('roomDesc').value.trim();
+
+        if (!name) return alert("Please enter a room name.");
+
+        try {
+            await window.addDoc(window.collection(window.db, "rooms"), {
+                name: name,
+                description: desc,
+                createdBy: currentUserData ? currentUserData.username : "Unknown",
+                createdAt: new Date().toISOString()
+            });
+            closeCreateModal();
+            loadFeed(); 
+        } catch (e) {
+            console.error("Error creating room: ", e);
+            alert("Failed to create room.");
+        }
+    }
+
+    function showComingSoon(title) {
+        document.getElementById('csTitle').textContent = title + " Coming Soon";
+        document.getElementById('comingSoonModal').classList.add('active');
+    }
+
+    function openProfile() {
+        showComingSoon("Profile Settings");
+    }
+
+    async function handleLogout() {
+        await window.signOut(window.auth);
+        window.location.href = '/my-website/login/';
+    }
+</script>
+</body>
+</html>
