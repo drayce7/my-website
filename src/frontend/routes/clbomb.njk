@@ -42,7 +42,11 @@ permalink: "/clbomb/"
     .go-btn:hover { background: #2563eb; }
     .btn-search { background: #8b5cf6; }
     .btn-search:hover { background: #7c3aed; }
-    .status-text { flex-grow: 1; font-weight: bold; font-size: 13px; color: #aaa; text-align: right; }
+    
+    /* COUNTER STYLES */
+    .counter-container { display: flex; gap: 20px; flex-grow: 1; justify-content: flex-end; }
+    .status-text { font-weight: bold; font-size: 13px; color: #aaa; }
+    .status-text span { color: #3b82f6; font-size: 15px; }
 
     .main-text-container { display: flex; gap: 10px; margin-bottom: 10px; }
     .main-text-box { flex-grow: 1; background-color: #2e8555; border: 2px solid #236b43; border-radius: 8px; padding: 10px; text-align: center; font-size: 16px; font-weight: bold; color: white; transition: 0.2s; min-height: 24px; user-select: text; cursor: pointer; }
@@ -89,7 +93,7 @@ permalink: "/clbomb/"
 </style>
 
 <main class="bomb-container">
-    <h1 style="margin-top: 5px; margin-bottom: 10px; font-size: 20px;">CLbomb <span style="font-size: 12px; color: #f59e0b; background: #333; padding: 2px 8px; border-radius: 4px; vertical-align: middle;">LIMITED V2</span></h1>
+    <h1 style="margin-top: 5px; margin-bottom: 10px; font-size: 20px;">CLbomb <span style="font-size: 12px; color: #f59e0b; background: #333; padding: 2px 8px; border-radius: 4px; vertical-align: middle;">LIMITED V3</span></h1>
     
     <div class="top-line">
         <div class="input-group">
@@ -98,7 +102,12 @@ permalink: "/clbomb/"
         </div>
         <button class="go-btn" onclick="actionAdd()">➔</button>
         <button class="go-btn btn-search" onclick="actionSearch()">🔍</button>
-        <div class="status-text" id="statusDisplay">Loading...</div>
+        
+        <!-- NEW COUNTERS HERE -->
+        <div class="counter-container">
+            <div class="status-text" id="queueCounter">Unassigned Left: <span>0</span></div>
+            <div class="status-text" id="assignedCounter">Assigned to Number: <span>0</span></div>
+        </div>
     </div>
     
     <div class="main-text-container" id="mainTextContainer" style="display: none;">
@@ -120,7 +129,6 @@ permalink: "/clbomb/"
             <div class="copy-row">
                 <div class="copy-text-display">PCA Main 1</div>
                 <button class="btn-icon" id="pca-btn-1" onclick="nextAndCopy('pca', 1)">📋</button>
-                <!-- Notice the + button no longer passes 'standard' directly. It passes the current active tab instead -->
                 <button class="btn-add-plus" onclick="openModal('pca', 1)">+</button>
             </div>
             <div class="copy-row">
@@ -154,8 +162,7 @@ permalink: "/clbomb/"
 </div>
 
 <script>
-    // CHANGED TO v11
-    let data = JSON.parse(localStorage.getItem('clbomb_data_v11')) || {
+    let data = JSON.parse(localStorage.getItem('clbomb_data_v12')) || {
         "pca-standard-1": [],
         "pca-standard-2": [],
         "pca-followup1-1": [],
@@ -181,9 +188,9 @@ permalink: "/clbomb/"
     let editingIndex = -1; 
 
     window.addEventListener('firebaseLoaded', async () => {
-        document.getElementById('statusDisplay').textContent = "Loading Queue...";
+        document.getElementById('queueCounter').innerHTML = "Loading...";
         await fetchCloudQueue();
-        document.getElementById('statusDisplay').textContent = masterQueue.length > 0 ? `Ready (${masterQueue.length} texts)` : "Ready (Queue empty)";
+        updateCounters();
     });
 
     async function fetchCloudQueue() {
@@ -192,6 +199,17 @@ permalink: "/clbomb/"
             const docSnap = await window.getDoc(docRef);
             masterQueue = docSnap.exists() ? docSnap.data().texts || [] : [];
         } catch (e) { console.error("Error loading queue", e); }
+    }
+
+    // NEW FUNCTION TO UPDATE THE COUNTERS ON SCREEN
+    function updateCounters() {
+        document.getElementById('queueCounter').innerHTML = `Unassigned Left: <span>${masterQueue.length}</span>`;
+        
+        if (currentNumber && cloudTextsForNumber) {
+            document.getElementById('assignedCounter').innerHTML = `Assigned to ${currentNumber}: <span>${cloudTextsForNumber.length}</span>`;
+        } else {
+            document.getElementById('assignedCounter').innerHTML = `Assigned to Number: <span>0</span>`;
+        }
     }
 
     async function actionAdd() {
@@ -209,11 +227,7 @@ permalink: "/clbomb/"
         displayBox.classList.add('active');
         displayBox.classList.remove('void-state');
         
-        document.getElementById('statusDisplay').textContent = `Checking queue...`;
-        document.getElementById('statusDisplay').style.color = '#f59e0b';
-
         await fetchCloudQueue();
-        document.getElementById('statusDisplay').textContent = `ADD MODE: ${num}`;
         await assignNextFromQueue();
     }
 
@@ -226,9 +240,6 @@ permalink: "/clbomb/"
         currentMode = 'search';
         searchIndex = 0;
 
-        document.getElementById('statusDisplay').textContent = `SEARCHING ${num}...`;
-        document.getElementById('statusDisplay').style.color = '#3b82f6';
-        
         const textContainer = document.getElementById('mainTextContainer');
         const displayBox = document.getElementById('mainTextDisplay');
         
@@ -237,14 +248,13 @@ permalink: "/clbomb/"
         displayBox.classList.remove('void-state');
         
         cloudTextsForNumber = await fetchTextsFromCloud(num);
+        updateCounters();
 
         if (cloudTextsForNumber.length === 0) {
             displayBox.textContent = "VOID - No history found";
             displayBox.classList.add('void-state');
-            document.getElementById('statusDisplay').textContent = `NO TEXTS FOR ${num}`;
         } else {
             displayBox.textContent = cloudTextsForNumber[searchIndex]; 
-            document.getElementById('statusDisplay').textContent = `FOUND ${cloudTextsForNumber.length} TEXTS`;
         }
     }
 
@@ -255,11 +265,9 @@ permalink: "/clbomb/"
             if (searchIndex < cloudTextsForNumber.length - 1) {
                 searchIndex++;
                 document.getElementById('mainTextDisplay').textContent = cloudTextsForNumber[searchIndex];
-                document.getElementById('statusDisplay').textContent = `VIEWING ${searchIndex + 1} OF ${cloudTextsForNumber.length}`;
             } else {
                 document.getElementById('mainTextDisplay').textContent = "VOID - End of history";
                 document.getElementById('mainTextDisplay').classList.add('void-state');
-                document.getElementById('statusDisplay').textContent = `END OF HISTORY`;
             }
         }
     }
@@ -269,27 +277,27 @@ permalink: "/clbomb/"
         if (masterQueue.length === 0) {
             displayBox.textContent = "VOID - No texts left in Page 1 Queue!";
             displayBox.classList.add('void-state');
+            updateCounters();
             return;
         }
 
         const nextText = masterQueue.shift(); 
         displayBox.textContent = nextText;
-        document.getElementById('statusDisplay').textContent = `SAVING TO ${currentNumber}...`;
-
+        
         const success = await saveTextToCloud(currentNumber, nextText);
 
         if (success) {
             await updateCloudQueue();
             cloudTextsForNumber.push(nextText);
-            document.getElementById('statusDisplay').textContent = `SAVED TO ${currentNumber}`;
-            document.getElementById('statusDisplay').style.color = '#10b981'; 
+            displayBox.style.color = "#10b981"; // Flash green on success
+            setTimeout(() => { displayBox.style.color = "white"; }, 500);
         } else {
             masterQueue.unshift(nextText);
-            document.getElementById('statusDisplay').textContent = `ERROR SAVING TO CLOUD!`;
-            document.getElementById('statusDisplay').style.color = '#ef4444'; 
             displayBox.textContent = "Error saving to database.";
             displayBox.classList.add('void-state');
         }
+        
+        updateCounters();
     }
 
     async function updateCloudQueue() {
@@ -304,6 +312,11 @@ permalink: "/clbomb/"
             const docRef = window.doc(window.db, "clbomb_data", number);
             const docSnap = await window.getDoc(docRef);
             let currentTexts = docSnap.exists() ? docSnap.data().assigned_texts || [] : [];
+            
+            if (currentTexts.includes(text)) {
+                return true; // Skip duplicates
+            }
+
             currentTexts.push(text);
             await window.setDoc(docRef, { assigned_texts: currentTexts });
             return true;
@@ -329,7 +342,6 @@ permalink: "/clbomb/"
     }
 
     function nextAndCopy(type, boxNum) {
-        // Dynamically determine the flat key based on the active tab and the button clicked
         const activeCategory = currentTab.category; 
         const key = `${type}-${activeCategory}-${boxNum}`;
         const list = data[key];
@@ -371,12 +383,8 @@ permalink: "/clbomb/"
         pointer2 = 0;
     }
 
-    // FIXED: It now reads currentTab.category so the + button uses the active tab
     function openModal(type, boxNum) {
-        // Get the currently active category
         const activeCategory = currentTab.category;
-        
-        // Create the specific key for this exact box
         currentModalKey = `${type}-${activeCategory}-${boxNum}`;
         
         const categoryNames = { standard: "Standard", followup1: "1", followup2: "2" };
@@ -429,6 +437,11 @@ permalink: "/clbomb/"
         
         const list = data[currentModalKey];
 
+        if (editingIndex === -1 && list.includes(text)) {
+            alert("This text already exists in this specific box!");
+            return;
+        }
+
         if (editingIndex === -1) {
             list.push(text);
         } else {
@@ -438,7 +451,7 @@ permalink: "/clbomb/"
             document.getElementById('modalAddBtn').onclick = saveModalText;
         }
 
-        localStorage.setItem('clbomb_data_v11', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v12', JSON.stringify(data));
         
         document.getElementById('modalInput').value = "";
         renderModalList();
@@ -459,7 +472,7 @@ permalink: "/clbomb/"
     function deleteFromModal(index) {
         const list = data[currentModalKey];
         list.splice(index, 1);
-        localStorage.setItem('clbomb_data_v11', JSON.stringify(data));
+        localStorage.setItem('clbomb_data_v12', JSON.stringify(data));
         
         if (editingIndex === index) {
             editingIndex = -1;
