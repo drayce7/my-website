@@ -1,0 +1,236 @@
+---
+layout: "base.njk"
+title: "Login"
+permalink: "/login/"
+---
+<!-- Load Firebase Auth -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
+    authDomain: "clbomb.firebaseapp.com",
+    projectId: "clbomb",
+    storageBucket: "clbomb.firebasestorage.app",
+    messagingSenderId: "515939060816",
+    appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  window.auth = auth;
+  window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+  window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+  window.onAuthStateChanged = onAuthStateChanged;
+  window.signOut = signOut;
+
+  window.firebaseReady = true;
+  window.dispatchEvent(new Event('firebaseLoaded'));
+</script>
+
+<style>
+    body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    
+    .login-container {
+        background: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 30px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    h1 { text-align: center; margin-top: 0; margin-bottom: 20px; color: #fff; }
+
+    .input-group { display: flex; flex-direction: column; margin-bottom: 15px; }
+
+    label { font-size: 13px; color: #888; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
+
+    input {
+        padding: 12px;
+        font-size: 15px;
+        background: #111;
+        border: 2px solid #444;
+        border-radius: 8px;
+        color: white;
+        outline: none;
+        transition: 0.3s;
+    }
+
+    input:focus { border-color: #3b82f6; }
+
+    .btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: white;
+        transition: 0.2s;
+        margin-top: 10px;
+    }
+
+    .btn-login { background-color: #3b82f6; }
+    .btn-login:hover { background-color: #2563eb; }
+
+    .btn-signup { background-color: #10b981; }
+    .btn-signup:hover { background-color: #059669; }
+
+    .toggle-text { text-align: center; margin-top: 20px; font-size: 14px; color: #aaa; }
+    .toggle-link { color: #3b82f6; cursor: pointer; font-weight: bold; }
+    .toggle-link:hover { text-decoration: underline; }
+
+    .error-msg { color: #ef4444; text-align: center; font-size: 14px; margin-top: 10px; display: none; }
+    .success-msg { color: #10b981; text-align: center; font-size: 14px; margin-top: 10px; display: none; }
+
+    .logged-in-box { display: none; text-align: center; }
+    .logged-in-box h2 { color: #10b981; }
+</style>
+
+<main class="login-container">
+    
+    <div id="authForm">
+        <h1 id="formTitle">Welcome Back</h1>
+        
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="emailInput" placeholder="you@example.com">
+        </div>
+        
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="passwordInput" placeholder="••••••••">
+        </div>
+
+        <button class="btn btn-login" id="mainActionBtn" onclick="handleLogin()">Log In</button>
+        
+        <div class="error-msg" id="errorMsg"></div>
+        <div class="success-msg" id="successMsg"></div>
+
+        <div class="toggle-text">
+            <span id="togglePrompt">Don't have an account? </span>
+            <span class="toggle-link" id="toggleLink" onclick="toggleMode()">Sign Up</span>
+        </div>
+    </div>
+
+    <div class="logged-in-box" id="loggedInBox">
+        <h2>Login Successful!</h2>
+        <p>You are now logged in as: <span id="userEmail" style="color:white; font-weight:bold;"></span></p>
+        <p style="color:#aaa; font-size:14px;">(The Chat Lobby page will go here soon...)</p>
+        <button class="btn" style="background-color: #ef4444; margin-top:20px;" onclick="handleLogout()">Log Out</button>
+    </div>
+
+</main>
+
+<script>
+    let isLoginMode = true;
+
+    window.addEventListener('firebaseLoaded', () => {
+        window.onAuthStateChanged(window.auth, (user) => {
+            if (user) {
+                showLoggedIn(user.email);
+            } else {
+                showForm();
+            }
+        });
+    });
+
+    function toggleMode() {
+        isLoginMode = !isLoginMode;
+        document.getElementById('errorMsg').style.display = 'none';
+        document.getElementById('successMsg').style.display = 'none';
+        
+        const title = document.getElementById('formTitle');
+        const btn = document.getElementById('mainActionBtn');
+        const prompt = document.getElementById('togglePrompt');
+        const link = document.getElementById('toggleLink');
+
+        if (isLoginMode) {
+            title.textContent = "Welcome Back";
+            btn.textContent = "Log In";
+            btn.className = "btn btn-login";
+            btn.setAttribute('onclick', 'handleLogin()');
+            prompt.textContent = "Don't have an account? ";
+            link.textContent = "Sign Up";
+        } else {
+            title.textContent = "Create an Account";
+            btn.textContent = "Sign Up";
+            btn.className = "btn btn-signup";
+            btn.setAttribute('onclick', 'handleSignup()');
+            prompt.textContent = "Already have an account? ";
+            link.textContent = "Log In";
+        }
+    }
+
+    async function handleLogin() {
+        const email = document.getElementById('emailInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
+
+        if (!email || !password) { showError("Please enter both email and password."); return; }
+
+        try {
+            document.getElementById('mainActionBtn').textContent = "Logging in...";
+            await window.signInWithEmailAndPassword(window.auth, email, password);
+            showSuccess("Logged in successfully!");
+        } catch (error) {
+            showError(error.message);
+            document.getElementById('mainActionBtn').textContent = "Log In";
+        }
+    }
+
+    async function handleSignup() {
+        const email = document.getElementById('emailInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
+
+        if (!email || !password) { showError("Please enter both email and password."); return; }
+        if (password.length < 6) { showError("Password must be at least 6 characters."); return; }
+
+        try {
+            document.getElementById('mainActionBtn').textContent = "Creating account...";
+            await window.createUserWithEmailAndPassword(window.auth, email, password);
+            showSuccess("Account created successfully!");
+        } catch (error) {
+            showError(error.message);
+            document.getElementById('mainActionBtn').textContent = "Sign Up";
+        }
+    }
+
+    async function handleLogout() {
+        try {
+            await window.signOut(window.auth);
+            showForm();
+            document.getElementById('emailInput').value = "";
+            document.getElementById('passwordInput').value = "";
+        } catch (error) { console.error("Error logging out:", error); }
+    }
+
+    function showForm() {
+        document.getElementById('authForm').style.display = 'block';
+        document.getElementById('loggedInBox').style.display = 'none';
+    }
+
+    function showLoggedIn(email) {
+        document.getElementById('authForm').style.display = 'none';
+        document.getElementById('loggedInBox').style.display = 'block';
+        document.getElementById('userEmail').textContent = email;
+    }
+
+    function showError(msg) {
+        const err = document.getElementById('errorMsg');
+        err.textContent = msg;
+        err.style.display = 'block';
+        document.getElementById('successMsg').style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+        const suc = document.getElementById('successMsg');
+        suc.textContent = msg;
+        suc.style.display = 'block';
+        document.getElementById('errorMsg').style.display = 'none';
+    }
+</script>
