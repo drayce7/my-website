@@ -5,7 +5,7 @@ permalink: "/clbomb/"
 ---
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
@@ -23,6 +23,7 @@ permalink: "/clbomb/"
   window.doc = doc;
   window.getDoc = getDoc;
   window.setDoc = setDoc;
+  window.deleteDoc = deleteDoc;
   
   window.firebaseReady = true;
   window.dispatchEvent(new Event('firebaseLoaded'));
@@ -43,7 +44,6 @@ permalink: "/clbomb/"
     .btn-search { background: #8b5cf6; }
     .btn-search:hover { background: #7c3aed; }
     
-    /* COUNTER STYLES */
     .counter-container { display: flex; gap: 20px; flex-grow: 1; justify-content: flex-end; }
     .status-text { font-weight: bold; font-size: 13px; color: #aaa; }
     .status-text span { color: #3b82f6; font-size: 15px; }
@@ -55,6 +55,8 @@ permalink: "/clbomb/"
     .main-text-box.void-state { background-color: #4a0000; border-color: #ff0000; color: #ffaaaa; cursor: not-allowed; }
     .btn-copy-main { padding: 10px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; transition: 0.2s;}
     .btn-copy-main:hover { background: #2563eb; }
+    .btn-list-main { padding: 10px; background: #eab308; color: #000; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; transition: 0.2s;}
+    .btn-list-main:hover { background: #ca8a04; }
 
     .tabs-container { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
     .tab-btn { padding: 6px 10px; background: #222; color: #ccc; border: 1px solid #444; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; flex-grow: 1; text-align: center; font-size: 12px;}
@@ -103,7 +105,6 @@ permalink: "/clbomb/"
         <button class="go-btn" onclick="actionAdd()">➔</button>
         <button class="go-btn btn-search" onclick="actionSearch()">🔍</button>
         
-        <!-- NEW COUNTERS HERE -->
         <div class="counter-container">
             <div class="status-text" id="queueCounter">Unassigned Left: <span>0</span></div>
             <div class="status-text" id="assignedCounter">Assigned to Number: <span>0</span></div>
@@ -113,6 +114,8 @@ permalink: "/clbomb/"
     <div class="main-text-container" id="mainTextContainer" style="display: none;">
         <div class="main-text-box" id="mainTextDisplay" onclick="handleMainTextClick()">Waiting...</div>
         <button class="btn-copy-main" onclick="copyMainText()">📋</button>
+        <!-- NEW: BUTTON TO VIEW ASSIGNED LIST -->
+        <button class="btn-list-main" id="btnListMain" onclick="openHistoryModal()">📋 List</button>
     </div>
     
     <div class="tabs-container">
@@ -147,6 +150,7 @@ permalink: "/clbomb/"
     </div>
 </main>
 
+<!-- MODAL FOR MANAGING LOCAL TEXTS (The + buttons) -->
 <div class="modal-overlay" id="addModal">
     <div class="modal-box">
         <h3 id="modalTitle">Manage Texts</h3>
@@ -157,6 +161,17 @@ permalink: "/clbomb/"
         </div>
         <div class="modal-actions">
             <button class="btn-cancel" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- NEW MODAL FOR VIEWING/DELETING ASSIGNED HISTORY -->
+<div class="modal-overlay" id="historyModal">
+    <div class="modal-box">
+        <h3 id="historyTitle">Assigned History</h3>
+        <div class="modal-list" id="historyList"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeHistoryModal()">Close</button>
         </div>
     </div>
 </div>
@@ -201,14 +216,15 @@ permalink: "/clbomb/"
         } catch (e) { console.error("Error loading queue", e); }
     }
 
-    // NEW FUNCTION TO UPDATE THE COUNTERS ON SCREEN
     function updateCounters() {
         document.getElementById('queueCounter').innerHTML = `Unassigned Left: <span>${masterQueue.length}</span>`;
         
         if (currentNumber && cloudTextsForNumber) {
             document.getElementById('assignedCounter').innerHTML = `Assigned to ${currentNumber}: <span>${cloudTextsForNumber.length}</span>`;
+            document.getElementById('btnListMain').style.display = 'block';
         } else {
             document.getElementById('assignedCounter').innerHTML = `Assigned to Number: <span>0</span>`;
+            document.getElementById('btnListMain').style.display = 'none';
         }
     }
 
@@ -258,6 +274,78 @@ permalink: "/clbomb/"
         }
     }
 
+    // --- NEW: OPEN HISTORY MODAL ---
+    function openHistoryModal() {
+        if (!currentNumber || !cloudTextsForNumber) return;
+        
+        document.getElementById('historyTitle').textContent = `Texts Assigned to Number ${currentNumber}`;
+        renderHistoryList();
+        document.getElementById('historyModal').classList.add('active');
+    }
+
+    function closeHistoryModal() {
+        document.getElementById('historyModal').classList.remove('active');
+    }
+
+    function renderHistoryList() {
+        const container = document.getElementById('historyList');
+        container.innerHTML = '';
+        
+        if (cloudTextsForNumber.length === 0) {
+            container.innerHTML = `<p style="color:#888; font-size:12px; text-align:center;">No texts saved to this number.</p>`;
+            return;
+        }
+
+        cloudTextsForNumber.forEach((text, index) => {
+            const item = document.createElement('div');
+            item.className = 'modal-list-item';
+            item.innerHTML = `
+                <span>${text}</span>
+                <button class="modal-btn-del" onclick="deleteSingleHistory(${index})">X</button>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    // --- NEW: DELETE A SINGLE TEXT FROM HISTORY ---
+    async function deleteSingleHistory(index) {
+        if (!confirm("Delete this text permanently from this number?")) return;
+
+        const textToDelete = cloudTextsForNumber[index];
+        
+        // Remove from local memory array
+        cloudTextsForNumber.splice(index, 1);
+
+        try {
+            // Save the updated array back to Firebase
+            const docRef = window.doc(window.db, "clbomb_data", currentNumber);
+            if (cloudTextsForNumber.length === 0) {
+                await window.deleteDoc(docRef); // If it's the last one, delete the whole document
+            } else {
+                await window.setDoc(docRef, { assigned_texts: cloudTextsForNumber });
+            }
+
+            // Update UI
+            renderHistoryList();
+            updateCounters();
+            
+            // If the deleted text was the one showing in the main box, clear it or show the next one
+            if (document.getElementById('mainTextDisplay').textContent === textToDelete) {
+                if (cloudTextsForNumber.length > 0) {
+                    document.getElementById('mainTextDisplay').textContent = cloudTextsForNumber[0];
+                    searchIndex = 0;
+                } else {
+                    document.getElementById('mainTextDisplay').textContent = "VOID - History cleared";
+                    document.getElementById('mainTextDisplay').classList.add('void-state');
+                }
+            }
+            
+        } catch (error) {
+            console.error("Error deleting single text:", error);
+            alert("Failed to delete. Check console.");
+        }
+    }
+
     async function handleMainTextClick() {
         if (currentMode === 'add') { copyMainText(); } 
         else if (currentMode === 'search') {
@@ -289,7 +377,7 @@ permalink: "/clbomb/"
         if (success) {
             await updateCloudQueue();
             cloudTextsForNumber.push(nextText);
-            displayBox.style.color = "#10b981"; // Flash green on success
+            displayBox.style.color = "#10b981"; 
             setTimeout(() => { displayBox.style.color = "white"; }, 500);
         } else {
             masterQueue.unshift(nextText);
@@ -314,7 +402,7 @@ permalink: "/clbomb/"
             let currentTexts = docSnap.exists() ? docSnap.data().assigned_texts || [] : [];
             
             if (currentTexts.includes(text)) {
-                return true; // Skip duplicates
+                return true;
             }
 
             currentTexts.push(text);
