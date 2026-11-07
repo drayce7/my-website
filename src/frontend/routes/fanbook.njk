@@ -30,7 +30,6 @@ layout: false
             align-items: center;
             overflow: hidden;
             font-family: 'Playfair Display', serif;
-            perspective: 1500px;
             touch-action: pan-y; 
         }
 
@@ -41,75 +40,81 @@ layout: false
             height: 100vh;
             display: flex;
             flex-direction: column;
-            background: #fdf6e3; /* Cream background for the whole app */
+            background: #fdf6e3; 
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
         }
 
-        /* --- FIXED UPPER REGION --- */
+        /* --- FIXED UPPER REGION (Dark Glass) --- */
         .top-region {
             position: relative;
             width: 100%;
-            min-height: 180px;
-            background: rgba(255, 255, 255, 0.4);
+            height: 150px;
+            background: rgba(20, 15, 30, 0.95);
+            backdrop-filter: blur(10px);
             border-bottom: 2px solid #d4c4a8;
             display: flex;
             flex-direction: column;
             padding: 15px;
             z-index: 50;
             flex-shrink: 0;
+            overflow: hidden;
         }
 
-        /* OPAY STYLE SUPPORT ICON */
+        /* SMALL OPAY STYLE SUPPORT ICON */
         .opay-support {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: #ef4444; /* Bright red */
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-family: sans-serif;
-            font-size: 13px;
-            font-weight: bold;
+            width: 40px;
+            height: 40px;
+            background: #ef4444;
+            border-radius: 50%;
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 5px;
+            font-size: 20px;
             box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
             cursor: pointer;
-            transition: 0.2s;
             z-index: 60;
+            transition: 0.2s;
+            color: white;
         }
-        .opay-support:hover { transform: scale(1.05); background: #dc2626; }
-        .opay-support::before {
-            content: '🎧'; /* Headset icon */
-            font-size: 16px;
-        }
+        .opay-support:hover { transform: scale(1.1); }
 
-        /* --- LIVE COMMENTS (4 AT A TIME) --- */
-        .comments-container {
-            margin-top: 50px; /* Push below the support icon */
+        /* --- TICKER COMMENTS --- */
+        .ticker-container {
+            margin-top: 10px;
+            height: 100px;
+            overflow: hidden;
+            position: relative;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            justify-content: flex-end;
+            padding-bottom: 10px;
         }
 
         .comment-bubble {
-            background: #fff;
-            border: 1px solid #e0d0c0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             padding: 8px 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 8px;
             font-size: 13px;
-            color: #4a3b32;
+            color: #e0e0e0;
             display: flex;
             align-items: center;
             gap: 8px;
+            animation: slideUp 0.5s ease-out forwards;
         }
 
-        /* Rainbow Username */
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
         .rainbow-username {
             font-family: 'Caveat', cursive;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffff, #33ff33, #ffff33, #ff9933, #ff00cc);
             -webkit-background-clip: text;
@@ -131,8 +136,7 @@ layout: false
             overflow: hidden;
             display: flex;
             justify-content: center;
-            padding: 15px;
-            perspective: 1200px;
+            padding: 10px;
         }
 
         .page {
@@ -146,71 +150,70 @@ layout: false
             flex-wrap: wrap;
             justify-content: center;
             align-content: flex-start;
-            gap: 10px;
+            gap: 5px; /* Tighter gap for chaos */
             backface-visibility: hidden;
             transform-origin: left center;
             background: inherit;
         }
 
-        /* --- SCATTERED FAN GRID --- */
+        /* --- CHAOTIC SCATTERED FAN GRID --- */
         .fan-card {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 95px;
-            margin-bottom: 10px;
-            transition: transform 0.2s;
+            width: 90px;
+            margin-bottom: 5px;
             cursor: pointer;
+            transition: transform 0.2s;
         }
-        .fan-card:hover { transform: scale(1.05) rotate(2deg); z-index: 5; }
+        .fan-card:hover { transform: scale(1.1); z-index: 10; }
 
         /* THE COLORFUL CIRCLE AVATAR */
         .fan-avatar {
-            width: 75px;
-            height: 75px;
+            width: 65px;
+            height: 65px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 26px;
+            font-size: 24px;
             color: white;
-            border: 5px solid;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            margin-bottom: 6px;
-            background-size: cover;
+            border: 4px solid;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin-bottom: 5px;
         }
 
         /* THE SHRINK-TO-FIT EMAIL RECTANGLE */
         .fan-email {
             background: #f0e4d0;
-            border: 1.5px solid #c4b4a8;
-            padding: 3px 6px;
+            border: 1px solid #c4b4a8;
+            padding: 2px 5px;
             border-radius: 4px;
             font-family: monospace;
-            font-size: 9px;
+            font-size: 8px;
             color: #5a4b42;
-            max-width: 95px;
+            max-width: 90px;
             text-align: center;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: inline-block;
             width: auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        /* --- PAGE INDICATOR --- */
+        /* --- PAGE INDICATOR (Pinned to bottom) --- */
         .page-indicator {
-            position: fixed;
-            bottom: 20px;
+            position: absolute;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
             background: #2a1b18;
             color: #fdf6e3;
-            padding: 8px 25px;
+            padding: 8px 20px;
             border-radius: 20px;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             font-family: sans-serif;
             letter-spacing: 2px;
@@ -220,18 +223,18 @@ layout: false
 
         /* --- ADD FAN BUTTON (Floating) --- */
         .add-fan-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 50px;
+            height: 50px;
             background: #00d2ff;
             color: black;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
+            font-size: 28px;
             font-weight: bold;
             box-shadow: 0 4px 15px rgba(0, 210, 255, 0.5);
             cursor: pointer;
@@ -276,37 +279,18 @@ layout: false
         .btn-submit { background: #00d2ff; color: black; }
 
         /* --- SWIPE ANIMATIONS --- */
-        @keyframes flipOutLeft {
-            0% { transform: rotateY(0deg); opacity: 1; }
-            100% { transform: rotateY(-180deg); opacity: 0; }
-        }
-        @keyframes flipInRight {
-            0% { transform: rotateY(180deg); opacity: 0; }
-            100% { transform: rotateY(0deg); opacity: 1; }
-        }
-        @keyframes flipOutRight {
-            0% { transform: rotateY(0deg); opacity: 1; }
-            100% { transform: rotateY(180deg); opacity: 0; }
-        }
-        @keyframes flipInLeft {
-            0% { transform: rotateY(-180deg); opacity: 0; }
-            100% { transform: rotateY(0deg); opacity: 1; }
-        }
+        @keyframes flipOutLeft { 0% { transform: rotateY(0deg); opacity: 1; } 100% { transform: rotateY(-180deg); opacity: 0; } }
+        @keyframes flipInRight { 0% { transform: rotateY(180deg); opacity: 0; } 100% { transform: rotateY(0deg); opacity: 1; } }
+        @keyframes flipOutRight { 0% { transform: rotateY(0deg); opacity: 1; } 100% { transform: rotateY(180deg); opacity: 0; } }
+        @keyframes flipInLeft { 0% { transform: rotateY(-180deg); opacity: 0; } 100% { transform: rotateY(0deg); opacity: 1; } }
 
         .flip-out-left { animation: flipOutLeft 0.5s ease-in forwards; }
         .flip-in-right { animation: flipInRight 0.5s ease-out forwards; }
         .flip-out-right { animation: flipOutRight 0.5s ease-in forwards; }
         .flip-in-left { animation: flipInLeft 0.5s ease-out forwards; }
 
-        /* --- DESKTOP LAYOUT TWEAKS --- */
         @media (min-width: 769px) {
-            .app-wrapper {
-                max-width: 900px;
-                height: 90vh;
-                border-radius: 20px;
-                overflow: hidden;
-                box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            }
+            .app-wrapper { max-width: 900px; height: 90vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
         }
     </style>
 </head>
@@ -314,35 +298,17 @@ layout: false
 
     <div class="app-wrapper">
         
-        <!-- TOP REGION: Notes & Support -->
+        <!-- TOP REGION: Dark Glass Notes & Support -->
         <div class="top-region">
-            <div class="opay-support" onclick="alert('Live chat coming soon!')">Customer Care</div>
+            <div class="opay-support" onclick="alert('Live chat coming soon!')">🎧</div>
             
-            <div class="comments-container">
-                <!-- 4 Live Comments with Rainbow Names -->
-                <div class="comment-bubble">
-                    <span class="rainbow-username">Sarah_M:</span>
-                    <span class="comment-text">This artist changed my life, I swear. The last album was just...</span>
-                </div>
-                <div class="comment-bubble">
-                    <span class="rainbow-username">MikeT:</span>
-                    <span class="comment-text">Does anyone know when the tour tickets drop? I need to be front row!</span>
-                </div>
-                <div class="comment-bubble">
-                    <span class="rainbow-username">Jessica99:</span>
-                    <span class="comment-text">Just joined the fanbook. So excited to be part of this community...</span>
-                </div>
-                <div class="comment-bubble">
-                    <span class="rainbow-username">Alex_R:</span>
-                    <span class="comment-text">The vibes in here are immaculate. Love you all!</span>
-                </div>
+            <div class="ticker-container" id="tickerContainer">
+                <!-- Comments will be injected here by JS -->
             </div>
         </div>
 
         <!-- BOOK AREA: Scattered Fans -->
-        <div class="book-area" id="bookArea">
-            <!-- The pages will be injected here by JS -->
-        </div>
+        <div class="book-area" id="bookArea"></div>
 
         <!-- Page Indicator -->
         <div class="page-indicator" id="pageIndicator">Page 1</div>
@@ -364,48 +330,38 @@ layout: false
     </div>
 
 <script>
-    // 40 Imaginary fans with individual colors
+    // 40 Imaginary fans
     let fanData = [
-        { email: "sarah.m@email.com", bgColor: "#ffb3ba", ringColor: "#ff6b81" },
-        { email: "mike.t@email.com", bgColor: "#bae1ff", ringColor: "#4dabf7" },
-        { email: "jess.r@email.com", bgColor: "#ffffba", ringColor: "#fcc419" },
-        { email: "alex.j@email.com", bgColor: "#baffc9", ringColor: "#51cf66" },
-        { email: "emma.w@email.com", bgColor: "#e6b3ff", ringColor: "#cc5de8" },
-        { email: "david.l@email.com", bgColor: "#ffccb3", ringColor: "#ff922b" },
-        { email: "chloe.b@email.com", bgColor: "#b3e6ff", ringColor: "#339af0" },
-        { email: "ryan.g@email.com", bgColor: "#ffb3e6", ringColor: "#f06595" },
-        { email: "olivia.k@email.com", bgColor: "#ccffb3", ringColor: "#94d82d" },
-        { email: "james.p@email.com", bgColor: "#ffd9b3", ringColor: "#ff922b" },
-        { email: "sophia.r@email.com", bgColor: "#b3ffcc", ringColor: "#20c997" },
-        { email: "daniel.m@email.com", bgColor: "#e6ccff", ringColor: "#9775fa" },
-        { email: "mia.s@email.com", bgColor: "#ffb3cc", ringColor: "#f783ac" },
-        { email: "noah.t@email.com", bgColor: "#ccb3ff", ringColor: "#845ef7" },
-        { email: "isabella.d@email.com", bgColor: "#ffffcc", ringColor: "#fcc419" },
-        { email: "liam.h@email.com", bgColor: "#ffccf2", ringColor: "#e64980" },
-        { email: "ava.c@email.com", bgColor: "#ccfff2", ringColor: "#20c997" },
-        { email: "ethan.b@email.com", bgColor: "#ffebcc", ringColor: "#ff922b" },
-        { email: "amelia.f@email.com", bgColor: "#ebccff", ringColor: "#be4bdb" },
-        { email: "lucas.g@email.com", bgColor: "#ccffeb", ringColor: "#38d9a9" },
-        { email: "harper.j@email.com", bgColor: "#ffccd9", ringColor: "#f06595" },
-        { email: "mason.k@email.com", bgColor: "#ccd9ff", ringColor: "#748ffc" },
-        { email: "evelyn.l@email.com", bgColor: "#e6ffcc", ringColor: "#94d82d" },
-        { email: "logan.m@email.com", bgColor: "#ffccb3", ringColor: "#ff922b" },
-        { email: "abigail.n@email.com", bgColor: "#b3ccff", ringColor: "#4dabf7" },
-        { email: "jack.o@email.com", bgColor: "#ffcc99", ringColor: "#ff922b" },
-        { email: "ella.p@email.com", bgColor: "#99ffcc", ringColor: "#20c997" },
-        { email: "sebastian.q@email.com", bgColor: "#ff99cc", ringColor: "#f06595" },
-        { email: "scarlett.r@email.com", bgColor: "#99ccff", ringColor: "#4dabf7" },
-        { email: "henry.s@email.com", bgColor: "#ffff99", ringColor: "#fcc419" },
-        { email: "zoe.w@email.com", bgColor: "#ff99ff", ringColor: "#e64980" },
-        { email: "sam.b@email.com", bgColor: "#99ffff", ringColor: "#20c997" },
-        { email: "lily.c@email.com", bgColor: "#cc99ff", ringColor: "#9775fa" },
-        { email: "max.d@email.com", bgColor: "#ffcc99", ringColor: "#ff922b" },
-        { email: "grace.e@email.com", bgColor: "#99ff99", ringColor: "#51cf66" },
-        { email: "leo.f@email.com", bgColor: "#ff9999", ringColor: "#ff6b81" },
-        { email: "chloe.g@email.com", bgColor: "#9999ff", ringColor: "#4dabf7" },
-        { email: "nina.h@email.com", bgColor: "#ffff99", ringColor: "#fcc419" },
-        { email: "fred.i@email.com", bgColor: "#ff99cc", ringColor: "#f06595" },
-        { email: "ivy.j@email.com", bgColor: "#99ccff", ringColor: "#4dabf7" }
+        { email: "sarah.m@email.com", bgColor: "#ffb3ba", ringColor: "#ff6b81" }, { email: "mike.t@email.com", bgColor: "#bae1ff", ringColor: "#4dabf7" },
+        { email: "jess.r@email.com", bgColor: "#ffffba", ringColor: "#fcc419" }, { email: "alex.j@email.com", bgColor: "#baffc9", ringColor: "#51cf66" },
+        { email: "emma.w@email.com", bgColor: "#e6b3ff", ringColor: "#cc5de8" }, { email: "david.l@email.com", bgColor: "#ffccb3", ringColor: "#ff922b" },
+        { email: "chloe.b@email.com", bgColor: "#b3e6ff", ringColor: "#339af0" }, { email: "ryan.g@email.com", bgColor: "#ffb3e6", ringColor: "#f06595" },
+        { email: "olivia.k@email.com", bgColor: "#ccffb3", ringColor: "#94d82d" }, { email: "james.p@email.com", bgColor: "#ffd9b3", ringColor: "#ff922b" },
+        { email: "sophia.r@email.com", bgColor: "#b3ffcc", ringColor: "#20c997" }, { email: "daniel.m@email.com", bgColor: "#e6ccff", ringColor: "#9775fa" },
+        { email: "mia.s@email.com", bgColor: "#ffb3cc", ringColor: "#f783ac" }, { email: "noah.t@email.com", bgColor: "#ccb3ff", ringColor: "#845ef7" },
+        { email: "isabella.d@email.com", bgColor: "#ffffcc", ringColor: "#fcc419" }, { email: "liam.h@email.com", bgColor: "#ffccf2", ringColor: "#e64980" },
+        { email: "ava.c@email.com", bgColor: "#ccfff2", ringColor: "#20c997" }, { email: "ethan.b@email.com", bgColor: "#ffebcc", ringColor: "#ff922b" },
+        { email: "amelia.f@email.com", bgColor: "#ebccff", ringColor: "#be4bdb" }, { email: "lucas.g@email.com", bgColor: "#ccffeb", ringColor: "#38d9a9" },
+        { email: "harper.j@email.com", bgColor: "#ffccd9", ringColor: "#f06595" }, { email: "mason.k@email.com", bgColor: "#ccd9ff", ringColor: "#748ffc" },
+        { email: "evelyn.l@email.com", bgColor: "#e6ffcc", ringColor: "#94d82d" }, { email: "logan.m@email.com", bgColor: "#ffccb3", ringColor: "#ff922b" },
+        { email: "abigail.n@email.com", bgColor: "#b3ccff", ringColor: "#4dabf7" }, { email: "jack.o@email.com", bgColor: "#ffcc99", ringColor: "#ff922b" },
+        { email: "ella.p@email.com", bgColor: "#99ffcc", ringColor: "#20c997" }, { email: "sebastian.q@email.com", bgColor: "#ff99cc", ringColor: "#f06595" },
+        { email: "scarlett.r@email.com", bgColor: "#99ccff", ringColor: "#4dabf7" }, { email: "henry.s@email.com", bgColor: "#ffff99", ringColor: "#fcc419" },
+        { email: "zoe.w@email.com", bgColor: "#ff99ff", ringColor: "#e64980" }, { email: "sam.b@email.com", bgColor: "#99ffff", ringColor: "#20c997" },
+        { email: "lily.c@email.com", bgColor: "#cc99ff", ringColor: "#9775fa" }, { email: "max.d@email.com", bgColor: "#ffcc99", ringColor: "#ff922b" },
+        { email: "grace.e@email.com", bgColor: "#99ff99", ringColor: "#51cf66" }, { email: "leo.f@email.com", bgColor: "#ff9999", ringColor: "#ff6b81" },
+        { email: "chloe.g@email.com", bgColor: "#9999ff", ringColor: "#4dabf7" }, { email: "nina.h@email.com", bgColor: "#ffff99", ringColor: "#fcc419" },
+        { email: "fred.i@email.com", bgColor: "#ff99cc", ringColor: "#f06595" }, { email: "ivy.j@email.com", bgColor: "#99ccff", ringColor: "#4dabf7" }
+    ];
+
+    // Fake Comments Data
+    const commentData = [
+        { user: "Sarah_M", text: "This artist changed my life, I swear. The last album was just..." },
+        { user: "MikeT", text: "Does anyone know when the tour tickets drop? I need to be front row!" },
+        { user: "Jessica99", text: "Just joined the fanbook. So excited to be part of this community..." },
+        { user: "Alex_R", text: "The vibes in here are immaculate. Love you all!" },
+        { user: "Emma_W", text: "I've been listening to the new single on repeat all day." },
+        { user: "David_L", text: "Who else is coming to the London show next month?" }
     ];
 
     let currentPageStart = 0;
@@ -413,10 +369,12 @@ layout: false
     let isAnimating = false;
     let pageNumber = 1;
 
+    // Aggressive chaotic scatter
     function getScatterStyle(index) {
-        const yOffset = (Math.random() * 20) - 10;
-        const rotation = (Math.random() * 8) - 4;
-        return `transform: translateY(${yOffset}px) rotate(${rotation}deg);`;
+        const yOffset = (Math.random() * 40) - 20; // -20px to +20px vertical
+        const rotation = (Math.random() * 14) - 7; // -7deg to +7deg rotation
+        const xOffset = (Math.random() * 10) - 5; // slight horizontal shift
+        return `transform: translate(${xOffset}px, ${yOffset}px) rotate(${rotation}deg); z-index: ${Math.floor(Math.random() * 10)};`;
     }
 
     function createPageHTML() {
@@ -455,7 +413,6 @@ layout: false
             oldPage.classList.add('flip-out-left');
             newPage.classList.add('flip-in-right');
             bookArea.appendChild(newPage);
-            
             setTimeout(() => {
                 oldPage.remove();
                 newPage.classList.remove('flip-in-right');
@@ -466,7 +423,6 @@ layout: false
             oldPage.classList.add('flip-out-right');
             newPage.classList.add('flip-in-left');
             bookArea.appendChild(newPage);
-
             setTimeout(() => {
                 oldPage.remove();
                 newPage.classList.remove('flip-in-left');
@@ -475,6 +431,36 @@ layout: false
             }, 500);
         }
     }
+
+    // --- TICKER LOGIC (Rolling Comments) ---
+    const tickerContainer = document.getElementById('tickerContainer');
+    let commentIndex = 0;
+
+    function addComment() {
+        const comment = commentData[commentIndex];
+        
+        const bubble = document.createElement('div');
+        bubble.className = 'comment-bubble';
+        bubble.innerHTML = `
+            <span class="rainbow-username">${comment.user}:</span>
+            <span class="comment-text">${comment.text}</span>
+        `;
+        
+        tickerContainer.appendChild(bubble);
+
+        // Keep only 3 bubbles visible at once for the rolling effect
+        if (tickerContainer.children.length > 3) {
+            tickerContainer.removeChild(tickerContainer.firstChild);
+        }
+
+        commentIndex = (commentIndex + 1) % commentData.length;
+    }
+
+    // Add a new comment every 3 seconds
+    setInterval(addComment, 3000);
+    // Initialize with 2 comments
+    addComment();
+    addComment();
 
     // --- TOUCH SWIPE LOGIC ---
     let touchStartX = 0;
@@ -519,30 +505,18 @@ layout: false
     function nextPage() {
         if (isAnimating) return;
         isAnimating = true;
-        
         currentPageStart += fansPerPage;
         pageNumber++;
-
-        if (currentPageStart >= fanData.length) {
-            currentPageStart = 0;
-            pageNumber = 1;
-        }
-
+        if (currentPageStart >= fanData.length) { currentPageStart = 0; pageNumber = 1; }
         renderPage('next');
     }
 
     function prevPage() {
         if (isAnimating) return;
         isAnimating = true;
-        
         currentPageStart -= fansPerPage;
         pageNumber--;
-
-        if (currentPageStart < 0) {
-            currentPageStart = Math.max(0, fanData.length - fansPerPage);
-            pageNumber = Math.ceil(fanData.length / fansPerPage);
-        }
-
+        if (currentPageStart < 0) { currentPageStart = Math.max(0, fanData.length - fansPerPage); pageNumber = Math.ceil(fanData.length / fansPerPage); }
         renderPage('prev');
     }
 
@@ -554,20 +528,13 @@ layout: false
         const email = document.getElementById('fanEmailInput').value.trim();
         if (!email) return alert("Please enter an email.");
 
-        // Generate a random color for the new fan
         const colors = [
             { bg: "#ffb3ba", ring: "#ff6b81" }, { bg: "#bae1ff", ring: "#4dabf7" },
             { bg: "#baffc9", ring: "#51cf66" }, { bg: "#e6b3ff", ring: "#cc5de8" }
         ];
         const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-        // Add to the list
-        fanData.push({ 
-            email: email, 
-            bgColor: randomColor.bg, 
-            ringColor: randomColor.ring 
-        });
-
+        fanData.push({ email: email, bgColor: randomColor.bg, ringColor: randomColor.ring });
         closeModal();
         
         // Jump to the last page to show the new fan
@@ -575,7 +542,6 @@ layout: false
         currentPageStart = lastPageIndex;
         pageNumber = Math.ceil(fanData.length / fansPerPage);
         
-        // Re-render without animation to show the new fan
         renderPage();
     }
 
