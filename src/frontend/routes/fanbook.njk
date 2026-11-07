@@ -379,7 +379,7 @@ layout: false
             letter-spacing: 1px;
         }
 
-        /* BRAIN TEXT (Not Emoji) */
+        /* BRAIN TEXT */
         .brain-text {
             font-family: sans-serif;
             font-size: 14px;
@@ -401,7 +401,97 @@ layout: false
             cursor: pointer;
         }
 
-        /* BRAIN MESSAGE MODAL (Replaces Edit Modal) */
+        /* --- KEY SYSTEM MODAL (SINGLE INPUT) --- */
+        .key-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .key-modal.active { display: flex; }
+
+        .key-box {
+            background: #fdf6e3;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border: 2px solid #d4c4a8;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: popIn 0.3s ease-out;
+        }
+
+        .key-box h2 { 
+            color: #4a3b32; 
+            margin-bottom: 15px; 
+            font-family: 'Caveat', cursive; 
+            font-size: 28px; 
+        }
+
+        /* THE SINGLE INPUT BOX */
+        .key-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            text-align: center;
+            background: #fff;
+            border: 2px solid #d4c4a8;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-family: monospace;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .key-input:focus { border-color: #00d2ff; box-shadow: 0 0 10px rgba(0,210,255,0.3); }
+        
+        .key-input.shake { animation: shake 0.4s ease-in-out; border-color: #ef4444 !important; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+        }
+
+        /* THE EDITABLE HINT TEXT */
+        .key-hint {
+            font-size: 13px;
+            color: #8a7b72;
+            margin-bottom: 25px;
+            font-family: sans-serif;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        .key-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .btn-key {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+        }
+
+        .btn-dismiss { background: #e0d0c0; color: #4a3b32; }
+        .btn-dismiss:hover { background: #d0c0b0; }
+
+        .btn-proceed { background: #00d2ff; color: #000; }
+        .btn-proceed:hover { background: #00b8e6; transform: scale(1.02); }
+
+        /* BRAIN MESSAGE MODAL */
         .brain-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -424,28 +514,11 @@ layout: false
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
             animation: popIn 0.3s ease-out;
         }
-        .brain-box h2 { 
-            color: #4a3b32; 
-            margin-bottom: 15px; 
-            font-family: 'Caveat', cursive; 
-            font-size: 28px; 
-        }
-        .brain-box p {
-            color: #5a4b42;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 25px;
-        }
+        .brain-box h2 { color: #4a3b32; margin-bottom: 15px; font-family: 'Caveat', cursive; font-size: 28px; }
+        .brain-box p { color: #5a4b42; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
         .btn-okay {
-            background: #00d2ff;
-            color: black;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.2s;
+            background: #00d2ff; color: black; padding: 12px 30px; border: none;
+            border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s;
         }
         .btn-okay:hover { background: #00b8e6; transform: scale(1.05); }
 
@@ -488,6 +561,25 @@ layout: false
     <div class="focus-overlay" id="focusOverlay" onclick="closeFocusModal()">
         <div class="focus-card" id="focusCard" onclick="event.stopPropagation()">
             <!-- Content injected by JS -->
+        </div>
+    </div>
+
+    <!-- KEY SYSTEM MODAL (SINGLE INPUT) -->
+    <div class="key-modal" id="keyModal">
+        <div class="key-box">
+            <h2>Enter Activation Key</h2>
+            
+            <input type="text" id="keyInput" class="key-input" placeholder="Enter your key here...">
+            
+            <!-- EDITABLE HINT MESSAGE -->
+            <div class="key-hint" id="keyHint">
+                Format: 9 letters, 4 letters, 7 letters, 10 letters, 4 letters, 7 letters, 8 letters, 8 letters
+            </div>
+
+            <div class="key-actions">
+                <button class="btn-key btn-dismiss" onclick="closeKeyModal()">Dismiss</button>
+                <button class="btn-key btn-proceed" onclick="checkKey()">Proceed</button>
+            </div>
         </div>
     </div>
 
@@ -606,7 +698,6 @@ layout: false
         const overlay = document.getElementById('focusOverlay');
         const card = document.getElementById('focusCard');
         
-        // Show loading state initially
         card.innerHTML = `
             <div class="loader"></div>
             <div class="loading-text">Summoning fan details...</div>
@@ -614,11 +705,9 @@ layout: false
         
         overlay.classList.add('active');
 
-        // Random delay between 5 and 13 seconds
         const delay = Math.floor(Math.random() * 8000) + 5000;
 
         setTimeout(() => {
-            // Render the full details
             card.innerHTML = `
                 <div class="focus-avatar" style="background: ${fan.bgColor}; border-color: ${fan.ringColor};">
                     ${fan.email.charAt(0).toUpperCase()}
@@ -627,13 +716,12 @@ layout: false
                 
                 <div class="focus-sec-row">
                     <div class="focus-sec-img">${fan.secImg}</div>
-                    <div class="brain-text" onclick="openBrainModal()">Brain</div>
+                    <div class="brain-text" onclick="openKeyModal()">Brain</div>
                 </div>
                 
                 <button class="btn-close" onclick="closeFocusModal()">Close</button>
             `;
 
-            // Generate Slower Sparks
             const colors = ['#ff00cc', '#00d2ff', '#ffff33', '#33ff33', '#ff9933'];
             for (let i = 0; i < 20; i++) {
                 const spark = document.createElement('div');
@@ -661,6 +749,33 @@ layout: false
         document.getElementById('focusOverlay').classList.remove('active');
     }
 
+    // --- KEY SYSTEM LOGIC (SINGLE INPUT) ---
+    function openKeyModal() {
+        document.getElementById('keyModal').classList.add('active');
+        document.getElementById('keyInput').value = "";
+        document.getElementById('keyInput').classList.remove('shake');
+    }
+
+    function closeKeyModal() {
+        document.getElementById('keyModal').classList.remove('active');
+    }
+
+    function checkKey() {
+        const input = document.getElementById('keyInput');
+        const val = input.value.trim();
+
+        if (val === "") {
+            // If empty, shake the box
+            input.classList.add('shake');
+            setTimeout(() => input.classList.remove('shake'), 500);
+        } else {
+            // For now, any text allows access. 
+            // Later, we will check if val === theRealKey
+            closeKeyModal();
+            openBrainModal();
+        }
+    }
+
     // --- BRAIN MODAL LOGIC ---
     function openBrainModal() {
         document.getElementById('brainModal').classList.add('active');
@@ -668,7 +783,6 @@ layout: false
 
     function closeBrainModal() {
         document.getElementById('brainModal').classList.remove('active');
-        // The fan modal (focusOverlay) stays open underneath, so they just return to the fan profile
     }
 
     // --- SEARCH LOGIC ---
