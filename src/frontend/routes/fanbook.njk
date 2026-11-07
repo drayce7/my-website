@@ -31,65 +31,70 @@ layout: false
             overflow: hidden;
             font-family: 'Playfair Display', serif;
             perspective: 1500px;
-            touch-action: pan-y; /* Allows vertical scrolling, captures horizontal swipes */
+            touch-action: pan-y; 
         }
 
-        /* --- SUPPORT/CUSTOMER CARE ICON --- */
+        /* --- MOBILE APP LAYOUT --- */
+        .app-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- FIXED UPPER REGION (Notes & Support) --- */
+        .top-region {
+            position: relative;
+            width: 100%;
+            height: 150px; /* Dedicated space for notes */
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 50;
+            flex-shrink: 0;
+        }
+
         .support-icon {
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             background: #fdf6e3;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+            font-size: 22px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
             cursor: pointer;
-            z-index: 50;
             border: 2px solid #d4c4a8;
             transition: 0.2s;
         }
         .support-icon:hover { transform: scale(1.1); }
 
-        /* --- BOOK CONTAINER --- */
-        .book-container {
-            position: relative;
-            width: 95vw;
-            max-width: 1000px;
-            height: 85vh;
-            max-height: 750px;
-            display: flex;
-            transform-style: preserve-3d;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            border-radius: 10px;
-            transition: transform 0.4s ease;
-        }
-
-        /* --- LIVE FAN NOTES (TOP BANNER) --- */
+        /* --- LIVE FAN NOTES --- */
         .live-notes {
-            position: absolute;
-            top: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            height: 45px;
-            background: rgba(255, 255, 255, 0.85);
+            position: relative;
+            width: 85%;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.9);
             border: 1px dashed #b0a090;
-            border-radius: 5px;
+            border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'Caveat', cursive;
-            font-size: 20px;
+            font-size: 22px;
             color: #4a3b32;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             overflow: hidden;
-            z-index: 20;
-            transform: rotate(-1deg); /* Slight tilt for scrapbook feel */
+            transform: rotate(-1deg);
         }
         
         .note-line {
@@ -99,77 +104,60 @@ layout: false
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.5s, transform 0.5s;
+            padding: 0 10px;
         }
         .note-line.active { opacity: 1; transform: translateY(0); }
 
-        /* --- PAGES --- */
-        .page {
+        /* --- BOOK AREA (Scattered Fans) --- */
+        .book-area {
+            flex-grow: 1;
             position: relative;
-            width: 50%;
-            height: 100%;
+            overflow: hidden;
             background: #fdf6e3;
-            background: linear-gradient(to right, #fdf6e3 0%, #f4e8c1 100%);
-            border: 1px solid #d4c4a8;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            overflow-y: auto;
-            scrollbar-width: none; 
             /* Add a subtle paper texture */
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
-        }
-        .page::-webkit-scrollbar { display: none; }
-
-        .page-left {
-            border-radius: 10px 0 0 10px;
-            box-shadow: inset -15px 0 30px rgba(0,0,0,0.05), inset 0 0 30px rgba(180, 150, 110, 0.2);
-            transform-origin: right center;
-        }
-
-        .page-right {
-            border-radius: 0 10px 10px 0;
-            box-shadow: inset 15px 0 30px rgba(0,0,0,0.05), inset 0 0 30px rgba(180, 150, 110, 0.2);
-            transform-origin: left center;
+            border-top: 4px solid #d4c4a8;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            perspective: 1200px;
         }
 
-        .book-spine {
+        /* The pages for flipping */
+        .page {
             position: absolute;
-            left: 50%;
-            top: 0;
-            width: 6px;
+            width: 100%;
             height: 100%;
-            background: #d4c4a8;
-            transform: translateX(-50%);
-            box-shadow: 0 0 15px rgba(0,0,0,0.4);
-            z-index: 10;
-        }
-
-        /* --- SCATTERED FAN GRID --- */
-        .fan-grid {
+            top: 0;
+            left: 0;
+            padding: 20px;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             align-content: flex-start;
             gap: 10px;
-            padding: 10px 0;
-            width: 100%;
+            backface-visibility: hidden; /* Hides the back of the page during flip */
+            transform-origin: left center;
+            background: inherit; /* Inherit the paper texture */
         }
 
+        /* --- SCATTERED FAN GRID --- */
         .fan-card {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100px; /* Fixed width to keep them contained */
-            margin-bottom: 10px;
+            width: 105px;
+            margin-bottom: 15px;
             transition: transform 0.2s;
             cursor: pointer;
         }
         .fan-card:hover { transform: scale(1.05) rotate(2deg); z-index: 5; }
 
-        /* THE THICKER CIRCLE AVATAR */
+        /* THE COLORFUL CIRCLE AVATAR */
         .fan-avatar {
-            width: 90px;
-            height: 90px;
+            width: 85px;
+            height: 85px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -177,174 +165,228 @@ layout: false
             font-weight: bold;
             font-size: 32px;
             color: white;
-            border: 7px solid #fff; /* Thick white border like a polaroid */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2), 0 0 0 1px #d4c4a8; /* Outer ring */
+            border: 6px solid; /* The color will be applied via inline styles */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             margin-bottom: 8px;
             background-size: cover;
+            background-position: center;
         }
 
-        /* THE WIDER EMAIL RECTANGLE */
+        /* THE SHRINK-TO-FIT EMAIL RECTANGLE */
         .fan-email {
             background: #f0e4d0;
             border: 1.5px solid #c4b4a8;
-            padding: 5px 8px;
+            padding: 4px 8px;
             border-radius: 6px;
             font-family: monospace;
-            font-size: 11px;
+            font-size: 10px;
             color: #5a4b42;
-            width: 110%; /* Wider than the avatar */
+            max-width: 110px;
             text-align: center;
             letter-spacing: 0.2px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            /* Shrink to fit content */
+            display: inline-block;
+            width: auto;
         }
+
+        /* --- SWIPE ANIMATIONS --- */
+        @keyframes flipOutLeft {
+            0% { transform: rotateY(0deg); opacity: 1; }
+            100% { transform: rotateY(-180deg); opacity: 0; }
+        }
+        @keyframes flipInRight {
+            0% { transform: rotateY(180deg); opacity: 0; }
+            100% { transform: rotateY(0deg); opacity: 1; }
+        }
+        @keyframes flipOutRight {
+            0% { transform: rotateY(0deg); opacity: 1; }
+            100% { transform: rotateY(180deg); opacity: 0; }
+        }
+        @keyframes flipInLeft {
+            0% { transform: rotateY(-180deg); opacity: 0; }
+            100% { transform: rotateY(0deg); opacity: 1; }
+        }
+
+        .flip-out-left { animation: flipOutLeft 0.5s ease-in forwards; }
+        .flip-in-right { animation: flipInRight 0.5s ease-out forwards; }
+        .flip-out-right { animation: flipOutRight 0.5s ease-in forwards; }
+        .flip-in-left { animation: flipInLeft 0.5s ease-out forwards; }
 
         /* --- PAGE INDICATOR --- */
         .page-indicator {
             position: absolute;
-            bottom: 10px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             color: white;
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 12px;
             letter-spacing: 1px;
             z-index: 20;
+            font-family: sans-serif;
         }
 
-        /* --- MOBILE RESPONSIVENESS --- */
-        @media (max-width: 768px) {
-            .book-container { 
-                width: 100vw; 
-                height: 100vh; 
-                max-height: none;
-                flex-direction: column; 
-                border-radius: 0;
+        /* --- DESKTOP LAYOUT TWEAKS --- */
+        @media (min-width: 769px) {
+            .app-wrapper {
+                max-width: 900px;
+                height: 90vh;
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             }
-            .page { width: 100%; height: 100%; padding: 15px; }
-            .page-left { display: none; } /* Hide left page on mobile */
-            .page-right { border-radius: 0; }
-            .book-spine { display: none; }
-            .live-notes { top: 10px; width: 90%; height: 40px; font-size: 18px; }
-            .fan-grid { gap: 5px; }
-            .fan-card { width: 85px; transform: rotate(var(--random-rotate)); } /* Apply random rotation on mobile */
-            .fan-avatar { width: 75px; height: 75px; font-size: 26px; border-width: 5px; }
-            .fan-email { width: 105%; font-size: 10px; padding: 4px; }
-            .support-icon { width: 45px; height: 45px; top: 10px; right: 10px; font-size: 20px;}
+            .book-area {
+                border-radius: 0 0 20px 20px;
+            }
+            .top-region {
+                border-radius: 20px 20px 0 0;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Support Icon -->
-    <div class="support-icon" onclick="alert('Live chat coming soon!')">🎧</div>
-
-    <div class="book-container" id="bookContainer">
+    <div class="app-wrapper">
         
-        <!-- Live Notes Banner -->
-        <div class="live-notes" id="liveNotes">
-            <div class="note-line" id="note0">"I love this artist!" - Sarah</div>
-            <div class="note-line" id="note1">"Best community ever." - Mike</div>
-            <div class="note-line" id="note2">"Just joined, loving the vibe." - Jess</div>
-            <div class="note-line" id="note3">"The music saved me." - Alex</div>
+        <!-- TOP REGION: Notes & Support -->
+        <div class="top-region">
+            <div class="support-icon" onclick="alert('Live chat coming soon!')">🎧</div>
+            
+            <div class="live-notes">
+                <div class="note-line" id="note0">"I love this artist!" - Sarah</div>
+                <div class="note-line" id="note1">"Best community ever." - Mike</div>
+                <div class="note-line" id="note2">"Just joined, loving the vibe." - Jess</div>
+                <div class="note-line" id="note3">"The music saved me." - Alex</div>
+            </div>
         </div>
 
-        <!-- Left Page -->
-        <div class="page page-left" id="pageLeft">
-            <div class="fan-grid" id="leftGrid"></div>
+        <!-- BOOK AREA: Scattered Fans -->
+        <div class="book-area" id="bookArea">
+            <!-- The pages will be injected here by JS for animation -->
         </div>
 
-        <!-- Spine -->
-        <div class="book-spine"></div>
-
-        <!-- Right Page -->
-        <div class="page page-right" id="pageRight">
-            <div class="fan-grid" id="rightGrid"></div>
-        </div>
-
-        <!-- Page Indicator -->
         <div class="page-indicator" id="pageIndicator">Page 1</div>
     </div>
 
 <script>
-    // 40 Imaginary fans
+    // 40 Imaginary fans with individual outer ring colors
     const fanData = [
-        { email: "sarah.m@email.com", color: "#ffb3ba" }, { email: "mike.t@email.com", color: "#bae1ff" },
-        { email: "jess.r@email.com", color: "#ffffba" }, { email: "alex.j@email.com", color: "#baffc9" },
-        { email: "emma.w@email.com", color: "#e6b3ff" }, { email: "david.l@email.com", color: "#ffccb3" },
-        { email: "chloe.b@email.com", color: "#b3e6ff" }, { email: "ryan.g@email.com", color: "#ffb3e6" },
-        { email: "olivia.k@email.com", color: "#ccffb3" }, { email: "james.p@email.com", color: "#ffd9b3" },
-        { email: "sophia.r@email.com", color: "#b3ffcc" }, { email: "daniel.m@email.com", color: "#e6ccff" },
-        { email: "mia.s@email.com", color: "#ffb3cc" }, { email: "noah.t@email.com", color: "#ccb3ff" },
-        { email: "isabella.d@email.com", color: "#ffffcc" }, { email: "liam.h@email.com", color: "#ffccf2" },
-        { email: "ava.c@email.com", color: "#ccfff2" }, { email: "ethan.b@email.com", color: "#ffebcc" },
-        { email: "amelia.f@email.com", color: "#ebccff" }, { email: "lucas.g@email.com", color: "#ccffeb" },
-        { email: "harper.j@email.com", color: "#ffccd9" }, { email: "mason.k@email.com", color: "#ccd9ff" },
-        { email: "evelyn.l@email.com", color: "#e6ffcc" }, { email: "logan.m@email.com", color: "#ffccb3" },
-        { email: "abigail.n@email.com", color: "#b3ccff" }, { email: "jack.o@email.com", color: "#ffcc99" },
-        { email: "ella.p@email.com", color: "#99ffcc" }, { email: "sebastian.q@email.com", color: "#ff99cc" },
-        { email: "scarlett.r@email.com", color: "#99ccff" }, { email: "henry.s@email.com", color: "#ffff99" },
-        { email: "zoe.w@email.com", color: "#ff99ff" }, { email: "sam.b@email.com", color: "#99ffff" },
-        { email: "lily.c@email.com", color: "#cc99ff" }, { email: "max.d@email.com", color: "#ffcc99" },
-        { email: "grace.e@email.com", color: "#99ff99" }, { email: "leo.f@email.com", color: "#ff9999" },
-        { email: "chloe.g@email.com", color: "#9999ff" }, { email: "nina.h@email.com", color: "#ffff99" },
-        { email: "fred.i@email.com", color: "#ff99cc" }, { email: "ivy.j@email.com", color: "#99ccff" }
+        { email: "sarah.m@email.com", bgColor: "#ffb3ba", ringColor: "#ff6b81" },
+        { email: "mike.t@email.com", bgColor: "#bae1ff", ringColor: "#4dabf7" },
+        { email: "jess.r@email.com", bgColor: "#ffffba", ringColor: "#fcc419" },
+        { email: "alex.j@email.com", bgColor: "#baffc9", ringColor: "#51cf66" },
+        { email: "emma.w@email.com", bgColor: "#e6b3ff", ringColor: "#cc5de8" },
+        { email: "david.l@email.com", bgColor: "#ffccb3", ringColor: "#ff922b" },
+        { email: "chloe.b@email.com", bgColor: "#b3e6ff", ringColor: "#339af0" },
+        { email: "ryan.g@email.com", bgColor: "#ffb3e6", ringColor: "#f06595" },
+        { email: "olivia.k@email.com", bgColor: "#ccffb3", ringColor: "#94d82d" },
+        { email: "james.p@email.com", bgColor: "#ffd9b3", ringColor: "#ff922b" },
+        { email: "sophia.r@email.com", bgColor: "#b3ffcc", ringColor: "#20c997" },
+        { email: "daniel.m@email.com", bgColor: "#e6ccff", ringColor: "#9775fa" },
+        { email: "mia.s@email.com", bgColor: "#ffb3cc", ringColor: "#f783ac" },
+        { email: "noah.t@email.com", bgColor: "#ccb3ff", ringColor: "#845ef7" },
+        { email: "isabella.d@email.com", bgColor: "#ffffcc", ringColor: "#fcc419" },
+        { email: "liam.h@email.com", bgColor: "#ffccf2", ringColor: "#e64980" },
+        { email: "ava.c@email.com", bgColor: "#ccfff2", ringColor: "#20c997" },
+        { email: "ethan.b@email.com", bgColor: "#ffebcc", ringColor: "#ff922b" },
+        { email: "amelia.f@email.com", bgColor: "#ebccff", ringColor: "#be4bdb" },
+        { email: "lucas.g@email.com", bgColor: "#ccffeb", ringColor: "#38d9a9" },
+        { email: "harper.j@email.com", bgColor: "#ffccd9", ringColor: "#f06595" },
+        { email: "mason.k@email.com", bgColor: "#ccd9ff", ringColor: "#748ffc" },
+        { email: "evelyn.l@email.com", bgColor: "#e6ffcc", ringColor: "#94d82d" },
+        { email: "logan.m@email.com", bgColor: "#ffccb3", ringColor: "#ff922b" },
+        { email: "abigail.n@email.com", bgColor: "#b3ccff", ringColor: "#4dabf7" },
+        { email: "jack.o@email.com", bgColor: "#ffcc99", ringColor: "#ff922b" },
+        { email: "ella.p@email.com", bgColor: "#99ffcc", ringColor: "#20c997" },
+        { email: "sebastian.q@email.com", bgColor: "#ff99cc", ringColor: "#f06595" },
+        { email: "scarlett.r@email.com", bgColor: "#99ccff", ringColor: "#4dabf7" },
+        { email: "henry.s@email.com", bgColor: "#ffff99", ringColor: "#fcc419" },
+        { email: "zoe.w@email.com", bgColor: "#ff99ff", ringColor: "#e64980" },
+        { email: "sam.b@email.com", bgColor: "#99ffff", ringColor: "#20c997" },
+        { email: "lily.c@email.com", bgColor: "#cc99ff", ringColor: "#9775fa" },
+        { email: "max.d@email.com", bgColor: "#ffcc99", ringColor: "#ff922b" },
+        { email: "grace.e@email.com", bgColor: "#99ff99", ringColor: "#51cf66" },
+        { email: "leo.f@email.com", bgColor: "#ff9999", ringColor: "#ff6b81" },
+        { email: "chloe.g@email.com", bgColor: "#9999ff", ringColor: "#4dabf7" },
+        { email: "nina.h@email.com", bgColor: "#ffff99", ringColor: "#fcc419" },
+        { email: "fred.i@email.com", bgColor: "#ff99cc", ringColor: "#f06595" },
+        { email: "ivy.j@email.com", bgColor: "#99ccff", ringColor: "#4dabf7" }
     ];
 
     let currentPageStart = 0;
-    const fansPerPage = 12; 
+    const fansPerPage = 15; // Fit more fans on the screen
     let isAnimating = false;
 
-    // Function to scatter items vertically and slightly rotate them
     function getScatterStyle(index) {
-        // Generate a random Y offset between -15px and 15px
         const yOffset = (Math.random() * 30) - 15;
-        // Generate a random rotation between -5deg and 5deg
         const rotation = (Math.random() * 10) - 5;
         return `transform: translateY(${yOffset}px) rotate(${rotation}deg);`;
     }
 
-    function loadFans() {
-        const leftGrid = document.getElementById('leftGrid');
-        const rightGrid = document.getElementById('rightGrid');
-        
-        leftGrid.innerHTML = '';
-        rightGrid.innerHTML = '';
-
+    function createPageHTML() {
         const currentFans = fanData.slice(currentPageStart, currentPageStart + fansPerPage);
-
+        let html = '';
+        
         currentFans.forEach((fan, index) => {
-            const card = document.createElement('div');
-            card.className = 'fan-card';
-            
-            // Apply random scatter style
-            card.style.cssText = getScatterStyle(index);
-
-            const avatar = document.createElement('div');
-            avatar.className = 'fan-avatar';
-            avatar.style.background = fan.color;
-            avatar.textContent = fan.email.charAt(0).toUpperCase();
-            
-            const emailBox = document.createElement('div');
-            emailBox.className = 'fan-email';
-            emailBox.textContent = fan.email;
-
-            card.appendChild(avatar);
-            card.appendChild(emailBox);
-
-            // Split items between left and right pages
-            if (index < fansPerPage / 2) {
-                leftGrid.appendChild(card);
-            } else {
-                rightGrid.appendChild(card);
-            }
+            html += `
+                <div class="fan-card" style="${getScatterStyle(index)}">
+                    <div class="fan-avatar" style="background: ${fan.bgColor}; border-color: ${fan.ringColor};">
+                        ${fan.email.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="fan-email">${fan.email}</div>
+                </div>
+            `;
         });
+        return html;
+    }
 
-        document.getElementById('pageIndicator').textContent = `Page ${Math.floor(currentPageStart / fansPerPage) + 1}`;
+    function renderPage(animateDirection) {
+        const bookArea = document.getElementById('bookArea');
+        
+        if (!animateDirection) {
+            // Initial load without animation
+            bookArea.innerHTML = `<div class="page">${createPageHTML()}</div>`;
+            document.getElementById('pageIndicator').textContent = `Page ${Math.floor(currentPageStart / fansPerPage) + 1}`;
+            return;
+        }
+
+        // Create the new page
+        const newPage = document.createElement('div');
+        newPage.className = 'page';
+        newPage.innerHTML = createPageHTML();
+
+        // Get the old page
+        const oldPage = bookArea.querySelector('.page');
+
+        if (animateDirection === 'next') {
+            oldPage.classList.add('flip-out-left');
+            newPage.classList.add('flip-in-right');
+            bookArea.appendChild(newPage);
+            
+            setTimeout(() => {
+                oldPage.remove();
+                newPage.classList.remove('flip-in-right');
+                isAnimating = false;
+                document.getElementById('pageIndicator').textContent = `Page ${Math.floor(currentPageStart / fansPerPage) + 1}`;
+            }, 500);
+        } else {
+            oldPage.classList.add('flip-out-right');
+            newPage.classList.add('flip-in-left');
+            bookArea.appendChild(newPage);
+
+            setTimeout(() => {
+                oldPage.remove();
+                newPage.classList.remove('flip-in-left');
+                isAnimating = false;
+                document.getElementById('pageIndicator').textContent = `Page ${Math.floor(currentPageStart / fansPerPage) + 1}`;
+            }, 500);
+        }
     }
 
     // --- LIVE NOTES ANIMATION ---
@@ -353,43 +395,50 @@ layout: false
 
     function cycleNotes() {
         notes.forEach(note => note.classList.remove('active'));
-        
         notes[currentNoteIndex].classList.add('active');
-        
         currentNoteIndex = (currentNoteIndex + 1) % notes.length;
-        
-        // Wait 4 seconds before switching to the next note
         setTimeout(cycleNotes, 4000); 
     }
-    
-    // Start the notes cycle
     setTimeout(cycleNotes, 1000);
 
     // --- TOUCH SWIPE LOGIC ---
     let touchStartX = 0;
     let touchEndX = 0;
+    const bookArea = document.getElementById('bookArea');
 
-    const book = document.getElementById('bookContainer');
-
-    book.addEventListener('touchstart', e => {
+    bookArea.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
     }, { passive: true });
 
-    book.addEventListener('touchend', e => {
+    bookArea.addEventListener('touchend', e => {
         touchEndX = e.changedTouches[0].screenX;
         handleSwipe();
     }, { passive: true });
 
+    // For Desktop Mouse Swipes
+    let mouseStartX = 0;
+    let isMouseDown = false;
+
+    bookArea.addEventListener('mousedown', e => {
+        mouseStartX = e.screenX;
+        isMouseDown = true;
+    });
+
+    bookArea.addEventListener('mouseup', e => {
+        if (!isMouseDown) return;
+        const mouseEndX = e.screenX;
+        const diff = mouseEndX - mouseStartX;
+        
+        if (diff < -50) nextPage();
+        if (diff > 50) prevPage();
+        
+        isMouseDown = false;
+    });
+
     function handleSwipe() {
-        const swipeThreshold = 50; // Minimum distance to be considered a swipe
-        if (touchEndX < touchStartX - swipeThreshold) {
-            // Swiped Left (Next Page)
-            nextPage();
-        }
-        if (touchEndX > touchStartX + swipeThreshold) {
-            // Swiped Right (Previous Page)
-            prevPage();
-        }
+        const swipeThreshold = 50;
+        if (touchEndX < touchStartX - swipeThreshold) nextPage();
+        if (touchEndX > touchStartX + swipeThreshold) prevPage();
     }
 
     function nextPage() {
@@ -397,22 +446,9 @@ layout: false
         isAnimating = true;
         
         currentPageStart += fansPerPage;
-        
-        // If we reach the end, loop back to the start
-        if (currentPageStart >= fanData.length) {
-            currentPageStart = 0;
-        }
+        if (currentPageStart >= fanData.length) currentPageStart = 0;
 
-        // Animate the right page flipping
-        const rightPage = document.getElementById('pageRight');
-        rightPage.style.animation = 'none';
-        void rightPage.offsetWidth; // Trigger reflow
-        rightPage.style.animation = 'flipRight 0.6s ease-out';
-
-        setTimeout(() => {
-            loadFans();
-            isAnimating = false;
-        }, 300); // Load new content halfway through the animation
+        renderPage('next');
     }
 
     function prevPage() {
@@ -420,25 +456,13 @@ layout: false
         isAnimating = true;
         
         currentPageStart -= fansPerPage;
-        
-        // If we go before the start, loop to the end
-        if (currentPageStart < 0) {
-            currentPageStart = Math.max(0, fanData.length - fansPerPage);
-        }
+        if (currentPageStart < 0) currentPageStart = Math.max(0, fanData.length - fansPerPage);
 
-        const leftPage = document.getElementById('pageLeft');
-        leftPage.style.animation = 'none';
-        void leftPage.offsetWidth;
-        leftPage.style.animation = 'flipLeft 0.6s ease-out';
-
-        setTimeout(() => {
-            loadFans();
-            isAnimating = false;
-        }, 300);
+        renderPage('prev');
     }
 
-    // Load the initial fans
-    loadFans();
+    // Initial Load
+    renderPage();
 </script>
 </body>
 </html>
