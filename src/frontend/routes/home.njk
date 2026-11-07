@@ -44,7 +44,7 @@ layout: false
         :root {
             --bg-dark: #0f0c29;
             --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            --sidebar-bg: rgba(15, 12, 41, 0.7);
+            --sidebar-bg: rgba(15, 12, 41, 0.85);
             --glass: rgba(255, 255, 255, 0.05);
             --border-glass: rgba(255, 255, 255, 0.1);
             --primary: #00d2ff;
@@ -53,57 +53,118 @@ layout: false
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-gradient); color: var(--text-main); height: 100vh; width: 100vw; display: flex; overflow: hidden; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg-gradient); 
+            color: var(--text-main); 
+            height: 100vh; 
+            width: 100vw; 
+            display: flex; 
+            overflow: hidden; 
+        }
 
         /* --- SIDEBAR --- */
-        .sidebar { width: 280px; background: var(--sidebar-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-right: 1px solid var(--border-glass); display: flex; flex-direction: column; padding: 20px; }
+        .sidebar { 
+            width: 280px; 
+            background: var(--sidebar-bg); 
+            backdrop-filter: blur(20px); 
+            border-right: 1px solid var(--border-glass); 
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px; 
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
         .brand { font-size: 24px; font-weight: bold; color: var(--primary); margin-bottom: 30px; letter-spacing: 1px; }
         
-        /* PROFILE CARD WITH RAINBOW TEXT */
         .user-profile { display: flex; align-items: center; gap: 12px; padding: 15px; background: var(--glass); border-radius: 12px; border: 1px solid var(--border-glass); margin-bottom: 30px; cursor: pointer; transition: 0.3s; }
         .user-profile:hover { background: rgba(255,255,255,0.1); box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); }
         .avatar { width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 20px; flex-shrink: 0;}
-        .user-info h4 { font-size: 15px; margin-bottom: 3px; }
         
         .rainbow-text { background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffff, #33ff33, #ffff33, #ff9933, #ff00cc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; letter-spacing: 0.5px; }
         
+        .user-info h4 { font-size: 15px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;}
         .user-info p { font-size: 12px; color: var(--text-muted); }
 
         .nav-links { display: flex; flex-direction: column; gap: 5px; }
-        .nav-item { padding: 12px 15px; border-radius: 8px; cursor: pointer; color: var(--text-muted); font-weight: 600; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
+        .nav-item { padding: 12px 15px; border-radius: 8px; cursor: pointer; color: var(--text-muted); font-weight: 600; transition: 0.2s; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
         .nav-item:hover, .nav-item.active { background: var(--glass); color: var(--text-main); }
         .nav-item.active { border-left: 3px solid var(--primary); }
 
         .spacer { flex-grow: 1; }
-        .btn-logout { background: transparent; border: 1px solid rgba(255, 75, 75, 0.3); color: #ff4b4b; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-logout { background: transparent; border: 1px solid rgba(255, 75, 75, 0.3); color: #ff4b4b; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; text-align: center; }
         .btn-logout:hover { background: rgba(255, 75, 75, 0.1); }
 
-        /* --- MAIN CONTENT (SCROLLING HOME) --- */
+        /* --- MAIN CONTENT --- */
         .main-content { flex-grow: 1; padding: 30px; display: flex; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .header h1 { font-size: 28px; }
-        .btn-create { background: var(--primary); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-create:hover { background: #00b8e6; transform: translateY(-2px); }
+        .btn-create { background: var(--primary); color: #000; border: none; padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; }
+        .btn-create:hover { background: #00b8e6; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,210,255,0.4); }
 
-        /* FEED GRID */
-        .feed-grid { display: flex; flex-direction: column; gap: 20px; padding-bottom: 50px; }
+        /* --- ROOM CARDS --- */
+        .feed-grid { display: flex; flex-direction: column; gap: 20px; padding-bottom: 80px; }
         
-        .feed-card { background: var(--glass); border: 1px solid var(--border-glass); border-radius: 16px; padding: 20px; display: flex; gap: 15px; transition: 0.3s; align-items: center; cursor: pointer; }
-        .feed-card:hover { background: rgba(255,255,255,0.08); transform: translateX(5px); border-color: var(--primary); }
+        .room-card { 
+            background: var(--glass); border: 1px solid var(--border-glass); 
+            border-radius: 20px; padding: 25px; display: flex; align-items: center; gap: 20px; 
+            cursor: pointer; transition: 0.3s; position: relative; overflow: hidden;
+        }
+        .room-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 10px 25px rgba(0,210,255,0.15); }
         
-        .feed-icon { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #ff00cc, #333399); display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; flex-shrink: 0;}
-        .feed-info h3 { font-size: 18px; margin-bottom: 5px; color: var(--primary); }
-        .feed-info p { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
-        .feed-meta { display: flex; gap: 10px; margin-top: 10px; font-size: 11px; color: #888; }
-        .tag { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; }
+        .room-icon { 
+            width: 70px; height: 70px; border-radius: 18px; 
+            background: linear-gradient(135deg, #ff00cc, #333399); 
+            display: flex; justify-content: center; align-items: center; 
+            font-size: 28px; font-weight: bold; flex-shrink: 0; position: relative;
+        }
+        
+        /* The little green "Online" dot */
+        .room-icon::after {
+            content: ''; position: absolute; bottom: -2px; right: -2px; width: 18px; height: 18px;
+            background: #10b981; border-radius: 50%; border: 3px solid #1e1e2f;
+        }
 
-        /* --- COMING SOON OVERLAY --- */
-        .coming-soon { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .coming-soon.active { display: flex; }
-        .coming-box { background: #1e1e2f; padding: 40px; border-radius: 20px; text-align: center; border: 1px solid var(--primary); box-shadow: 0 0 30px rgba(0,210,255,0.2); }
-        .coming-box h2 { color: var(--primary); margin-bottom: 10px; }
-        .coming-box p { color: var(--text-muted); margin-bottom: 20px; }
+        .room-info { flex-grow: 1; }
+        .room-info h3 { font-size: 20px; margin-bottom: 6px; color: var(--primary); display: flex; align-items: center; gap: 10px;}
+        .room-info p { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px; }
+        
+        .room-meta { display: flex; gap: 15px; font-size: 12px; color: #888; flex-wrap: wrap; }
+        .meta-item { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);}
+        .meta-item strong { color: white; }
+
+        /* --- MODALS --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: #1e1e2f; padding: 30px; border-radius: 20px; width: 100%; max-width: 450px; border: 1px solid var(--primary); box-shadow: 0 0 40px rgba(0,210,255,0.15); margin: 20px;}
+        .modal-box h2 { color: var(--primary); margin-bottom: 20px; }
+        .modal-box input, .modal-box textarea { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid #444; border-radius: 10px; color: white; margin-bottom: 15px; font-family: inherit; outline: none;}
+        .modal-box input:focus, .modal-box textarea:focus { border-color: var(--primary); }
+        .modal-box textarea { resize: none; height: 100px; }
+        
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { 
+                width: 100%; height: 70px; flex-direction: row; padding: 10px 20px; 
+                align-items: center; justify-content: space-between; border-right: none; border-bottom: 1px solid var(--border-glass);
+            }
+            .brand { margin-bottom: 0; font-size: 20px;}
+            .user-profile { margin-bottom: 0; border: none; background: transparent; padding: 5px; }
+            .user-info { display: none; } /* Hide text on mobile header */
+            .nav-links { display: none; } /* Hide nav links on mobile for now */
+            .btn-logout { display: none; }
+            
+            .main-content { padding: 20px; }
+            .room-card { flex-direction: column; text-align: center; padding: 20px; }
+            .room-info h3 { justify-content: center; }
+            .room-meta { justify-content: center; }
+        }
     </style>
 </head>
 <body>
@@ -142,24 +203,23 @@ layout: false
     </main>
 
     <!-- CREATE ROOM MODAL -->
-    <div class="coming-soon" id="createModal">
-        <div class="coming-box">
+    <div class="modal-overlay" id="createModal">
+        <div class="modal-box">
             <h2>Create a Room</h2>
-            <p>Start a new public conversation.</p>
-            <input type="text" id="roomName" placeholder="Room Name" style="width:100%; padding:12px; background:rgba(0,0,0,0.3); border:1px solid #444; border-radius:8px; color:white; margin-bottom:10px;">
-            <textarea id="roomDesc" placeholder="Description" style="width:100%; padding:12px; background:rgba(0,0,0,0.3); border:1px solid #444; border-radius:8px; color:white; margin-bottom:20px; resize:none; height:80px;"></textarea>
-            <div style="display:flex; gap:10px; justify-content:flex-end;">
-                <button class="btn-logout" style="border-color:#444; color:white;" onclick="closeCreateModal()">Cancel</button>
-                <button class="btn-create" onclick="createRoom()">Create</button>
+            <input type="text" id="roomName" placeholder="Room Name">
+            <textarea id="roomDesc" placeholder="What is this room about?"></textarea>
+            <div class="modal-actions">
+                <button class="btn-logout" style="border-color:#444; color:white; padding:12px 24px;" onclick="closeCreateModal()">Cancel</button>
+                <button class="btn-create" onclick="createRoom()">Create Room</button>
             </div>
         </div>
     </div>
 
     <!-- COMING SOON MODAL -->
-    <div class="coming-soon" id="comingSoonModal">
-        <div class="coming-box">
+    <div class="modal-overlay" id="comingSoonModal">
+        <div class="modal-box" style="text-align:center;">
             <h2 id="csTitle">Coming Soon</h2>
-            <p>We are building this feature right now. Check back later!</p>
+            <p style="margin-bottom:20px; color:var(--text-muted);">We are building this feature right now. Check back later!</p>
             <button class="btn-create" onclick="document.getElementById('comingSoonModal').classList.remove('active')">Got it</button>
         </div>
     </div>
@@ -194,7 +254,7 @@ layout: false
         });
     });
 
-    // --- AUTO SCROLL LOGIC ---
+    // --- AUTO SCROLL LOGIC (FIXED) ---
     function startAutoScroll() {
         const mainContent = document.getElementById('mainContent');
         
@@ -205,26 +265,25 @@ layout: false
             if (mainContent.scrollHeight - mainContent.scrollTop - mainContent.clientHeight < 5) {
                 mainContent.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                mainContent.scrollBy({ top: 150, behavior: 'smooth' });
+                mainContent.scrollBy({ top: 200, behavior: 'smooth' });
             }
             
-            // Random wait between 5 and 9 seconds (5000ms to 9000ms)
+            // Random wait between 5 and 9 seconds
             const randomDelay = Math.floor(Math.random() * 4000) + 5000;
             autoScrollInterval = setTimeout(scrollStep, randomDelay);
         }
 
-        // Start the first scroll after 5 seconds
         autoScrollInterval = setTimeout(scrollStep, 5000);
     }
 
-    // Pause auto-scroll if user hovers over the content
-    document.getElementById('mainContent').addEventListener('mouseenter', () => { isAutoScrolling = false; });
-    document.getElementById('mainContent').addEventListener('mouseleave', () => { isAutoScrolling = true; });
+    // Pause only when the mouse hovers EXACTLY over a card (not the whole page)
+    document.getElementById('feedGrid').addEventListener('mouseenter', () => { isAutoScrolling = false; });
+    document.getElementById('feedGrid').addEventListener('mouseleave', () => { isAutoScrolling = true; });
 
     // --- LOAD FEED ---
     async function loadFeed() {
         const grid = document.getElementById('feedGrid');
-        grid.innerHTML = '<div style="color: var(--text-muted); padding: 20px;">Loading public feed...</div>';
+        grid.innerHTML = '<div style="color: var(--text-muted); padding: 20px;">Loading rooms...</div>';
 
         try {
             const querySnapshot = await window.getDocs(window.collection(window.db, "rooms"));
@@ -235,43 +294,32 @@ layout: false
                 return;
             }
 
-            // Create a mix of rooms and users to show in the feed
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 const div = document.createElement('div');
-                div.className = 'feed-card';
+                div.className = 'room-card';
                 div.onclick = () => { window.location.href = `/my-website/room/?id=${doc.id}`; };
                 
+                // Simulated member count and status for now
+                const memberCount = Math.floor(Math.random() * 50) + 3; 
+
                 div.innerHTML = `
-                    <div class="feed-icon">${data.name.charAt(0).toUpperCase()}</div>
-                    <div class="feed-info">
-                        <h3>${data.name}</h3>
+                    <div class="room-icon">${data.name.charAt(0).toUpperCase()}</div>
+                    <div class="room-info">
+                        <h3>${data.name} <span style="font-size:12px; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 8px; border-radius:10px; border:1px solid rgba(16,185,129,0.3);">Active</span></h3>
                         <p>${data.description || "A public room."}</p>
-                        <div class="feed-meta">
-                            <span class="tag">Public Room</span>
-                            <span>Created by @${data.createdBy}</span>
+                        <div class="room-meta">
+                            <div class="meta-item">👥 <strong>${memberCount}</strong> Members</div>
+                            <div class="meta-item">👑 Created by @${data.createdBy}</div>
                         </div>
                     </div>
                 `;
                 grid.appendChild(div);
             });
 
-            // Add a fake user card to show it's a mix of content
-            const userCard = document.createElement('div');
-            userCard.className = 'feed-card';
-            userCard.innerHTML = `
-                <div class="feed-icon" style="background: #ff00cc;">U</div>
-                <div class="feed-info">
-                    <h3>New Users</h3>
-                    <p>Discover people joining the vibe.</p>
-                    <div class="feed-meta"><span class="tag">Community</span></div>
-                </div>
-            `;
-            grid.appendChild(userCard);
-
         } catch (e) {
             console.error("Error loading feed: ", e);
-            grid.innerHTML = '<div style="color: #ff4b4b; text-align:center; padding: 40px;">Failed to load feed. Check console.</div>';
+            grid.innerHTML = '<div style="color: #ff4b4b; text-align:center; padding: 40px;">Failed to load feed.</div>';
         }
     }
 
@@ -304,9 +352,7 @@ layout: false
         document.getElementById('comingSoonModal').classList.add('active');
     }
 
-    function openProfile() {
-        showComingSoon("Profile Settings");
-    }
+    function openProfile() { showComingSoon("Profile Settings"); }
 
     async function handleLogout() {
         await window.signOut(window.auth);
