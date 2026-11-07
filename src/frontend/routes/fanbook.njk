@@ -7,7 +7,7 @@ layout: false
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Artist Fanbook</title>
     
     <script type="module">
@@ -31,22 +31,78 @@ layout: false
             overflow: hidden;
             font-family: 'Playfair Display', serif;
             perspective: 1500px;
+            touch-action: pan-y; /* Allows vertical scrolling, captures horizontal swipes */
         }
 
-        /* --- THE BOOK CONTAINER --- */
+        /* --- SUPPORT/CUSTOMER CARE ICON --- */
+        .support-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: #fdf6e3;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            cursor: pointer;
+            z-index: 50;
+            border: 2px solid #d4c4a8;
+            transition: 0.2s;
+        }
+        .support-icon:hover { transform: scale(1.1); }
+
+        /* --- BOOK CONTAINER --- */
         .book-container {
             position: relative;
             width: 95vw;
             max-width: 1000px;
             height: 85vh;
-            max-height: 700px;
+            max-height: 750px;
             display: flex;
             transform-style: preserve-3d;
             box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             border-radius: 10px;
+            transition: transform 0.4s ease;
         }
 
-        /* --- THE PAPER PAGES --- */
+        /* --- LIVE FAN NOTES (TOP BANNER) --- */
+        .live-notes {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px dashed #b0a090;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Caveat', cursive;
+            font-size: 20px;
+            color: #4a3b32;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            overflow: hidden;
+            z-index: 20;
+            transform: rotate(-1deg); /* Slight tilt for scrapbook feel */
+        }
+        
+        .note-line {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        .note-line.active { opacity: 1; transform: translateY(0); }
+
+        /* --- PAGES --- */
         .page {
             position: relative;
             width: 50%;
@@ -56,29 +112,26 @@ layout: false
             border: 1px solid #d4c4a8;
             display: flex;
             flex-direction: column;
-            padding: 30px;
+            padding: 20px;
             overflow-y: auto;
-            scrollbar-width: none; /* Hide scrollbar */
+            scrollbar-width: none; 
+            /* Add a subtle paper texture */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
         }
         .page::-webkit-scrollbar { display: none; }
 
-        /* Left Page styling */
         .page-left {
             border-radius: 10px 0 0 10px;
             box-shadow: inset -15px 0 30px rgba(0,0,0,0.05), inset 0 0 30px rgba(180, 150, 110, 0.2);
             transform-origin: right center;
-            background: linear-gradient(to left, #f4e8c1 0%, #fdf6e3 100%);
         }
 
-        /* Right Page styling */
         .page-right {
             border-radius: 0 10px 10px 0;
             box-shadow: inset 15px 0 30px rgba(0,0,0,0.05), inset 0 0 30px rgba(180, 150, 110, 0.2);
             transform-origin: left center;
-            background: linear-gradient(to right, #f4e8c1 0%, #fdf6e3 100%);
         }
 
-        /* Spine in the middle */
         .book-spine {
             position: absolute;
             left: 50%;
@@ -91,120 +144,118 @@ layout: false
             z-index: 10;
         }
 
-        /* --- FAN GRID (TIGHTLY PACKED) --- */
+        /* --- SCATTERED FAN GRID --- */
         .fan-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 20px 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-content: flex-start;
+            gap: 10px;
             padding: 10px 0;
+            width: 100%;
         }
 
         .fan-card {
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-align: center;
-            cursor: pointer;
+            width: 100px; /* Fixed width to keep them contained */
+            margin-bottom: 10px;
             transition: transform 0.2s;
+            cursor: pointer;
         }
-        .fan-card:hover { transform: scale(1.05); }
+        .fan-card:hover { transform: scale(1.05) rotate(2deg); z-index: 5; }
 
-        /* THE THICK CIRCLE AVATAR */
+        /* THE THICKER CIRCLE AVATAR */
         .fan-avatar {
-            width: 85px;
-            height: 85px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 30px;
+            font-size: 32px;
             color: white;
-            /* The thicker border ring */
-            border: 6px solid #d4c4a8; 
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-            margin-bottom: 10px;
+            border: 7px solid #fff; /* Thick white border like a polaroid */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2), 0 0 0 1px #d4c4a8; /* Outer ring */
+            margin-bottom: 8px;
             background-size: cover;
-            background-position: center;
         }
 
-        /* THE RECTANGULAR EMAIL BOX */
+        /* THE WIDER EMAIL RECTANGLE */
         .fan-email {
             background: #f0e4d0;
             border: 1.5px solid #c4b4a8;
-            padding: 4px 6px;
-            border-radius: 4px;
+            padding: 5px 8px;
+            border-radius: 6px;
             font-family: monospace;
-            font-size: 10px;
-            color: #6a5b52;
-            width: 100%;
-            max-width: 110px;
+            font-size: 11px;
+            color: #5a4b42;
+            width: 110%; /* Wider than the avatar */
+            text-align: center;
             letter-spacing: 0.2px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* --- PAGE CONTROLS --- */
-        .controls {
+        /* --- PAGE INDICATOR --- */
+        .page-indicator {
             position: absolute;
-            bottom: -70px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
-            display: flex;
-            gap: 20px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            letter-spacing: 1px;
             z-index: 20;
-        }
-
-        .btn {
-            background: #fdf6e3;
-            color: #4a3b32;
-            border: 2px solid #d4c4a8;
-            padding: 12px 25px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: 0.2s;
-        }
-
-        .btn:hover { background: #fff; transform: translateY(-2px); }
-        .btn:active { transform: translateY(0); }
-
-        /* --- ANIMATION --- */
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
         }
 
         /* --- MOBILE RESPONSIVENESS --- */
         @media (max-width: 768px) {
             .book-container { 
-                width: 90vw; 
-                height: 80vh; 
+                width: 100vw; 
+                height: 100vh; 
+                max-height: none;
                 flex-direction: column; 
-                border-radius: 10px;
+                border-radius: 0;
             }
-            .page { width: 100%; height: 100%; padding: 20px; }
-            .page-left { display: none; } /* Hide left page on mobile, act like a single sheet */
-            .page-right { border-radius: 10px; }
+            .page { width: 100%; height: 100%; padding: 15px; }
+            .page-left { display: none; } /* Hide left page on mobile */
+            .page-right { border-radius: 0; }
             .book-spine { display: none; }
-            .fan-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 15px 10px; }
-            .fan-avatar { width: 70px; height: 70px; font-size: 24px; border-width: 5px; }
+            .live-notes { top: 10px; width: 90%; height: 40px; font-size: 18px; }
+            .fan-grid { gap: 5px; }
+            .fan-card { width: 85px; transform: rotate(var(--random-rotate)); } /* Apply random rotation on mobile */
+            .fan-avatar { width: 75px; height: 75px; font-size: 26px; border-width: 5px; }
+            .fan-email { width: 105%; font-size: 10px; padding: 4px; }
+            .support-icon { width: 45px; height: 45px; top: 10px; right: 10px; font-size: 20px;}
         }
     </style>
 </head>
 <body>
 
-    <div class="book-container">
+    <!-- Support Icon -->
+    <div class="support-icon" onclick="alert('Live chat coming soon!')">🎧</div>
+
+    <div class="book-container" id="bookContainer">
         
+        <!-- Live Notes Banner -->
+        <div class="live-notes" id="liveNotes">
+            <div class="note-line" id="note0">"I love this artist!" - Sarah</div>
+            <div class="note-line" id="note1">"Best community ever." - Mike</div>
+            <div class="note-line" id="note2">"Just joined, loving the vibe." - Jess</div>
+            <div class="note-line" id="note3">"The music saved me." - Alex</div>
+        </div>
+
         <!-- Left Page -->
         <div class="page page-left" id="pageLeft">
-            <h1 style="font-family: 'Caveat', cursive; font-size: 36px; color: #4a3b32; text-align: center; margin-bottom: 20px;">The Fans</h1>
-            <div class="fan-grid" id="leftGrid">
-                <!-- Fans go here -->
-            </div>
+            <div class="fan-grid" id="leftGrid"></div>
         </div>
 
         <!-- Spine -->
@@ -212,56 +263,50 @@ layout: false
 
         <!-- Right Page -->
         <div class="page page-right" id="pageRight">
-            <h1 style="font-family: 'Caveat', cursive; font-size: 36px; color: #4a3b32; text-align: center; margin-bottom: 20px;">The Supporters</h1>
-            <div class="fan-grid" id="rightGrid">
-                <!-- Fans go here -->
-            </div>
+            <div class="fan-grid" id="rightGrid"></div>
         </div>
 
-        <!-- Controls -->
-        <div class="controls">
-            <button class="btn" onclick="nextPage()">Swipe Page →</button>
-        </div>
-
+        <!-- Page Indicator -->
+        <div class="page-indicator" id="pageIndicator">Page 1</div>
     </div>
 
 <script>
-    // 30 Imaginary fans
+    // 40 Imaginary fans
     const fanData = [
-        { email: "sarah.m@email.com", color: "#ffb3ba" },
-        { email: "mike.t@email.com", color: "#bae1ff" },
-        { email: "jess.r@email.com", color: "#ffffba" },
-        { email: "alex.j@email.com", color: "#baffc9" },
-        { email: "emma.w@email.com", color: "#e6b3ff" },
-        { email: "david.l@email.com", color: "#ffccb3" },
-        { email: "chloe.b@email.com", color: "#b3e6ff" },
-        { email: "ryan.g@email.com", color: "#ffb3e6" },
-        { email: "olivia.k@email.com", color: "#ccffb3" },
-        { email: "james.p@email.com", color: "#ffd9b3" },
-        { email: "sophia.r@email.com", color: "#b3ffcc" },
-        { email: "daniel.m@email.com", color: "#e6ccff" },
-        { email: "mia.s@email.com", color: "#ffb3cc" },
-        { email: "noah.t@email.com", color: "#ccb3ff" },
-        { email: "isabella.d@email.com", color: "#ffffcc" },
-        { email: "liam.h@email.com", color: "#ffccf2" },
-        { email: "ava.c@email.com", color: "#ccfff2" },
-        { email: "ethan.b@email.com", color: "#ffebcc" },
-        { email: "amelia.f@email.com", color: "#ebccff" },
-        { email: "lucas.g@email.com", color: "#ccffeb" },
-        { email: "harper.j@email.com", color: "#ffccd9" },
-        { email: "mason.k@email.com", color: "#ccd9ff" },
-        { email: "evelyn.l@email.com", color: "#e6ffcc" },
-        { email: "logan.m@email.com", color: "#ffccb3" },
-        { email: "abigail.n@email.com", color: "#b3ccff" },
-        { email: "jack.o@email.com", color: "#ffcc99" },
-        { email: "ella.p@email.com", color: "#99ffcc" },
-        { email: "sebastian.q@email.com", color: "#ff99cc" },
-        { email: "scarlett.r@email.com", color: "#99ccff" },
-        { email: "henry.s@email.com", color: "#ffff99" }
+        { email: "sarah.m@email.com", color: "#ffb3ba" }, { email: "mike.t@email.com", color: "#bae1ff" },
+        { email: "jess.r@email.com", color: "#ffffba" }, { email: "alex.j@email.com", color: "#baffc9" },
+        { email: "emma.w@email.com", color: "#e6b3ff" }, { email: "david.l@email.com", color: "#ffccb3" },
+        { email: "chloe.b@email.com", color: "#b3e6ff" }, { email: "ryan.g@email.com", color: "#ffb3e6" },
+        { email: "olivia.k@email.com", color: "#ccffb3" }, { email: "james.p@email.com", color: "#ffd9b3" },
+        { email: "sophia.r@email.com", color: "#b3ffcc" }, { email: "daniel.m@email.com", color: "#e6ccff" },
+        { email: "mia.s@email.com", color: "#ffb3cc" }, { email: "noah.t@email.com", color: "#ccb3ff" },
+        { email: "isabella.d@email.com", color: "#ffffcc" }, { email: "liam.h@email.com", color: "#ffccf2" },
+        { email: "ava.c@email.com", color: "#ccfff2" }, { email: "ethan.b@email.com", color: "#ffebcc" },
+        { email: "amelia.f@email.com", color: "#ebccff" }, { email: "lucas.g@email.com", color: "#ccffeb" },
+        { email: "harper.j@email.com", color: "#ffccd9" }, { email: "mason.k@email.com", color: "#ccd9ff" },
+        { email: "evelyn.l@email.com", color: "#e6ffcc" }, { email: "logan.m@email.com", color: "#ffccb3" },
+        { email: "abigail.n@email.com", color: "#b3ccff" }, { email: "jack.o@email.com", color: "#ffcc99" },
+        { email: "ella.p@email.com", color: "#99ffcc" }, { email: "sebastian.q@email.com", color: "#ff99cc" },
+        { email: "scarlett.r@email.com", color: "#99ccff" }, { email: "henry.s@email.com", color: "#ffff99" },
+        { email: "zoe.w@email.com", color: "#ff99ff" }, { email: "sam.b@email.com", color: "#99ffff" },
+        { email: "lily.c@email.com", color: "#cc99ff" }, { email: "max.d@email.com", color: "#ffcc99" },
+        { email: "grace.e@email.com", color: "#99ff99" }, { email: "leo.f@email.com", color: "#ff9999" },
+        { email: "chloe.g@email.com", color: "#9999ff" }, { email: "nina.h@email.com", color: "#ffff99" },
+        { email: "fred.i@email.com", color: "#ff99cc" }, { email: "ivy.j@email.com", color: "#99ccff" }
     ];
 
     let currentPageStart = 0;
-    const fansPerPage = 10; // Show 10 fans per page
+    const fansPerPage = 12; 
+    let isAnimating = false;
+
+    // Function to scatter items vertically and slightly rotate them
+    function getScatterStyle(index) {
+        // Generate a random Y offset between -15px and 15px
+        const yOffset = (Math.random() * 30) - 15;
+        // Generate a random rotation between -5deg and 5deg
+        const rotation = (Math.random() * 10) - 5;
+        return `transform: translateY(${yOffset}px) rotate(${rotation}deg);`;
+    }
 
     function loadFans() {
         const leftGrid = document.getElementById('leftGrid');
@@ -270,20 +315,20 @@ layout: false
         leftGrid.innerHTML = '';
         rightGrid.innerHTML = '';
 
-        // Get the slice of fans for this page
         const currentFans = fanData.slice(currentPageStart, currentPageStart + fansPerPage);
 
         currentFans.forEach((fan, index) => {
             const card = document.createElement('div');
             card.className = 'fan-card';
             
-            // Create the circular avatar with the thick ring
+            // Apply random scatter style
+            card.style.cssText = getScatterStyle(index);
+
             const avatar = document.createElement('div');
             avatar.className = 'fan-avatar';
             avatar.style.background = fan.color;
             avatar.textContent = fan.email.charAt(0).toUpperCase();
             
-            // Create the rectangular email box
             const emailBox = document.createElement('div');
             emailBox.className = 'fan-email';
             emailBox.textContent = fan.email;
@@ -291,17 +336,66 @@ layout: false
             card.appendChild(avatar);
             card.appendChild(emailBox);
 
-            // Put half on the left page, half on the right
-            if (index < 5) {
+            // Split items between left and right pages
+            if (index < fansPerPage / 2) {
                 leftGrid.appendChild(card);
             } else {
                 rightGrid.appendChild(card);
             }
         });
+
+        document.getElementById('pageIndicator').textContent = `Page ${Math.floor(currentPageStart / fansPerPage) + 1}`;
     }
 
-    // Function for the swipe button
+    // --- LIVE NOTES ANIMATION ---
+    const notes = document.querySelectorAll('.note-line');
+    let currentNoteIndex = 0;
+
+    function cycleNotes() {
+        notes.forEach(note => note.classList.remove('active'));
+        
+        notes[currentNoteIndex].classList.add('active');
+        
+        currentNoteIndex = (currentNoteIndex + 1) % notes.length;
+        
+        // Wait 4 seconds before switching to the next note
+        setTimeout(cycleNotes, 4000); 
+    }
+    
+    // Start the notes cycle
+    setTimeout(cycleNotes, 1000);
+
+    // --- TOUCH SWIPE LOGIC ---
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const book = document.getElementById('bookContainer');
+
+    book.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    book.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+        const swipeThreshold = 50; // Minimum distance to be considered a swipe
+        if (touchEndX < touchStartX - swipeThreshold) {
+            // Swiped Left (Next Page)
+            nextPage();
+        }
+        if (touchEndX > touchStartX + swipeThreshold) {
+            // Swiped Right (Previous Page)
+            prevPage();
+        }
+    }
+
     function nextPage() {
+        if (isAnimating) return;
+        isAnimating = true;
+        
         currentPageStart += fansPerPage;
         
         // If we reach the end, loop back to the start
@@ -313,10 +407,34 @@ layout: false
         const rightPage = document.getElementById('pageRight');
         rightPage.style.animation = 'none';
         void rightPage.offsetWidth; // Trigger reflow
-        rightPage.style.animation = 'slideInRight 0.5s ease-out';
+        rightPage.style.animation = 'flipRight 0.6s ease-out';
 
-        // Load the new fans
-        loadFans();
+        setTimeout(() => {
+            loadFans();
+            isAnimating = false;
+        }, 300); // Load new content halfway through the animation
+    }
+
+    function prevPage() {
+        if (isAnimating) return;
+        isAnimating = true;
+        
+        currentPageStart -= fansPerPage;
+        
+        // If we go before the start, loop to the end
+        if (currentPageStart < 0) {
+            currentPageStart = Math.max(0, fanData.length - fansPerPage);
+        }
+
+        const leftPage = document.getElementById('pageLeft');
+        leftPage.style.animation = 'none';
+        void leftPage.offsetWidth;
+        leftPage.style.animation = 'flipLeft 0.6s ease-out';
+
+        setTimeout(() => {
+            loadFans();
+            isAnimating = false;
+        }, 300);
     }
 
     // Load the initial fans
