@@ -42,7 +42,7 @@ layout: false
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
         }
 
-        /* --- TOP REGION (Comments & Search) --- */
+        /* --- TOP REGION --- */
         .top-region {
             position: relative;
             width: 100%;
@@ -58,7 +58,7 @@ layout: false
             overflow: hidden;
         }
 
-        /* --- TICKER COMMENTS --- */
+        /* --- TICKER COMMENTS (Fixed Logic) --- */
         .ticker-container {
             margin-top: 5px;
             height: 70px;
@@ -77,9 +77,9 @@ layout: false
             font-weight: 600;
             color: #e0e0e0;
             margin-bottom: 4px;
-            white-space: nowrap; /* Prevent wrapping */
+            white-space: nowrap; 
             overflow: hidden;
-            text-overflow: ellipsis; /* Truncate */
+            text-overflow: ellipsis; 
             animation: slideUp 0.4s ease-out forwards;
             font-family: sans-serif;
             padding: 0 5px;
@@ -115,15 +115,7 @@ layout: false
             margin-right: auto;
         }
 
-        .search-input {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 12px;
-            width: 100%;
-            outline: none;
-        }
-        
+        .search-input { background: transparent; border: none; color: white; font-size: 12px; width: 100%; outline: none; }
         .search-input::placeholder { color: #888; }
         .search-btn { background: transparent; border: none; color: #00d2ff; font-size: 16px; cursor: pointer; margin-left: 5px; }
 
@@ -147,7 +139,7 @@ layout: false
             align-items: center;
             width: 85px;
             margin-bottom: 5px;
-            transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
         }
 
@@ -182,7 +174,7 @@ layout: false
             font-family: monospace;
             font-size: 8px;
             color: #5a4b42;
-            width: 100%; /* Fixed width so it doesn't break the layout */
+            width: 100%;
             text-align: center;
             white-space: nowrap;
             overflow: hidden;
@@ -190,58 +182,47 @@ layout: false
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        /* SEC IMG TEXT */
+        /* SEC IMG TEXT (Shrink to fit) */
         .sec-img {
+            display: inline-block;
+            background: rgba(0,0,0,0.05);
+            padding: 1px 4px;
+            border-radius: 3px;
             font-size: 7px;
             color: #8a7b72;
             margin-top: 2px;
             text-transform: uppercase;
             font-family: sans-serif;
             letter-spacing: 0.5px;
+            width: auto;
+            max-width: 80px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        /* --- FLOATING BUTTONS (Bottom) --- */
-        .bottom-controls {
+        /* --- FLOATING SUPPORT BUTTON (Only one left) --- */
+        .btn-support {
             position: fixed;
             bottom: 20px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            pointer-events: none; /* Let clicks pass through to background */
-            z-index: 100;
-        }
-
-        .btn-float {
+            left: 20px;
             width: 55px;
             height: 55px;
+            background: #ef4444;
+            color: white;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 28px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: 0.2s;
-            pointer-events: auto; /* Enable clicks on the buttons themselves */
-        }
-
-        .btn-support {
-            background: #ef4444;
-            color: white;
             font-size: 24px;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            transition: 0.2s;
         }
         .btn-support:hover { transform: scale(1.1); background: #dc2626; }
 
-        .btn-add {
-            background: #00d2ff;
-            color: black;
-        }
-        .btn-add:hover { transform: scale(1.1) rotate(90deg); }
-
-        /* --- POPUP MODAL (Focus Mode) --- */
+        /* --- POPUP MODAL (Focus Mode with Sparks) --- */
         .focus-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -263,12 +244,29 @@ layout: false
             max-width: 300px;
             text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            position: relative;
+            overflow: visible;
         }
 
         @keyframes popIn {
             from { transform: scale(0.5); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
+        }
+
+        /* SPARKS EFFECT */
+        .spark {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: explode 0.8s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
         }
 
         .focus-avatar {
@@ -298,13 +296,33 @@ layout: false
             word-break: break-all;
         }
 
+        /* SEC IMG ROW WITH BRAIN */
+        .focus-sec-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
         .focus-sec-img {
+            display: inline-block;
+            background: rgba(0,0,0,0.05);
+            padding: 4px 10px;
+            border-radius: 6px;
             font-size: 12px;
             color: #8a7b72;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 20px;
         }
+
+        .brain-icon {
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+            filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.5));
+        }
+        .brain-icon:hover { transform: scale(1.2); }
 
         .btn-close {
             background: #ef4444;
@@ -315,37 +333,6 @@ layout: false
             font-weight: bold;
             cursor: pointer;
         }
-
-        /* --- ADD FAN MODAL --- */
-        .modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 600;
-        }
-        .modal.active { display: flex; }
-        .modal-box {
-            background: #fdf6e3;
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 350px;
-            text-align: center;
-            border: 2px solid #d4c4a8;
-        }
-        .modal-box h2 { color: #4a3b32; margin-bottom: 20px; font-family: 'Caveat', cursive; font-size: 32px; }
-        .modal-box input {
-            width: 100%; padding: 12px; margin-bottom: 20px;
-            border: 1px solid #d4c4a8; border-radius: 8px;
-            font-size: 16px; background: #fff;
-        }
-        .modal-actions { display: flex; gap: 10px; justify-content: center; }
-        .btn-modal { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 16px; }
-        .btn-cancel { background: #e0d0c0; color: #4a3b32; }
-        .btn-submit { background: #00d2ff; color: black; }
 
         @media (min-width: 769px) {
             .app-wrapper { max-width: 600px; height: 90vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
@@ -372,55 +359,30 @@ layout: false
         <!-- SCROLLING FAN AREA -->
         <div class="fan-area" id="fanArea"></div>
 
-        <!-- BOTTOM CONTROLS -->
-        <div class="bottom-controls">
-            <div class="btn-float btn-support" onclick="alert('Live chat coming soon!')">🎧</div>
-            <div class="btn-float btn-add" onclick="openModal()">+</div>
-        </div>
+        <!-- SUPPORT BUTTON -->
+        <div class="btn-support" onclick="alert('Live chat coming soon!')">🎧</div>
     </div>
 
-    <!-- FOCUS MODAL (Popup) -->
+    <!-- FOCUS MODAL -->
     <div class="focus-overlay" id="focusOverlay" onclick="closeFocusModal()">
         <div class="focus-card" id="focusCard" onclick="event.stopPropagation()">
             <!-- Content injected by JS -->
         </div>
     </div>
 
-    <!-- ADD FAN MODAL -->
-    <div class="modal" id="addFanModal">
-        <div class="modal-box">
-            <h2>Join the Fanbook</h2>
-            <input type="email" id="fanEmailInput" placeholder="Enter your email">
-            <div class="modal-actions">
-                <button class="btn-modal btn-cancel" onclick="closeModal()">Cancel</button>
-                <button class="btn-modal btn-submit" onclick="submitFan()">Apply</button>
-            </div>
-        </div>
-    </div>
-
 <script>
     // 40 Imaginary fans
     let fanData = [
-        { email: "sarah.m@email.com", bgColor: "#ffb3ba", ringColor: "#ff6b81" }, { email: "mike.t@email.com", bgColor: "#bae1ff", ringColor: "#4dabf7" },
-        { email: "jess.r@email.com", bgColor: "#ffffba", ringColor: "#fcc419" }, { email: "alex.j@email.com", bgColor: "#baffc9", ringColor: "#51cf66" },
-        { email: "emma.w@email.com", bgColor: "#e6b3ff", ringColor: "#cc5de8" }, { email: "david.l@email.com", bgColor: "#ffccb3", ringColor: "#ff922b" },
-        { email: "chloe.b@email.com", bgColor: "#b3e6ff", ringColor: "#339af0" }, { email: "ryan.g@email.com", bgColor: "#ffb3e6", ringColor: "#f06595" },
-        { email: "olivia.k@email.com", bgColor: "#ccffb3", ringColor: "#94d82d" }, { email: "james.p@email.com", bgColor: "#ffd9b3", ringColor: "#ff922b" },
-        { email: "sophia.r@email.com", bgColor: "#b3ffcc", ringColor: "#20c997" }, { email: "daniel.m@email.com", bgColor: "#e6ccff", ringColor: "#9775fa" },
-        { email: "mia.s@email.com", bgColor: "#ffb3cc", ringColor: "#f783ac" }, { email: "noah.t@email.com", bgColor: "#ccb3ff", ringColor: "#845ef7" },
-        { email: "isabella.d@email.com", bgColor: "#ffffcc", ringColor: "#fcc419" }, { email: "liam.h@email.com", bgColor: "#ffccf2", ringColor: "#e64980" },
-        { email: "ava.c@email.com", bgColor: "#ccfff2", ringColor: "#20c997" }, { email: "ethan.b@email.com", bgColor: "#ffebcc", ringColor: "#ff922b" },
-        { email: "amelia.f@email.com", bgColor: "#ebccff", ringColor: "#be4bdb" }, { email: "lucas.g@email.com", bgColor: "#ccffeb", ringColor: "#38d9a9" },
-        { email: "harper.j@email.com", bgColor: "#ffccd9", ringColor: "#f06595" }, { email: "mason.k@email.com", bgColor: "#ccd9ff", ringColor: "#748ffc" },
-        { email: "evelyn.l@email.com", bgColor: "#e6ffcc", ringColor: "#94d82d" }, { email: "logan.m@email.com", bgColor: "#ffccb3", ringColor: "#ff922b" },
-        { email: "abigail.n@email.com", bgColor: "#b3ccff", ringColor: "#4dabf7" }, { email: "jack.o@email.com", bgColor: "#ffcc99", ringColor: "#ff922b" },
-        { email: "ella.p@email.com", bgColor: "#99ffcc", ringColor: "#20c997" }, { email: "sebastian.q@email.com", bgColor: "#ff99cc", ringColor: "#f06595" },
-        { email: "scarlett.r@email.com", bgColor: "#99ccff", ringColor: "#4dabf7" }, { email: "henry.s@email.com", bgColor: "#ffff99", ringColor: "#fcc419" },
-        { email: "zoe.w@email.com", bgColor: "#ff99ff", ringColor: "#e64980" }, { email: "sam.b@email.com", bgColor: "#99ffff", ringColor: "#20c997" },
-        { email: "lily.c@email.com", bgColor: "#cc99ff", ringColor: "#9775fa" }, { email: "max.d@email.com", bgColor: "#ffcc99", ringColor: "#ff922b" },
-        { email: "grace.e@email.com", bgColor: "#99ff99", ringColor: "#51cf66" }, { email: "leo.f@email.com", bgColor: "#ff9999", ringColor: "#ff6b81" },
-        { email: "chloe.g@email.com", bgColor: "#9999ff", ringColor: "#4dabf7" }, { email: "nina.h@email.com", bgColor: "#ffff99", ringColor: "#fcc419" },
-        { email: "fred.i@email.com", bgColor: "#ff99cc", ringColor: "#f06595" }, { email: "ivy.j@email.com", bgColor: "#99ccff", ringColor: "#4dabf7" }
+        { email: "sarah.m@email.com", bgColor: "#ffb3ba", ringColor: "#ff6b81", secImg: "Loyal supporter" }, 
+        { email: "mike.t@email.com", bgColor: "#bae1ff", ringColor: "#4dabf7", secImg: "Day 1 fan" },
+        { email: "jess.r@email.com", bgColor: "#ffffba", ringColor: "#fcc419", secImg: "Superfan" },
+        { email: "alex.j@email.com", bgColor: "#baffc9", ringColor: "#51cf66", secImg: "VIP member" },
+        { email: "emma.w@email.com", bgColor: "#e6b3ff", ringColor: "#cc5de8", secImg: "Top supporter" },
+        { email: "david.l@email.com", bgColor: "#ffccb3", ringColor: "#ff922b", secImg: "Concert goer" },
+        { email: "chloe.b@email.com", bgColor: "#b3e6ff", ringColor: "#339af0", secImg: "Street team" },
+        { email: "ryan.g@email.com", bgColor: "#ffb3e6", ringColor: "#f06595", secImg: "Early bird" },
+        { email: "olivia.k@email.com", bgColor: "#ccffb3", ringColor: "#94d82d", secImg: "Merch collector" },
+        { email: "james.p@email.com", bgColor: "#ffd9b3", ringColor: "#ff922b", secImg: "Music lover" }
     ];
 
     const commentData = [
@@ -449,22 +411,21 @@ layout: false
             card.style.transform = `translate(${xOffset}px, ${yOffset}px) rotate(${rotation}deg)`;
             card.style.zIndex = zIndex;
             
-            // Add click event to open focus modal
-            card.onclick = () => openFocusModal(fan);
+            card.onclick = (e) => openFocusModal(fan, e);
 
             card.innerHTML = `
                 <div class="fan-avatar" style="background: ${fan.bgColor}; border-color: ${fan.ringColor};">
                     ${fan.email.charAt(0).toUpperCase()}
                 </div>
                 <div class="fan-email">${fan.email}</div>
-                <div class="sec-img">sec img</div>
+                <div class="sec-img">${fan.secImg}</div>
             `;
 
             fanArea.appendChild(card);
         });
     }
 
-    // --- TICKER LOGIC (FIXED) ---
+    // --- TICKER LOGIC (Strictly 3 lines) ---
     const tickerContainer = document.getElementById('tickerContainer');
     let commentIndex = 0;
 
@@ -480,21 +441,19 @@ layout: false
         
         tickerContainer.appendChild(line);
 
-        // Strictly keep only the last 3 comments on screen
-        if (tickerContainer.children.length > 3) {
+        // Force remove the oldest if we exceed 3
+        while (tickerContainer.children.length > 3) {
             tickerContainer.removeChild(tickerContainer.firstChild);
         }
 
         commentIndex = (commentIndex + 1) % commentData.length;
     }
 
-    // Add a new comment every 3 seconds
     setInterval(addComment, 3000);
-    // Initialize with 1 comment to start the flow
     addComment();
 
-    // --- FOCUS MODAL LOGIC ---
-    function openFocusModal(fan) {
+    // --- FOCUS MODAL LOGIC WITH SPARKS ---
+    function openFocusModal(fan, event) {
         const overlay = document.getElementById('focusOverlay');
         const card = document.getElementById('focusCard');
         
@@ -503,11 +462,40 @@ layout: false
                 ${fan.email.charAt(0).toUpperCase()}
             </div>
             <div class="focus-email">${fan.email}</div>
-            <div class="focus-sec-img">Sec Img Placeholder</div>
+            
+            <div class="focus-sec-row">
+                <div class="focus-sec-img">${fan.secImg}</div>
+                <div class="brain-icon" onclick="alert('Edit page coming soon!')">🧠</div>
+            </div>
+            
             <button class="btn-close" onclick="closeFocusModal()">Close</button>
         `;
         
         overlay.classList.add('active');
+
+        // Generate Sparks
+        const colors = ['#ff00cc', '#00d2ff', '#ffff33', '#33ff33', '#ff9933'];
+        for (let i = 0; i < 15; i++) {
+            const spark = document.createElement('div');
+            spark.className = 'spark';
+            
+            // Random direction
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 50 + Math.random() * 100; // 50px to 150px
+            
+            spark.style.setProperty('--x', `${Math.cos(angle) * distance}px`);
+            spark.style.setProperty('--y', `${Math.sin(angle) * distance}px`);
+            spark.style.background = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Position spark at center of card
+            spark.style.left = '50%';
+            spark.style.top = '50%';
+            
+            card.appendChild(spark);
+            
+            // Remove spark after animation
+            setTimeout(() => spark.remove(), 800);
+        }
     }
 
     function closeFocusModal() {
@@ -528,30 +516,6 @@ layout: false
         } else {
             alert("Fan not found! Try exact email.");
         }
-    }
-
-    // --- ADD FAN MODAL LOGIC ---
-    function openModal() { document.getElementById('addFanModal').classList.add('active'); }
-    function closeModal() { document.getElementById('addFanModal').classList.remove('active'); }
-
-    function submitFan() {
-        const email = document.getElementById('fanEmailInput').value.trim();
-        if (!email) return alert("Please enter an email.");
-
-        const colors = [
-            { bg: "#ffb3ba", ring: "#ff6b81" }, { bg: "#bae1ff", ring: "#4dabf7" },
-            { bg: "#baffc9", ring: "#51cf66" }, { bg: "#e6b3ff", ring: "#cc5de8" }
-        ];
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-
-        fanData.push({ email: email, bgColor: randomColor.bg, ringColor: randomColor.ring });
-        closeModal();
-        renderFans(); 
-        
-        setTimeout(() => {
-            const fanArea = document.getElementById('fanArea');
-            fanArea.scrollTop = fanArea.scrollHeight;
-        }, 100);
     }
 
     // Initial Load
