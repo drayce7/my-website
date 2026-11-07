@@ -1,0 +1,308 @@
+---
+title: "Artist Fanbook"
+permalink: "/fanbook/"
+layout: false
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist Fanbook</title>
+    
+    <script type="module">
+      // We will add Firebase later to load the real fans
+      window.firebaseReady = true;
+      window.dispatchEvent(new Event('firebaseLoaded'));
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            /* Deep, warm background to make the creamy book pop */
+            background: #2a1b18; 
+            background: radial-gradient(circle, #3d2c28 0%, #1a0f0d 100%);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Playfair Display', serif;
+            perspective: 1500px; /* Gives us the 3D book effect */
+        }
+
+        /* --- THE BOOK CONTAINER --- */
+        .book-container {
+            position: relative;
+            width: 900px;
+            height: 600px;
+            transform-style: preserve-3d;
+        }
+
+        /* --- THE PAPER PAGES --- */
+        .page {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            top: 0;
+            /* Creamy paper color with a slight gradient for depth */
+            background: #fdf6e3;
+            background: linear-gradient(to right, #fdf6e3 0%, #f4e8c1 100%);
+            border: 1px solid #d4c4a8;
+            box-shadow: inset 0 0 30px rgba(180, 150, 110, 0.2);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            overflow-y: auto;
+            /* Hide scrollbar for cleaner look */
+            scrollbar-width: none; 
+        }
+        .page::-webkit-scrollbar { display: none; }
+
+        /* Left Page styling */
+        .page-left {
+            left: 0;
+            border-radius: 10px 0 0 10px;
+            /* Shadow on the right edge to simulate the book spine */
+            box-shadow: inset -10px 0 20px rgba(0,0,0,0.05), inset 0 0 30px rgba(180, 150, 110, 0.2);
+            transform-origin: right center;
+        }
+
+        /* Right Page styling */
+        .page-right {
+            right: 0;
+            border-radius: 0 10px 10px 0;
+            /* Shadow on the left edge to simulate the book spine */
+            box-shadow: inset 10px 0 20px rgba(0,0,0,0.05), inset 0 0 30px rgba(180, 150, 110, 0.2);
+            transform-origin: left center;
+        }
+
+        /* Spine in the middle */
+        .book-spine {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: #d4c4a8;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        /* --- TEXT STYLING --- */
+        h1 {
+            font-family: 'Caveat', cursive;
+            font-size: 42px;
+            color: #4a3b32;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-family: 'Caveat', cursive;
+            font-size: 32px;
+            color: #6b5b52;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        p {
+            font-size: 16px;
+            color: #5c4e45;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* --- FAN LIST STYLING --- */
+        .fan-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .fan-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed #c4b4a8;
+        }
+
+        /* The circular profile image */
+        .fan-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e0d0c0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #4a3b32;
+            border: 2px solid #b0a090;
+            flex-shrink: 0;
+        }
+
+        .fan-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex-grow: 1;
+        }
+
+        .fan-name {
+            font-family: 'Caveat', cursive;
+            font-size: 22px;
+            color: #3a2b22;
+            font-weight: bold;
+        }
+
+        /* The rectangular email box */
+        .fan-email {
+            background: #f0e4d0;
+            border: 1px solid #d4c4a8;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #7a6b62;
+            width: fit-content;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- PAGE CONTROLS --- */
+        .controls {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 20;
+        }
+
+        .btn {
+            background: #fdf6e3;
+            color: #4a3b32;
+            border: 1px solid #d4c4a8;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: 0.2s;
+        }
+
+        .btn:hover { background: #fff; transform: translateY(-2px); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* --- ANIMATION FOR SWIPING --- */
+        .page.flipping {
+            animation: flipPage 0.6s ease-in forwards;
+        }
+
+        @keyframes flipPage {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(-180deg); }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .book-container { width: 95vw; height: 80vh; flex-direction: column; }
+            .page { width: 100%; height: 50%; position: relative; border-radius: 0; }
+            .page-left { border-radius: 10px 10px 0 0; border-bottom: none; box-shadow: inset 0 -10px 20px rgba(0,0,0,0.05); }
+            .page-right { border-radius: 0 0 10px 10px; border-top: none; box-shadow: inset 0 10px 20px rgba(0,0,0,0.05); }
+            .book-spine { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book-container">
+        
+        <!-- Left Page -->
+        <div class="page page-left" id="pageLeft">
+            <h1>Welcome to the</h1>
+            <h2>Fanbook</h2>
+            <p>This is a place where the community lives. Swipe the pages to see the names of the people who support the journey.</p>
+            
+            <div class="fan-list">
+                <!-- Example Fan -->
+                <div class="fan-card">
+                    <div class="fan-avatar" style="background: #ffb3ba;">A</div>
+                    <div class="fan-info">
+                        <div class="fan-name">Alex Johnson</div>
+                        <div class="fan-email">alex.johnson@email.com</div>
+                    </div>
+                </div>
+                <!-- Example Fan -->
+                <div class="fan-card">
+                    <div class="fan-avatar" style="background: #baffc9;">S</div>
+                    <div class="fan-info">
+                        <div class="fan-name">Sarah M.</div>
+                        <div class="fan-email">sarah.m@email.com</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spine -->
+        <div class="book-spine"></div>
+
+        <!-- Right Page -->
+        <div class="page page-right" id="pageRight">
+            <h2>Top Supporters</h2>
+            <div class="fan-list">
+                <!-- Example Fan -->
+                <div class="fan-card">
+                    <div class="fan-avatar" style="background: #bae1ff;">M</div>
+                    <div class="fan-info">
+                        <div class="fan-name">Mike T.</div>
+                        <div class="fan-email">mike.t@email.com</div>
+                    </div>
+                </div>
+                <!-- Example Fan -->
+                <div class="fan-card">
+                    <div class="fan-avatar" style="background: #ffffba;">J</div>
+                    <div class="fan-info">
+                        <div class="fan-name">Jessica R.</div>
+                        <div class="fan-email">jessica.r@email.com</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn" onclick="flipPage()">Swipe Page →</button>
+        </div>
+
+    </div>
+
+<script>
+    let currentPage = 1;
+
+    function flipPage() {
+        const rightPage = document.getElementById('pageRight');
+        
+        // Add the flipping animation class
+        rightPage.classList.add('flipping');
+
+        // Wait for the animation to finish, then reset (for now, we just simulate a page turn)
+        setTimeout(() => {
+            rightPage.classList.remove('flipping');
+            // In the next phase, we will load the NEXT set of fans here
+            alert("Page flipped! (Next step: Load the next set of fans from Firebase)");
+        }, 600);
+    }
+</script>
+</body>
+</html>
