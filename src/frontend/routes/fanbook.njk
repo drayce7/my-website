@@ -16,13 +16,12 @@ layout: false
     </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background: #2a1b18; 
-            background: radial-gradient(circle, #3d2c28 0%, #1a0f0d 100%);
             height: 100vh;
             width: 100vw;
             display: flex;
@@ -30,10 +29,9 @@ layout: false
             align-items: center;
             overflow: hidden;
             font-family: 'Playfair Display', serif;
-            touch-action: pan-y; 
         }
 
-        /* --- MOBILE APP LAYOUT --- */
+        /* --- MAIN APP CONTAINER --- */
         .app-wrapper {
             position: relative;
             width: 100vw;
@@ -48,7 +46,7 @@ layout: false
         .top-region {
             position: relative;
             width: 100%;
-            height: 150px;
+            height: 160px;
             background: rgba(20, 15, 30, 0.95);
             backdrop-filter: blur(10px);
             border-bottom: 2px solid #d4c4a8;
@@ -81,30 +79,28 @@ layout: false
         }
         .opay-support:hover { transform: scale(1.1); }
 
-        /* --- TICKER COMMENTS --- */
+        /* --- TICKER COMMENTS (Small & Thick) --- */
         .ticker-container {
-            margin-top: 10px;
-            height: 100px;
+            margin-top: 5px;
+            height: 80px;
             overflow: hidden;
             position: relative;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding-bottom: 10px;
+            padding-bottom: 5px;
         }
 
-        .comment-bubble {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-bottom: 8px;
-            font-size: 13px;
+        .comment-line {
+            font-size: 12px;
+            font-weight: 600;
             color: #e0e0e0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            animation: slideUp 0.5s ease-out forwards;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            animation: slideUp 0.4s ease-out forwards;
+            font-family: sans-serif;
         }
 
         @keyframes slideUp {
@@ -114,59 +110,79 @@ layout: false
 
         .rainbow-username {
             font-family: 'Caveat', cursive;
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 16px;
+            font-weight: 700;
             background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffff, #33ff33, #ffff33, #ff9933, #ff00cc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            white-space: nowrap;
+            margin-right: 5px;
         }
 
-        .comment-text {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex-grow: 1;
-        }
-
-        /* --- BOOK AREA (Scattered Fans) --- */
-        .book-area {
-            flex-grow: 1;
-            position: relative;
-            overflow: hidden;
+        /* --- SEARCH BAR --- */
+        .search-container {
+            margin-top: 10px;
             display: flex;
-            justify-content: center;
-            padding: 10px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 5px 10px;
+            width: 100%;
+            max-width: 250px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .page {
-            position: absolute;
+        .search-input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 12px;
             width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            padding: 10px;
+            outline: none;
+        }
+        
+        .search-input::placeholder { color: #888; }
+
+        .search-btn {
+            background: transparent;
+            border: none;
+            color: #00d2ff;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        /* --- SCROLLING FAN AREA --- */
+        .fan-area {
+            flex-grow: 1;
+            overflow-y: auto;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             align-content: flex-start;
-            gap: 5px; /* Tighter gap for chaos */
-            backface-visibility: hidden;
-            transform-origin: left center;
-            background: inherit;
+            gap: 5px;
+            padding: 20px 10px 80px 10px; /* Bottom padding to clear the floating button */
+            position: relative;
         }
 
-        /* --- CHAOTIC SCATTERED FAN GRID --- */
+        /* --- SCATTERED FAN CARDS --- */
         .fan-card {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 90px;
+            width: 85px;
             margin-bottom: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
-            transition: transform 0.2s;
+            /* Random rotation and vertical offset applied via inline styles */
         }
-        .fan-card:hover { transform: scale(1.1); z-index: 10; }
+
+        .fan-card:hover { 
+            transform: scale(1.15) !important; 
+            z-index: 100 !important; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
 
         /* THE COLORFUL CIRCLE AVATAR */
         .fan-avatar {
@@ -180,20 +196,20 @@ layout: false
             font-size: 24px;
             color: white;
             border: 4px solid;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            margin-bottom: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            margin-bottom: 3px;
         }
 
         /* THE SHRINK-TO-FIT EMAIL RECTANGLE */
         .fan-email {
             background: #f0e4d0;
             border: 1px solid #c4b4a8;
-            padding: 2px 5px;
+            padding: 2px 4px;
             border-radius: 4px;
             font-family: monospace;
             font-size: 8px;
             color: #5a4b42;
-            max-width: 90px;
+            max-width: 85px;
             text-align: center;
             white-space: nowrap;
             overflow: hidden;
@@ -203,38 +219,20 @@ layout: false
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        /* --- PAGE INDICATOR (Pinned to bottom) --- */
-        .page-indicator {
-            position: absolute;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2a1b18;
-            color: #fdf6e3;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            font-family: sans-serif;
-            letter-spacing: 2px;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        }
-
-        /* --- ADD FAN BUTTON (Floating) --- */
+        /* --- ADD FAN BUTTON --- */
         .add-fan-btn {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            width: 50px;
-            height: 50px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
             background: #00d2ff;
             color: black;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 28px;
+            font-size: 30px;
             font-weight: bold;
             box-shadow: 0 4px 15px rgba(0, 210, 255, 0.5);
             cursor: pointer;
@@ -278,19 +276,8 @@ layout: false
         .btn-cancel { background: #e0d0c0; color: #4a3b32; }
         .btn-submit { background: #00d2ff; color: black; }
 
-        /* --- SWIPE ANIMATIONS --- */
-        @keyframes flipOutLeft { 0% { transform: rotateY(0deg); opacity: 1; } 100% { transform: rotateY(-180deg); opacity: 0; } }
-        @keyframes flipInRight { 0% { transform: rotateY(180deg); opacity: 0; } 100% { transform: rotateY(0deg); opacity: 1; } }
-        @keyframes flipOutRight { 0% { transform: rotateY(0deg); opacity: 1; } 100% { transform: rotateY(180deg); opacity: 0; } }
-        @keyframes flipInLeft { 0% { transform: rotateY(-180deg); opacity: 0; } 100% { transform: rotateY(0deg); opacity: 1; } }
-
-        .flip-out-left { animation: flipOutLeft 0.5s ease-in forwards; }
-        .flip-in-right { animation: flipInRight 0.5s ease-out forwards; }
-        .flip-out-right { animation: flipOutRight 0.5s ease-in forwards; }
-        .flip-in-left { animation: flipInLeft 0.5s ease-out forwards; }
-
         @media (min-width: 769px) {
-            .app-wrapper { max-width: 900px; height: 90vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+            .app-wrapper { max-width: 600px; height: 90vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
         }
     </style>
 </head>
@@ -298,20 +285,25 @@ layout: false
 
     <div class="app-wrapper">
         
-        <!-- TOP REGION: Dark Glass Notes & Support -->
+        <!-- TOP REGION -->
         <div class="top-region">
             <div class="opay-support" onclick="alert('Live chat coming soon!')">🎧</div>
             
             <div class="ticker-container" id="tickerContainer">
-                <!-- Comments will be injected here by JS -->
+                <!-- Comments roll here -->
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by email...">
+                <button class="search-btn" onclick="searchFan()">🔍</button>
             </div>
         </div>
 
-        <!-- BOOK AREA: Scattered Fans -->
-        <div class="book-area" id="bookArea"></div>
-
-        <!-- Page Indicator -->
-        <div class="page-indicator" id="pageIndicator">Page 1</div>
+        <!-- SCROLLING FAN AREA -->
+        <div class="fan-area" id="fanArea">
+            <!-- All fans go here -->
+        </div>
 
         <!-- Add Fan Button -->
         <div class="add-fan-btn" onclick="openModal()">+</div>
@@ -330,7 +322,7 @@ layout: false
     </div>
 
 <script>
-    // 40 Imaginary fans
+    // 40 Imaginary fans with random scatter properties
     let fanData = [
         { email: "sarah.m@email.com", bgColor: "#ffb3ba", ringColor: "#ff6b81" }, { email: "mike.t@email.com", bgColor: "#bae1ff", ringColor: "#4dabf7" },
         { email: "jess.r@email.com", bgColor: "#ffffba", ringColor: "#fcc419" }, { email: "alex.j@email.com", bgColor: "#baffc9", ringColor: "#51cf66" },
@@ -364,91 +356,52 @@ layout: false
         { user: "David_L", text: "Who else is coming to the London show next month?" }
     ];
 
-    let currentPageStart = 0;
-    const fansPerPage = 15; 
-    let isAnimating = false;
-    let pageNumber = 1;
+    // --- RENDER FANS WITH SCATTER ---
+    function renderFans() {
+        const fanArea = document.getElementById('fanArea');
+        fanArea.innerHTML = '';
 
-    // Aggressive chaotic scatter
-    function getScatterStyle(index) {
-        const yOffset = (Math.random() * 40) - 20; // -20px to +20px vertical
-        const rotation = (Math.random() * 14) - 7; // -7deg to +7deg rotation
-        const xOffset = (Math.random() * 10) - 5; // slight horizontal shift
-        return `transform: translate(${xOffset}px, ${yOffset}px) rotate(${rotation}deg); z-index: ${Math.floor(Math.random() * 10)};`;
-    }
+        fanData.forEach((fan, index) => {
+            // Generate random scatter for each fan
+            const yOffset = (Math.random() * 30) - 15; 
+            const rotation = (Math.random() * 14) - 7; 
+            const xOffset = (Math.random() * 10) - 5; 
+            const zIndex = Math.floor(Math.random() * 10);
 
-    function createPageHTML() {
-        const currentFans = fanData.slice(currentPageStart, currentPageStart + fansPerPage);
-        let html = '';
-        
-        currentFans.forEach((fan, index) => {
-            html += `
-                <div class="fan-card" style="${getScatterStyle(index)}">
-                    <div class="fan-avatar" style="background: ${fan.bgColor}; border-color: ${fan.ringColor};">
-                        ${fan.email.charAt(0).toUpperCase()}
-                    </div>
-                    <div class="fan-email">${fan.email}</div>
+            const card = document.createElement('div');
+            card.className = 'fan-card';
+            card.id = `fan-${fan.email}`; // ID for searching
+            card.style.transform = `translate(${xOffset}px, ${yOffset}px) rotate(${rotation}deg)`;
+            card.style.zIndex = zIndex;
+
+            card.innerHTML = `
+                <div class="fan-avatar" style="background: ${fan.bgColor}; border-color: ${fan.ringColor};">
+                    ${fan.email.charAt(0).toUpperCase()}
                 </div>
+                <div class="fan-email">${fan.email}</div>
             `;
+
+            fanArea.appendChild(card);
         });
-        return html;
     }
 
-    function renderPage(animateDirection) {
-        const bookArea = document.getElementById('bookArea');
-        
-        if (!animateDirection) {
-            bookArea.innerHTML = `<div class="page">${createPageHTML()}</div>`;
-            document.getElementById('pageIndicator').textContent = `Page ${pageNumber}`;
-            return;
-        }
-
-        const newPage = document.createElement('div');
-        newPage.className = 'page';
-        newPage.innerHTML = createPageHTML();
-
-        const oldPage = bookArea.querySelector('.page');
-
-        if (animateDirection === 'next') {
-            oldPage.classList.add('flip-out-left');
-            newPage.classList.add('flip-in-right');
-            bookArea.appendChild(newPage);
-            setTimeout(() => {
-                oldPage.remove();
-                newPage.classList.remove('flip-in-right');
-                isAnimating = false;
-                document.getElementById('pageIndicator').textContent = `Page ${pageNumber}`;
-            }, 500);
-        } else {
-            oldPage.classList.add('flip-out-right');
-            newPage.classList.add('flip-in-left');
-            bookArea.appendChild(newPage);
-            setTimeout(() => {
-                oldPage.remove();
-                newPage.classList.remove('flip-in-left');
-                isAnimating = false;
-                document.getElementById('pageIndicator').textContent = `Page ${pageNumber}`;
-            }, 500);
-        }
-    }
-
-    // --- TICKER LOGIC (Rolling Comments) ---
+    // --- TICKER LOGIC ---
     const tickerContainer = document.getElementById('tickerContainer');
     let commentIndex = 0;
 
     function addComment() {
         const comment = commentData[commentIndex];
         
-        const bubble = document.createElement('div');
-        bubble.className = 'comment-bubble';
-        bubble.innerHTML = `
-            <span class="rainbow-username">${comment.user}:</span>
-            <span class="comment-text">${comment.text}</span>
+        const line = document.createElement('div');
+        line.className = 'comment-line';
+        line.innerHTML = `
+            <span class="rainbow-username">${comment.user}:</span> 
+            <span>${comment.text}</span>
         `;
         
-        tickerContainer.appendChild(bubble);
+        tickerContainer.appendChild(line);
 
-        // Keep only 3 bubbles visible at once for the rolling effect
+        // Keep 3 visible
         if (tickerContainer.children.length > 3) {
             tickerContainer.removeChild(tickerContainer.firstChild);
         }
@@ -456,68 +409,33 @@ layout: false
         commentIndex = (commentIndex + 1) % commentData.length;
     }
 
-    // Add a new comment every 3 seconds
     setInterval(addComment, 3000);
-    // Initialize with 2 comments
-    addComment();
-    addComment();
+    addComment(); addComment();
 
-    // --- TOUCH SWIPE LOGIC ---
-    let touchStartX = 0;
-    let touchEndX = 0;
-    const bookArea = document.getElementById('bookArea');
+    // --- SEARCH LOGIC ---
+    function searchFan() {
+        const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+        if (!searchInput) return;
 
-    bookArea.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    bookArea.addEventListener('touchend', e => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    }, { passive: true });
-
-    // For Desktop Mouse Swipes
-    let mouseStartX = 0;
-    let isMouseDown = false;
-
-    bookArea.addEventListener('mousedown', e => {
-        mouseStartX = e.screenX;
-        isMouseDown = true;
-    });
-
-    bookArea.addEventListener('mouseup', e => {
-        if (!isMouseDown) return;
-        const mouseEndX = e.screenX;
-        const diff = mouseEndX - mouseStartX;
+        const targetCard = document.getElementById(`fan-${searchInput}`);
         
-        if (diff < -50) nextPage();
-        if (diff > 50) prevPage();
-        
-        isMouseDown = false;
-    });
+        if (targetCard) {
+            // Highlight the card and scroll to it
+            targetCard.style.boxShadow = "0 0 20px 5px #00d2ff";
+            targetCard.style.zIndex = 200;
+            targetCard.style.transform = "scale(1.2)";
+            
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    function handleSwipe() {
-        const swipeThreshold = 50;
-        if (touchEndX < touchStartX - swipeThreshold) nextPage();
-        if (touchEndX > touchStartX + swipeThreshold) prevPage();
-    }
-
-    function nextPage() {
-        if (isAnimating) return;
-        isAnimating = true;
-        currentPageStart += fansPerPage;
-        pageNumber++;
-        if (currentPageStart >= fanData.length) { currentPageStart = 0; pageNumber = 1; }
-        renderPage('next');
-    }
-
-    function prevPage() {
-        if (isAnimating) return;
-        isAnimating = true;
-        currentPageStart -= fansPerPage;
-        pageNumber--;
-        if (currentPageStart < 0) { currentPageStart = Math.max(0, fanData.length - fansPerPage); pageNumber = Math.ceil(fanData.length / fansPerPage); }
-        renderPage('prev');
+            // Remove highlight after a few seconds
+            setTimeout(() => {
+                targetCard.style.boxShadow = "none";
+                targetCard.style.transform = "";
+                targetCard.style.zIndex = "";
+            }, 3000);
+        } else {
+            alert("Fan not found! Try exact email.");
+        }
     }
 
     // --- MODAL LOGIC ---
@@ -537,16 +455,17 @@ layout: false
         fanData.push({ email: email, bgColor: randomColor.bg, ringColor: randomColor.ring });
         closeModal();
         
-        // Jump to the last page to show the new fan
-        const lastPageIndex = Math.floor((fanData.length - 1) / fansPerPage) * fansPerPage;
-        currentPageStart = lastPageIndex;
-        pageNumber = Math.ceil(fanData.length / fansPerPage);
+        renderFans(); // Re-render to show the new fan
         
-        renderPage();
+        // Auto-scroll to the bottom to see the new fan
+        setTimeout(() => {
+            const fanArea = document.getElementById('fanArea');
+            fanArea.scrollTop = fanArea.scrollHeight;
+        }, 100);
     }
 
     // Initial Load
-    renderPage();
+    renderFans();
 </script>
 </body>
 </html>
