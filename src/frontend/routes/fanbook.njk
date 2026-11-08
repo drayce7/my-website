@@ -11,6 +11,31 @@ layout: false
     <title>Artist Fanbook</title>
     
     <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      import { getFirestore, doc, getDoc, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
+        authDomain: "clbomb.firebaseapp.com",
+        projectId: "clbomb",
+        storageBucket: "clbomb.firebasestorage.app",
+        messagingSenderId: "515939060816",
+        appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      window.auth = getAuth(app);
+      window.db = getFirestore(app);
+      
+      window.onAuthStateChanged = onAuthStateChanged;
+      window.signOut = signOut;
+      window.doc = doc;
+      window.getDoc = getDoc;
+      window.collection = collection;
+      window.getDocs = getDocs;
+      window.addDoc = addDoc;
+
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
     </script>
@@ -31,7 +56,6 @@ layout: false
             font-family: 'Playfair Display', serif;
         }
 
-        /* --- MAIN APP CONTAINER --- */
         .app-wrapper {
             position: relative;
             width: 100vw;
@@ -42,7 +66,6 @@ layout: false
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
         }
 
-        /* --- TOP REGION --- */
         .top-region {
             position: relative;
             width: 100%;
@@ -58,7 +81,6 @@ layout: false
             overflow: hidden;
         }
 
-        /* --- TICKER COMMENTS --- */
         .ticker-container {
             margin-top: 5px;
             height: 90px; 
@@ -101,7 +123,6 @@ layout: false
             margin-right: 5px;
         }
 
-        /* --- SEARCH BAR --- */
         .search-container {
             margin-top: 10px;
             display: flex;
@@ -120,7 +141,6 @@ layout: false
         .search-input::placeholder { color: #888; }
         .search-btn { background: transparent; border: none; color: #00d2ff; font-size: 16px; cursor: pointer; margin-left: 5px; }
 
-        /* --- SCROLLING FAN AREA --- */
         .fan-area {
             flex-grow: 1;
             overflow-y: auto;
@@ -129,7 +149,6 @@ layout: false
             padding: 15px 10px 100px 10px; 
         }
 
-        /* --- ARTIST TOP ROW --- */
         .artist-row {
             display: flex;
             align-items: center;
@@ -163,7 +182,6 @@ layout: false
             font-weight: bold;
         }
 
-        /* --- FAN GRID --- */
         .fan-grid {
             display: flex;
             flex-wrap: wrap;
@@ -172,7 +190,6 @@ layout: false
             gap: 5px;
         }
 
-        /* --- SCATTERED FAN CARDS --- */
         .fan-card {
             display: flex;
             flex-direction: column;
@@ -189,7 +206,6 @@ layout: false
             box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
 
-        /* THE COLORFUL CIRCLE AVATAR */
         .fan-avatar {
             width: 65px;
             height: 65px;
@@ -205,7 +221,6 @@ layout: false
             margin-bottom: 3px;
         }
 
-        /* THE EMAIL RECTANGLE */
         .fan-email {
             background: #f0e4d0;
             border: 1px solid #c4b4a8;
@@ -222,7 +237,6 @@ layout: false
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        /* SEC IMG TEXT (Shrink to fit) */
         .sec-img {
             display: inline-block;
             background: rgba(0,0,0,0.05);
@@ -241,7 +255,6 @@ layout: false
             text-overflow: ellipsis;
         }
 
-        /* --- FLOATING SUPPORT BUTTON --- */
         .btn-support {
             position: fixed;
             bottom: 20px;
@@ -262,7 +275,6 @@ layout: false
         }
         .btn-support:hover { transform: scale(1.1); background: #dc2626; }
 
-        /* --- POPUP MODAL (Focus Mode) --- */
         .focus-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -299,7 +311,6 @@ layout: false
             to { transform: scale(1); opacity: 1; }
         }
 
-        /* LOADING STATE */
         .loader {
             border: 4px solid rgba(0,0,0,0.1);
             border-left-color: #00d2ff;
@@ -318,7 +329,6 @@ layout: false
             color: #4a3b32;
         }
 
-        /* SPARKS EFFECT */
         .spark {
             position: absolute;
             width: 8px;
@@ -379,7 +389,6 @@ layout: false
             letter-spacing: 1px;
         }
 
-        /* BRAIN TEXT */
         .brain-text {
             font-family: sans-serif;
             font-size: 14px;
@@ -401,7 +410,6 @@ layout: false
             cursor: pointer;
         }
 
-        /* --- KEY SYSTEM MODAL (SINGLE INPUT) --- */
         .key-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -433,7 +441,6 @@ layout: false
             font-size: 28px; 
         }
 
-        /* THE SINGLE INPUT BOX */
         .key-input {
             width: 100%;
             padding: 15px;
@@ -458,7 +465,6 @@ layout: false
             75% { transform: translateX(-10px); }
         }
 
-        /* THE EDITABLE HINT TEXT */
         .key-hint {
             font-size: 13px;
             color: #8a7b72;
@@ -491,7 +497,6 @@ layout: false
         .btn-proceed { background: #00d2ff; color: #000; }
         .btn-proceed:hover { background: #00b8e6; transform: scale(1.02); }
 
-        /* BRAIN MESSAGE MODAL */
         .brain-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -531,7 +536,6 @@ layout: false
 
     <div class="app-wrapper">
         
-        <!-- TOP REGION -->
         <div class="top-region">
             <div class="ticker-container" id="tickerContainer"></div>
             <div class="search-container">
@@ -540,42 +544,31 @@ layout: false
             </div>
         </div>
 
-        <!-- SCROLLING FAN AREA -->
         <div class="fan-area" id="fanArea">
             
             <!-- ARTIST SECTION -->
             <div class="artist-row">
                 <div class="artist-circle">A</div>
-                <div class="artist-label">The Artist</div>
+                <div class="artist-label" id="artistNameLabel">The Artist</div>
             </div>
 
-            <!-- FAN GRID -->
             <div class="fan-grid" id="fanGrid"></div>
         </div>
 
-        <!-- SUPPORT BUTTON -->
         <div class="btn-support" onclick="window.location.href='/my-website/support/'">🎧</div>
     </div>
 
-    <!-- FOCUS MODAL -->
     <div class="focus-overlay" id="focusOverlay" onclick="closeFocusModal()">
-        <div class="focus-card" id="focusCard" onclick="event.stopPropagation()">
-            <!-- Content injected by JS -->
-        </div>
+        <div class="focus-card" id="focusCard" onclick="event.stopPropagation()"></div>
     </div>
 
-    <!-- KEY SYSTEM MODAL (SINGLE INPUT) -->
     <div class="key-modal" id="keyModal">
         <div class="key-box">
             <h2>Enter Activation Key</h2>
-            
             <input type="text" id="keyInput" class="key-input" placeholder="Enter your key here...">
-            
-            <!-- EDITABLE HINT MESSAGE -->
             <div class="key-hint" id="keyHint">
                 Format: 9 letters, 4 letters, 7 letters, 10 letters, 4 letters, 7 letters, 8 letters, 8 letters
             </div>
-
             <div class="key-actions">
                 <button class="btn-key btn-dismiss" onclick="closeKeyModal()">Dismiss</button>
                 <button class="btn-key btn-proceed" onclick="checkKey()">Proceed</button>
@@ -583,17 +576,15 @@ layout: false
         </div>
     </div>
 
-    <!-- BRAIN MESSAGE MODAL -->
     <div class="brain-modal" id="brainModal">
         <div class="brain-box">
             <h2>Artist Message</h2>
-            <p>This is a special message from the artist. We will make this editable later so the artist can change it!</p>
+            <p id="brainMessageText">This is a special message from the artist. We will make this editable later so the artist can change it!</p>
             <button class="btn-okay" onclick="closeBrainModal()">Okay</button>
         </div>
     </div>
 
 <script>
-    // 30 Imaginary fans
     let fanData = [
         { email: "sarah.m@email.com", bgColor: "#ffb3ba", ringColor: "#ff6b81", secImg: "Loyal supporter" }, 
         { email: "mike.t@email.com", bgColor: "#bae1ff", ringColor: "#4dabf7", secImg: "Day 1 fan" },
@@ -636,7 +627,28 @@ layout: false
         { user: "David_L", text: "Who else is coming to the London show next month?" }
     ];
 
-    // --- RENDER FANS ---
+    let artistWelcomeMessage = "Thank you for being a fan of mine. Please check the second page if you have a record with my fanbase.";
+
+    // FETCH ARTIST SETTINGS FROM DATABASE
+    window.addEventListener('firebaseLoaded', async () => {
+        try {
+            const artistRef = window.doc(window.db, "app_settings", "artist");
+            const artistSnap = await window.getDoc(artistRef);
+            if (artistSnap.exists()) {
+                const data = artistSnap.data();
+                if (data.name) document.getElementById('artistNameLabel').textContent = data.name;
+                if (data.message) {
+                    artistWelcomeMessage = data.message;
+                    document.getElementById('brainMessageText').textContent = data.message;
+                }
+            }
+        } catch (e) { console.log("Using default artist settings"); }
+
+        renderFans();
+        setInterval(addComment, 3000);
+        addComment();
+    });
+
     function renderFans() {
         const fanGrid = document.getElementById('fanGrid');
         fanGrid.innerHTML = '';
@@ -667,33 +679,24 @@ layout: false
         });
     }
 
-    // --- TICKER LOGIC ---
     const tickerContainer = document.getElementById('tickerContainer');
     let commentIndex = 0;
 
     function addComment() {
         const comment = commentData[commentIndex];
-        
         const line = document.createElement('div');
         line.className = 'comment-line';
         line.innerHTML = `
             <span class="rainbow-username">${comment.user}:</span> 
             <span>${comment.text}</span>
         `;
-        
         tickerContainer.appendChild(line);
-
         if (tickerContainer.children.length > 3) {
             tickerContainer.removeChild(tickerContainer.firstChild);
         }
-
         commentIndex = (commentIndex + 1) % commentData.length;
     }
 
-    setInterval(addComment, 3000);
-    addComment();
-
-    // --- FOCUS MODAL WITH DELAY & SPARKS ---
     function openFocusModal(fan, event) {
         const overlay = document.getElementById('focusOverlay');
         const card = document.getElementById('focusCard');
@@ -749,7 +752,6 @@ layout: false
         document.getElementById('focusOverlay').classList.remove('active');
     }
 
-    // --- KEY SYSTEM LOGIC (SINGLE INPUT) ---
     function openKeyModal() {
         document.getElementById('keyModal').classList.add('active');
         document.getElementById('keyInput').value = "";
@@ -765,18 +767,14 @@ layout: false
         const val = input.value.trim();
 
         if (val === "") {
-            // If empty, shake the box
             input.classList.add('shake');
             setTimeout(() => input.classList.remove('shake'), 500);
         } else {
-            // For now, any text allows access. 
-            // Later, we will check if val === theRealKey
             closeKeyModal();
             openBrainModal();
         }
     }
 
-    // --- BRAIN MODAL LOGIC ---
     function openBrainModal() {
         document.getElementById('brainModal').classList.add('active');
     }
@@ -785,7 +783,6 @@ layout: false
         document.getElementById('brainModal').classList.remove('active');
     }
 
-    // --- SEARCH LOGIC ---
     function searchFan() {
         const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
         if (!searchInput) return;
@@ -800,9 +797,6 @@ layout: false
             alert("Fan not found! Try exact email.");
         }
     }
-
-    // Initial Load
-    renderFans();
 </script>
 </body>
 </html>
