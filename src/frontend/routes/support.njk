@@ -12,7 +12,7 @@ layout: false
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-      import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
@@ -33,6 +33,8 @@ layout: false
       window.orderBy = orderBy;
       window.onSnapshot = onSnapshot;
       window.serverTimestamp = serverTimestamp;
+      window.doc = doc;
+      window.getDoc = getDoc;
 
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
@@ -94,16 +96,29 @@ layout: false
     const chatArea = document.getElementById('chatArea');
     const chatInput = document.getElementById('chatInput');
     
-    // Generate or retrieve unique Room ID
+    // 1. Generate/Get Fan ID
     let fanRoomId = localStorage.getItem('fanRoomId');
     if (!fanRoomId) {
         fanRoomId = Math.floor(100000 + Math.random() * 900000).toString();
         localStorage.setItem('fanRoomId', fanRoomId);
     }
-    const userId = fanRoomId; 
+    
+    // 2. Variable to hold the welcome text
+    let welcomeMessageText = "Hello, welcome <b>Fan</b>. How can I help you today?";
 
-    window.addEventListener('firebaseLoaded', () => {
-        // Fetch ALL messages, we will filter them in JS to avoid Firestore Index errors
+    window.addEventListener('firebaseLoaded', async () => {
+        // 3. Fetch Custom Welcome Text from Firebase Settings
+        try {
+            const settingsRef = window.doc(window.db, "app_settings", "support");
+            const settingsSnap = await window.getDoc(settingsRef);
+            if (settingsSnap.exists() && settingsSnap.data().welcomeText) {
+                welcomeMessageText = settingsSnap.data().welcomeText;
+            }
+        } catch (e) {
+            console.log("Using default welcome message.");
+        }
+
+        // 4. Start listening for messages
         const q = window.query(
             window.collection(window.db, "support_messages"), 
             window.orderBy("timestamp")
@@ -115,16 +130,17 @@ layout: false
 
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                // ONLY show messages that belong to THIS specific fan
                 if (data.roomId === fanRoomId) {
                     hasMessages = true;
                     renderMessage(data.text, data.sender, data.timestamp);
                 }
             });
 
+            // 5. Show the welcome message if no history exists
             if (!hasMessages) {
-                const welcomeMsg = `Hello, welcome <b>Fan</b> (ID: ${userId}). <br><br>How can I help you today?`;
-                renderMessage(welcomeMsg, "agent", null);
+                // Replace "Fan" with the actual ID
+                let finalWelcome = welcomeMessageText.replace("Fan", `Fan (ID: ${fanRoomId})`);
+                renderMessage(finalWelcome, "agent", null);
             }
             scrollToBottom();
         });
@@ -155,7 +171,7 @@ layout: false
             await window.addDoc(window.collection(window.db, "support_messages"), {
                 text: text,
                 sender: "user",
-                roomId: fanRoomId, // Attach the unique ID
+                roomId: fanRoomId,
                 timestamp: window.serverTimestamp()
             });
         } catch (e) {
