@@ -12,8 +12,8 @@ layout: false
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-      import { getFirestore, doc, getDoc, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
@@ -29,12 +29,12 @@ layout: false
       window.db = getFirestore(app);
       
       window.onAuthStateChanged = onAuthStateChanged;
-      window.signOut = signOut;
       window.doc = doc;
       window.getDoc = getDoc;
       window.collection = collection;
       window.getDocs = getDocs;
-      window.addDoc = addDoc;
+      window.query = query;
+      window.orderBy = orderBy;
 
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
@@ -42,500 +42,74 @@ layout: false
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background: #2a1b18; 
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .app-wrapper {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: #fdf6e3; 
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
-        }
-
-        .top-region {
-            position: relative;
-            width: 100%;
-            height: 150px;
-            background: rgba(20, 15, 30, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 2px solid #d4c4a8;
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
-            z-index: 50;
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-
-        .ticker-container {
-            margin-top: 5px;
-            height: 90px; 
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding-bottom: 5px;
-            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-        }
-
-        .comment-line {
-            font-size: 12px;
-            font-weight: 600;
-            color: #e0e0e0;
-            margin-bottom: 6px;
-            white-space: nowrap; 
-            overflow: hidden;
-            text-overflow: ellipsis; 
-            animation: slideUp 0.4s ease-out forwards;
-            font-family: sans-serif;
-            padding: 0 5px;
-            line-height: 1.2;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .rainbow-username {
-            font-family: 'Caveat', cursive;
-            font-size: 16px;
-            font-weight: 700;
-            background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffff, #33ff33, #ffff33, #ff9933, #ff00cc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-right: 5px;
-        }
-
-        .search-container {
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 5px 10px;
-            width: 100%;
-            max-width: 250px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
+        body { background: #2a1b18; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Playfair Display', serif; }
+        .app-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #fdf6e3; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>'); }
+        .top-region { position: relative; width: 100%; height: 150px; background: rgba(20, 15, 30, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid #d4c4a8; display: flex; flex-direction: column; padding: 15px; z-index: 50; flex-shrink: 0; overflow: hidden; }
+        .ticker-container { margin-top: 5px; height: 90px; overflow: hidden; position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 5px; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); }
+        .comment-line { font-size: 12px; font-weight: 600; color: #e0e0e0; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: slideUp 0.4s ease-out forwards; font-family: sans-serif; padding: 0 5px; line-height: 1.2; }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .rainbow-username { font-family: 'Caveat', cursive; font-size: 16px; font-weight: 700; background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffff, #33ff33, #ffff33, #ff9933, #ff00cc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-right: 5px; }
+        .search-container { margin-top: 10px; display: flex; align-items: center; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 5px 10px; width: 100%; max-width: 250px; margin-left: auto; margin-right: auto; }
         .search-input { background: transparent; border: none; color: white; font-size: 12px; width: 100%; outline: none; }
         .search-input::placeholder { color: #888; }
         .search-btn { background: transparent; border: none; color: #00d2ff; font-size: 16px; cursor: pointer; margin-left: 5px; }
-
-        .fan-area {
-            flex-grow: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            padding: 15px 10px 100px 10px; 
-        }
-
-        .artist-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 2px dashed #d4c4a8;
-            width: 100%;
-        }
-
-        .artist-circle {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ff00cc, #333399);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 32px;
-            color: white;
-            font-weight: bold;
-            border: 4px solid #fff;
-            box-shadow: 0 0 15px rgba(255, 0, 204, 0.5);
-            flex-shrink: 0;
-        }
-
-        .artist-label {
-            font-family: 'Caveat', cursive;
-            font-size: 24px;
-            color: #4a3b32;
-            font-weight: bold;
-        }
-
-        .fan-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-content: flex-start;
-            gap: 5px;
-        }
-
-        .fan-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 85px;
-            margin-bottom: 5px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-
-        .fan-card:hover { 
-            transform: scale(1.1) !important; 
-            z-index: 100 !important; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        }
-
-        .fan-avatar {
-            width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 24px;
-            color: white;
-            border: 4px solid;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            margin-bottom: 3px;
-        }
-
-        .fan-email {
-            background: #f0e4d0;
-            border: 1px solid #c4b4a8;
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 8px;
-            color: #5a4b42;
-            width: 100%;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .sec-img {
-            display: inline-block;
-            background: rgba(0,0,0,0.05);
-            padding: 1px 4px;
-            border-radius: 3px;
-            font-size: 7px;
-            color: #8a7b72;
-            margin-top: 2px;
-            text-transform: uppercase;
-            font-family: sans-serif;
-            letter-spacing: 0.5px;
-            width: auto;
-            max-width: 80px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .btn-support {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 55px;
-            height: 55px;
-            background: #ef4444;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-            cursor: pointer;
-            z-index: 100;
-            transition: 0.2s;
-        }
+        .fan-area { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 15px 10px 100px 10px; }
+        .artist-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px dashed #d4c4a8; width: 100%; }
+        .artist-circle { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #ff00cc, #333399); display: flex; justify-content: center; align-items: center; font-size: 32px; color: white; font-weight: bold; border: 4px solid #fff; box-shadow: 0 0 15px rgba(255, 0, 204, 0.5); flex-shrink: 0; }
+        .artist-label { font-family: 'Caveat', cursive; font-size: 24px; color: #4a3b32; font-weight: bold; }
+        .fan-grid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 5px; }
+        .fan-card { display: flex; flex-direction: column; align-items: center; width: 85px; margin-bottom: 5px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+        .fan-card:hover { transform: scale(1.1) !important; z-index: 100 !important; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .fan-avatar { width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 24px; color: white; border: 4px solid; box-shadow: 0 4px 8px rgba(0,0,0,0.15); margin-bottom: 3px; }
+        .fan-email { background: #f0e4d0; border: 1px solid #c4b4a8; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 8px; color: #5a4b42; width: 100%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .sec-img { display: inline-block; background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; font-size: 7px; color: #8a7b72; margin-top: 2px; text-transform: uppercase; font-family: sans-serif; letter-spacing: 0.5px; width: auto; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-support { position: fixed; bottom: 20px; left: 20px; width: 55px; height: 55px; background: #ef4444; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); cursor: pointer; z-index: 100; transition: 0.2s; }
         .btn-support:hover { transform: scale(1.1); background: #dc2626; }
-
-        .focus-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(8px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 500;
-        }
+        .focus-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 500; }
         .focus-overlay.active { display: flex; }
-
-        .focus-card {
-            background: #fdf6e3;
-            border: 3px solid #d4c4a8;
-            border-radius: 20px;
-            padding: 30px;
-            width: 80%;
-            max-width: 300px;
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            position: relative;
-            overflow: visible;
-            min-height: 250px; 
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .loader {
-            border: 4px solid rgba(0,0,0,0.1);
-            border-left-color: #00d2ff;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
+        .focus-card { background: #fdf6e3; border: 3px solid #d4c4a8; border-radius: 20px; padding: 30px; width: 80%; max-width: 300px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; position: relative; overflow: visible; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .loader { border: 4px solid rgba(0,0,0,0.1); border-left-color: #00d2ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .loading-text {
-            font-family: 'Caveat', cursive;
-            font-size: 24px;
-            color: #4a3b32;
-        }
-
-        .spark {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: explode 1.5s ease-out forwards; 
-        }
-
-        @keyframes explode {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
-        }
-
-        .focus-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            margin: 0 auto 15px auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 40px;
-            font-weight: bold;
-            color: white;
-            border: 6px solid;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        .focus-email {
-            font-family: monospace;
-            font-size: 14px;
-            color: #5a4b42;
-            background: #f0e4d0;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #c4b4a8;
-            margin-bottom: 10px;
-            word-break: break-all;
-        }
-
-        .focus-sec-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .focus-sec-img {
-            display: inline-block;
-            background: rgba(0,0,0,0.05);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #8a7b72;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .brain-text {
-            font-family: sans-serif;
-            font-size: 14px;
-            font-weight: bold;
-            color: #00d2ff;
-            cursor: pointer;
-            text-shadow: 0 0 8px rgba(0, 210, 255, 0.6);
-            transition: 0.2s;
-        }
+        .loading-text { font-family: 'Caveat', cursive; font-size: 24px; color: #4a3b32; }
+        .spark { position: absolute; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; animation: explode 1.5s ease-out forwards; }
+        @keyframes explode { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; } }
+        .focus-avatar { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 15px auto; display: flex; justify-content: center; align-items: center; font-size: 40px; font-weight: bold; color: white; border: 6px solid; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .focus-email { font-family: monospace; font-size: 14px; color: #5a4b42; background: #f0e4d0; padding: 8px; border-radius: 6px; border: 1px solid #c4b4a8; margin-bottom: 10px; word-break: break-all; }
+        .focus-sec-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .focus-sec-img { display: inline-block; background: rgba(0,0,0,0.05); padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #8a7b72; text-transform: uppercase; letter-spacing: 1px; }
+        .brain-text { font-family: sans-serif; font-size: 14px; font-weight: bold; color: #00d2ff; cursor: pointer; text-shadow: 0 0 8px rgba(0, 210, 255, 0.6); transition: 0.2s; }
         .brain-text:hover { transform: scale(1.1); color: #fff; }
-
-        .btn-close {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .key-modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+        .btn-close { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .key-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .key-modal.active { display: flex; }
-
-        .key-box {
-            background: #fdf6e3;
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            border: 2px solid #d4c4a8;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            animation: popIn 0.3s ease-out;
-        }
-
-        .key-box h2 { 
-            color: #4a3b32; 
-            margin-bottom: 15px; 
-            font-family: 'Caveat', cursive; 
-            font-size: 28px; 
-        }
-
-        .key-input {
-            width: 100%;
-            padding: 15px;
-            font-size: 18px;
-            text-align: center;
-            background: #fff;
-            border: 2px solid #d4c4a8;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            font-family: monospace;
-            outline: none;
-            transition: 0.3s;
-        }
-
+        .key-box { background: #fdf6e3; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; border: 2px solid #d4c4a8; box-shadow: 0 20px 40px rgba(0,0,0,0.5); animation: popIn 0.3s ease-out; }
+        .key-box h2 { color: #4a3b32; margin-bottom: 15px; font-family: 'Caveat', cursive; font-size: 28px; }
+        .key-input { width: 100%; padding: 15px; font-size: 18px; text-align: center; background: #fff; border: 2px solid #d4c4a8; border-radius: 10px; margin-bottom: 10px; font-family: monospace; outline: none; transition: 0.3s; }
         .key-input:focus { border-color: #00d2ff; box-shadow: 0 0 10px rgba(0,210,255,0.3); }
-        
         .key-input.shake { animation: shake 0.4s ease-in-out; border-color: #ef4444 !important; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
-            75% { transform: translateX(-10px); }
-        }
-
-        .key-hint {
-            font-size: 13px;
-            color: #8a7b72;
-            margin-bottom: 25px;
-            font-family: sans-serif;
-            line-height: 1.5;
-            font-style: italic;
-        }
-
-        .key-actions {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-        }
-
-        .btn-key {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            border: none;
-            transition: 0.2s;
-        }
-
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 75% { transform: translateX(-10px); } }
+        .key-hint { font-size: 13px; color: #8a7b72; margin-bottom: 25px; font-family: sans-serif; line-height: 1.5; font-style: italic; }
+        .key-actions { display: flex; justify-content: space-between; gap: 15px; }
+        .btn-key { flex: 1; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; border: none; transition: 0.2s; }
         .btn-dismiss { background: #e0d0c0; color: #4a3b32; }
         .btn-dismiss:hover { background: #d0c0b0; }
-
         .btn-proceed { background: #00d2ff; color: #000; }
         .btn-proceed:hover { background: #00b8e6; transform: scale(1.02); }
-
-        .brain-modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+        .brain-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .brain-modal.active { display: flex; }
-        .brain-box {
-            background: #fdf6e3;
-            padding: 30px;
-            border-radius: 15px;
-            width: 85%;
-            max-width: 320px;
-            text-align: center;
-            border: 2px solid #d4c4a8;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            animation: popIn 0.3s ease-out;
-        }
+        .brain-box { background: #fdf6e3; padding: 30px; border-radius: 15px; width: 85%; max-width: 320px; text-align: center; border: 2px solid #d4c4a8; box-shadow: 0 20px 40px rgba(0,0,0,0.5); animation: popIn 0.3s ease-out; }
         .brain-box h2 { color: #4a3b32; margin-bottom: 15px; font-family: 'Caveat', cursive; font-size: 28px; }
         .brain-box p { color: #5a4b42; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
-        .btn-okay {
-            background: #00d2ff; color: black; padding: 12px 30px; border: none;
-            border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s;
-        }
+        .btn-okay { background: #00d2ff; color: black; padding: 12px 30px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
         .btn-okay:hover { background: #00b8e6; transform: scale(1.05); }
-
-        @media (min-width: 769px) {
-            .app-wrapper { max-width: 600px; height: 90vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        }
+        @media (min-width: 769px) { .app-wrapper { max-width: 600px; height: 90vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); } }
     </style>
 </head>
 <body>
 
     <div class="app-wrapper">
-        
         <div class="top-region">
             <div class="ticker-container" id="tickerContainer"></div>
             <div class="search-container">
@@ -545,13 +119,10 @@ layout: false
         </div>
 
         <div class="fan-area" id="fanArea">
-            
-            <!-- ARTIST SECTION -->
             <div class="artist-row">
-                <div class="artist-circle">A</div>
+                <div class="artist-circle" id="artistAvatar">A</div>
                 <div class="artist-label" id="artistNameLabel">The Artist</div>
             </div>
-
             <div class="fan-grid" id="fanGrid"></div>
         </div>
 
@@ -579,81 +150,55 @@ layout: false
     <div class="brain-modal" id="brainModal">
         <div class="brain-box">
             <h2>Artist Message</h2>
-            <p id="brainMessageText">This is a special message from the artist. We will make this editable later so the artist can change it!</p>
+            <p id="brainMessageText">This is a special message from the artist.</p>
             <button class="btn-okay" onclick="closeBrainModal()">Okay</button>
         </div>
     </div>
 
 <script>
-    let fanData = [
-        { email: "sarah.m@email.com", bgColor: "#ffb3ba", ringColor: "#ff6b81", secImg: "Loyal supporter" }, 
-        { email: "mike.t@email.com", bgColor: "#bae1ff", ringColor: "#4dabf7", secImg: "Day 1 fan" },
-        { email: "jess.r@email.com", bgColor: "#ffffba", ringColor: "#fcc419", secImg: "Superfan" },
-        { email: "alex.j@email.com", bgColor: "#baffc9", ringColor: "#51cf66", secImg: "VIP member" },
-        { email: "emma.w@email.com", bgColor: "#e6b3ff", ringColor: "#cc5de8", secImg: "Top supporter" },
-        { email: "david.l@email.com", bgColor: "#ffccb3", ringColor: "#ff922b", secImg: "Concert goer" },
-        { email: "chloe.b@email.com", bgColor: "#b3e6ff", ringColor: "#339af0", secImg: "Street team" },
-        { email: "ryan.g@email.com", bgColor: "#ffb3e6", ringColor: "#f06595", secImg: "Early bird" },
-        { email: "olivia.k@email.com", bgColor: "#ccffb3", ringColor: "#94d82d", secImg: "Merch collector" },
-        { email: "james.p@email.com", bgColor: "#ffd9b3", ringColor: "#ff922b", secImg: "Music lover" },
-        { email: "sophia.r@email.com", bgColor: "#b3ffcc", ringColor: "#20c997", secImg: "Fan since 2019" },
-        { email: "daniel.m@email.com", bgColor: "#e6ccff", ringColor: "#9775fa", secImg: "Supporter" },
-        { email: "mia.s@email.com", bgColor: "#ffb3cc", ringColor: "#f783ac", secImg: "Vibe curator" },
-        { email: "noah.t@email.com", bgColor: "#ccb3ff", ringColor: "#845ef7", secImg: "Playlist king" },
-        { email: "isabella.d@email.com", bgColor: "#ffffcc", ringColor: "#fcc419", secImg: "Front row" },
-        { email: "liam.h@email.com", bgColor: "#ffccf2", ringColor: "#e64980", secImg: "Dedicated" },
-        { email: "ava.c@email.com", bgColor: "#ccfff2", ringColor: "#20c997", secImg: "Artist muse" },
-        { email: "ethan.b@email.com", bgColor: "#ffebcc", ringColor: "#ff922b", secImg: "Big fan" },
-        { email: "amelia.f@email.com", bgColor: "#ebccff", ringColor: "#be4bdb", secImg: "Music head" },
-        { email: "lucas.g@email.com", bgColor: "#ccffeb", ringColor: "#38d9a9", secImg: "Community lead" },
-        { email: "harper.j@email.com", bgColor: "#ffccd9", ringColor: "#f06595", secImg: "Loyal" },
-        { email: "mason.k@email.com", bgColor: "#ccd9ff", ringColor: "#748ffc", secImg: "Supporter" },
-        { email: "evelyn.l@email.com", bgColor: "#e6ffcc", ringColor: "#94d82d", secImg: "Vibes" },
-        { email: "logan.m@email.com", bgColor: "#ffccb3", ringColor: "#ff922b", secImg: "Hype man" },
-        { email: "abigail.n@email.com", bgColor: "#b3ccff", ringColor: "#4dabf7", secImg: "Day 1" },
-        { email: "jack.o@email.com", bgColor: "#ffcc99", ringColor: "#ff922b", secImg: "Concert lover" },
-        { email: "ella.p@email.com", bgColor: "#99ffcc", ringColor: "#20c997", secImg: "Fan club" },
-        { email: "sebastian.q@email.com", bgColor: "#ff99cc", ringColor: "#f06595", secImg: "Music fan" },
-        { email: "scarlett.r@email.com", bgColor: "#99ccff", ringColor: "#4dabf7", secImg: "Top 10" },
-        { email: "henry.s@email.com", bgColor: "#ffff99", ringColor: "#fcc419", secImg: "Loyal listener" }
-    ];
+    let artistWelcomeMessage = "Thank you for being a fan!";
+    let realActivationKey = "";
+    let allFans = [];
+    let allComments = [];
 
-    const commentData = [
-        { user: "Sarah_M", text: "This artist changed my life, I swear. The last album was just incredible." },
-        { user: "MikeT", text: "Does anyone know when the tour tickets drop? I need to be front row!" },
-        { user: "Jessica99", text: "Just joined the fanbook. So excited to be part of this amazing community." },
-        { user: "Alex_R", text: "The vibes in here are immaculate. Love you all!" },
-        { user: "Emma_W", text: "I've been listening to the new single on repeat all day. It's a masterpiece." },
-        { user: "David_L", text: "Who else is coming to the London show next month?" }
-    ];
-
-    let artistWelcomeMessage = "Thank you for being a fan of mine. Please check the second page if you have a record with my fanbase.";
-
-    // FETCH ARTIST SETTINGS FROM DATABASE
     window.addEventListener('firebaseLoaded', async () => {
-        try {
-            const artistRef = window.doc(window.db, "app_settings", "artist");
-            const artistSnap = await window.getDoc(artistRef);
-            if (artistSnap.exists()) {
-                const data = artistSnap.data();
-                if (data.name) document.getElementById('artistNameLabel').textContent = data.name;
-                if (data.message) {
-                    artistWelcomeMessage = data.message;
-                    document.getElementById('brainMessageText').textContent = data.message;
-                }
+        // 1. Fetch Artist Settings
+        const artistRef = window.doc(window.db, "app_settings", "artist");
+        const artistSnap = await window.getDoc(artistRef);
+        if (artistSnap.exists()) {
+            const data = artistSnap.data();
+            if (data.name) document.getElementById('artistNameLabel').textContent = data.name;
+            if (data.message) {
+                artistWelcomeMessage = data.message;
+                document.getElementById('brainMessageText').textContent = data.message;
             }
-        } catch (e) { console.log("Using default artist settings"); }
+        }
 
+        // 2. Fetch Security Key
+        const keyRef = window.doc(window.db, "app_settings", "security");
+        const keySnap = await window.getDoc(keyRef);
+        if (keySnap.exists()) {
+            realActivationKey = keySnap.data().activationKey || "";
+        }
+
+        // 3. Fetch Fans
+        const fansSnap = await window.getDocs(window.query(window.collection(window.db, "fans"), window.orderBy("createdAt")));
+        allFans = [];
+        fansSnap.forEach(doc => allFans.push(doc.data()));
         renderFans();
-        setInterval(addComment, 3000);
-        addComment();
+
+        // 4. Fetch Comments
+        const commentsSnap = await window.getDocs(window.query(window.collection(window.db, "comments"), window.orderBy("createdAt")));
+        allComments = [];
+        commentsSnap.forEach(doc => allComments.push(doc.data()));
+        startTicker();
     });
 
     function renderFans() {
         const fanGrid = document.getElementById('fanGrid');
         fanGrid.innerHTML = '';
 
-        fanData.forEach((fan, index) => {
+        allFans.forEach((fan, index) => {
             const yOffset = (Math.random() * 30) - 15; 
             const rotation = (Math.random() * 14) - 7; 
             const xOffset = (Math.random() * 10) - 5; 
@@ -679,11 +224,27 @@ layout: false
         });
     }
 
-    const tickerContainer = document.getElementById('tickerContainer');
-    let commentIndex = 0;
+    let tickerIndex = 0;
+    let tickerInterval;
 
-    function addComment() {
-        const comment = commentData[commentIndex];
+    function startTicker() {
+        const tickerContainer = document.getElementById('tickerContainer');
+        tickerContainer.innerHTML = '';
+        if (allComments.length === 0) return;
+
+        // Show first 3 comments initially
+        for(let i=0; i < Math.min(3, allComments.length); i++) {
+            addCommentToTicker(allComments[i]);
+        }
+
+        tickerInterval = setInterval(() => {
+            tickerIndex = (tickerIndex + 1) % allComments.length;
+            addCommentToTicker(allComments[tickerIndex]);
+        }, 3000);
+    }
+
+    function addCommentToTicker(comment) {
+        const tickerContainer = document.getElementById('tickerContainer');
         const line = document.createElement('div');
         line.className = 'comment-line';
         line.innerHTML = `
@@ -694,18 +255,13 @@ layout: false
         if (tickerContainer.children.length > 3) {
             tickerContainer.removeChild(tickerContainer.firstChild);
         }
-        commentIndex = (commentIndex + 1) % commentData.length;
     }
 
     function openFocusModal(fan, event) {
         const overlay = document.getElementById('focusOverlay');
         const card = document.getElementById('focusCard');
         
-        card.innerHTML = `
-            <div class="loader"></div>
-            <div class="loading-text">Summoning fan details...</div>
-        `;
-        
+        card.innerHTML = `<div class="loader"></div><div class="loading-text">Summoning fan details...</div>`;
         overlay.classList.add('active');
 
         const delay = Math.floor(Math.random() * 8000) + 5000;
@@ -729,22 +285,16 @@ layout: false
             for (let i = 0; i < 20; i++) {
                 const spark = document.createElement('div');
                 spark.className = 'spark';
-                
                 const angle = Math.random() * Math.PI * 2;
                 const distance = 80 + Math.random() * 120; 
-                
                 spark.style.setProperty('--x', `${Math.cos(angle) * distance}px`);
                 spark.style.setProperty('--y', `${Math.sin(angle) * distance}px`);
                 spark.style.background = colors[Math.floor(Math.random() * colors.length)];
-                
                 spark.style.left = '50%';
                 spark.style.top = '50%';
-                
                 card.appendChild(spark);
-                
                 setTimeout(() => spark.remove(), 1500);
             }
-
         }, delay);
     }
 
@@ -764,12 +314,17 @@ layout: false
 
     function checkKey() {
         const input = document.getElementById('keyInput');
-        const val = input.value.trim();
+        const val = input.value.trim().toLowerCase();
 
         if (val === "") {
             input.classList.add('shake');
             setTimeout(() => input.classList.remove('shake'), 500);
+        } else if (realActivationKey && val !== realActivationKey.toLowerCase()) {
+            input.classList.add('shake');
+            setTimeout(() => input.classList.remove('shake'), 500);
+            alert("Invalid Activation Key!");
         } else {
+            // If correct (or if no key is set yet), grant access
             closeKeyModal();
             openBrainModal();
         }
@@ -786,9 +341,7 @@ layout: false
     function searchFan() {
         const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
         if (!searchInput) return;
-
         const targetCard = document.getElementById(`fan-${searchInput}`);
-        
         if (targetCard) {
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             targetCard.style.boxShadow = "0 0 20px 5px #00d2ff";
