@@ -12,7 +12,7 @@ layout: false
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-      import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
@@ -33,7 +33,6 @@ layout: false
       window.orderBy = orderBy;
       window.onSnapshot = onSnapshot;
       window.serverTimestamp = serverTimestamp;
-      window.where = where; // Imported 'where' for filtering
 
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
@@ -41,191 +40,36 @@ layout: false
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-
-        body {
-            background: #e5e7eb; 
-            height: 100dvh; 
-            width: 100vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .app-wrapper {
-            position: relative;
-            width: 100vw;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            background: #f3f4f6; 
-        }
-
-        /* --- OPAY STYLE HEADER --- */
-        .chat-header {
-            background: #ef4444; 
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
-            z-index: 10;
-            flex-shrink: 0;
-        }
-
-        .back-btn {
-            background: transparent;
-            border: none;
-            color: white;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 20px;
-        }
-
+        body { background: #e5e7eb; height: 100dvh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .app-wrapper { position: relative; width: 100vw; height: 100dvh; display: flex; flex-direction: column; background: #f3f4f6; }
+        .chat-header { background: #ef4444; color: white; padding: 15px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3); z-index: 10; flex-shrink: 0; }
+        .back-btn { background: transparent; border: none; color: white; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 20px; }
         .agent-info { display: flex; align-items: center; gap: 12px; }
-
-        .agent-avatar {
-            width: 40px;
-            height: 40px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-        }
-
+        .agent-avatar { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; }
         .agent-text h2 { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
         .agent-text p { font-size: 12px; opacity: 0.9; display: flex; align-items: center; gap: 5px; }
         .online-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; display: inline-block; }
-
-        /* --- CHAT AREA --- */
-        .chat-area {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            scroll-behavior: smooth;
-        }
-
-        /* Message Bubbles */
-        .message {
-            max-width: 85%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            line-height: 1.5;
-            position: relative;
-            animation: popIn 0.3s ease-out forwards;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0.95); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .msg-agent {
-            align-self: flex-start;
-            background: #fff;
-            color: #1f2937;
-            border-top-left-radius: 4px;
-            border: 1px solid #e5e7eb;
-        }
-
-        .msg-user {
-            align-self: flex-end;
-            background: #ef4444; 
-            color: #fff;
-            border-top-right-radius: 4px;
-        }
-
-        .timestamp {
-            display: block;
-            font-size: 10px;
-            margin-top: 5px;
-            opacity: 0.6;
-            text-align: right;
-        }
-        
+        .chat-area { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
+        .message { max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.5; position: relative; animation: popIn 0.3s ease-out forwards; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .msg-agent { align-self: flex-start; background: #fff; color: #1f2937; border-top-left-radius: 4px; border: 1px solid #e5e7eb; }
+        .msg-user { align-self: flex-end; background: #ef4444; color: #fff; border-top-right-radius: 4px; }
+        .timestamp { display: block; font-size: 10px; margin-top: 5px; opacity: 0.6; text-align: right; }
         .msg-agent .timestamp { color: #6b7280; }
         .msg-user .timestamp { color: #fecaca; }
-
-        /* --- INPUT AREA (FIXED AT BOTTOM) --- */
-        .input-area {
-            padding: 12px 15px;
-            background: #fff;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            border-top: 1px solid #e5e7eb;
-            flex-shrink: 0; 
-            padding-bottom: calc(12px + env(safe-area-inset-bottom)); 
-        }
-
-        .attach-btn {
-            background: #f3f4f6;
-            color: #6b7280;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        .chat-input {
-            flex-grow: 1;
-            padding: 12px 15px;
-            border: 1px solid #e5e7eb;
-            border-radius: 25px;
-            font-size: 15px;
-            outline: none;
-            background: #f9fafb;
-            transition: 0.2s;
-        }
+        .input-area { padding: 12px 15px; background: #fff; display: flex; gap: 10px; align-items: center; border-top: 1px solid #e5e7eb; flex-shrink: 0; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+        .attach-btn { background: #f3f4f6; color: #6b7280; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 20px; flex-shrink: 0; }
+        .chat-input { flex-grow: 1; padding: 12px 15px; border: 1px solid #e5e7eb; border-radius: 25px; font-size: 15px; outline: none; background: #f9fafb; transition: 0.2s; }
         .chat-input:focus { border-color: #ef4444; background: #fff; }
-
-        .send-btn {
-            background: #ef4444;
-            color: #fff;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 16px;
-            flex-shrink: 0;
-            transition: 0.2s;
-        }
+        .send-btn { background: #ef4444; color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 16px; flex-shrink: 0; transition: 0.2s; }
         .send-btn:hover { transform: scale(1.05); }
-
-        @media (min-width: 769px) {
-            .app-wrapper { max-width: 500px; height: 85vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-        }
+        @media (min-width: 769px) { .app-wrapper { max-width: 500px; height: 85vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.2); } }
     </style>
 </head>
 <body>
 
     <div class="app-wrapper">
-        
-        <!-- HEADER -->
         <div class="chat-header">
             <button class="back-btn" onclick="goBack()">←</button>
             <div class="agent-info">
@@ -237,12 +81,8 @@ layout: false
             </div>
         </div>
 
-        <!-- CHAT AREA -->
-        <div class="chat-area" id="chatArea">
-            <!-- Messages load here from Firebase -->
-        </div>
+        <div class="chat-area" id="chatArea"></div>
 
-        <!-- INPUT AREA -->
         <div class="input-area">
             <button class="attach-btn" onclick="alert('Attachments coming soon!')">+</button>
             <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." onkeypress="handleEnter(event)">
@@ -254,21 +94,18 @@ layout: false
     const chatArea = document.getElementById('chatArea');
     const chatInput = document.getElementById('chatInput');
     
-    // --- RANDOM ID GENERATOR ---
+    // Generate or retrieve unique Room ID
     let fanRoomId = localStorage.getItem('fanRoomId');
     if (!fanRoomId) {
         fanRoomId = Math.floor(100000 + Math.random() * 900000).toString();
         localStorage.setItem('fanRoomId', fanRoomId);
     }
-    
-    const userName = "Fan";
     const userId = fanRoomId; 
 
     window.addEventListener('firebaseLoaded', () => {
-        // Filter messages so this fan ONLY sees messages for their roomId
+        // Fetch ALL messages, we will filter them in JS to avoid Firestore Index errors
         const q = window.query(
             window.collection(window.db, "support_messages"), 
-            window.where("roomId", "==", fanRoomId),
             window.orderBy("timestamp")
         );
         
@@ -278,16 +115,17 @@ layout: false
 
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                hasMessages = true;
-                renderMessage(data.text, data.sender, data.timestamp);
+                // ONLY show messages that belong to THIS specific fan
+                if (data.roomId === fanRoomId) {
+                    hasMessages = true;
+                    renderMessage(data.text, data.sender, data.timestamp);
+                }
             });
 
             if (!hasMessages) {
-                // Professional OPay-style greeting with their ID
-                const welcomeMsg = `Hello, welcome <b>${userName}</b> (ID: ${userId}). <br><br>How can I help you today?`;
+                const welcomeMsg = `Hello, welcome <b>Fan</b> (ID: ${userId}). <br><br>How can I help you today?`;
                 renderMessage(welcomeMsg, "agent", null);
             }
-            
             scrollToBottom();
         });
     });
@@ -295,12 +133,10 @@ layout: false
     function renderMessage(text, sender, timestamp) {
         let timeStr = "";
         if (timestamp) {
-            const date = timestamp.toDate();
-            timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            timeStr = timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         } else {
             timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
-
         const msgHTML = `
             <div class="message msg-${sender}">
                 ${text}
@@ -313,31 +149,26 @@ layout: false
     async function sendMessage() {
         const text = chatInput.value.trim();
         if (text === "") return;
-
         chatInput.value = "";
         
         try {
             await window.addDoc(window.collection(window.db, "support_messages"), {
                 text: text,
                 sender: "user",
-                roomId: fanRoomId, // Tag with the fan's unique ID
+                roomId: fanRoomId, // Attach the unique ID
                 timestamp: window.serverTimestamp()
             });
         } catch (e) {
-            console.error("Error saving user message: ", e);
+            console.error("Error saving: ", e);
         }
     }
 
     function handleEnter(event) {
-        if (event.key === 'Enter') {
-            sendMessage();
-        }
+        if (event.key === 'Enter') sendMessage();
     }
-
     function scrollToBottom() {
         chatArea.scrollTop = chatArea.scrollHeight;
     }
-
     function goBack() {
         window.location.href = '/my-website/fanbook/'; 
     }
