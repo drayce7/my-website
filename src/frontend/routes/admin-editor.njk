@@ -1,0 +1,241 @@
+---
+title: "Master Editor"
+permalink: "/admin-editor/"
+layout: false
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Editor</title>
+    
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
+        authDomain: "clbomb.firebaseapp.com",
+        projectId: "clbomb",
+        storageBucket: "clbomb.firebasestorage.app",
+        messagingSenderId: "515939060816",
+        appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      window.db = db;
+      window.doc = doc;
+      window.getDoc = getDoc;
+      window.setDoc = setDoc;
+      window.collection = collection;
+      window.getDocs = getDocs;
+      window.query = query;
+      window.orderBy = orderBy;
+      window.updateDoc = updateDoc;
+
+      window.firebaseReady = true;
+      window.dispatchEvent(new Event('firebaseLoaded'));
+    </script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #111827; color: white; height: 100vh; overflow-y: auto; display: flex; justify-content: center; }
+        
+        .container { width: 100%; max-width: 800px; padding: 40px 20px; }
+        
+        .login-box {
+            background: #1f2937; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            text-align: center; max-width: 400px; margin: 100px auto;
+        }
+        .login-box h2 { color: #3b82f6; margin-bottom: 20px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #374151; border-radius: 8px; font-size: 16px; background: #111827; color: white; text-align: center; }
+        .login-box button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+
+        .editor-content { display: none; }
+        .editor-content.active { display: block; }
+
+        h1 { color: #f3f4f6; margin-bottom: 30px; border-bottom: 2px solid #374151; padding-bottom: 10px; }
+        h2 { color: #60a5fa; margin-bottom: 15px; font-size: 20px; }
+        
+        .card { background: #1f2937; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #374151; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
+        .input-group input, .input-group textarea { width: 100%; padding: 12px; background: #111827; border: 1px solid #4b5563; border-radius: 8px; color: white; font-size: 15px; outline: none; }
+        .input-group textarea { resize: vertical; min-height: 80px; }
+        .input-group input:focus, .input-group textarea:focus { border-color: #3b82f6; }
+
+        .btn-save { background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; width: 100%; transition: 0.2s; }
+        .btn-save:hover { background: #059669; }
+
+        /* FAN LIST */
+        .fan-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        .fan-item { background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #374151; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .fan-item input { width: 100%; padding: 8px; background: #1f2937; border: 1px solid #4b5563; border-radius: 6px; color: white; }
+        .fan-item .btn-update { background: #3b82f6; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; grid-column: span 2; font-weight: bold;}
+
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 15px 25px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN -->
+    <div class="login-box" id="loginBox">
+        <h2>Master Editor Access</h2>
+        <input type="password" id="adminPass" placeholder="Enter admin password">
+        <button onclick="login()">Unlock Editor</button>
+    </div>
+
+    <!-- EDITOR CONTENT -->
+    <div class="container editor-content" id="editorContent">
+        <h1>⚙️ Master Editor</h1>
+
+        <!-- SECTION 1: GLOBAL SETTINGS -->
+        <div class="card">
+            <h2>1. Global Support Settings</h2>
+            <div class="input-group">
+                <label>Support Welcome Message</label>
+                <textarea id="supportWelcomeInput" placeholder="Enter the welcome message fans see when they open support..."></textarea>
+            </div>
+            <button class="btn-save" onclick="saveSupportSettings()">Save Support Settings</button>
+        </div>
+
+        <!-- SECTION 2: ARTIST PROFILE -->
+        <div class="card">
+            <h2>2. Artist Profile & Message</h2>
+            <div class="input-group">
+                <label>Artist Name</label>
+                <input type="text" id="artistNameInput" placeholder="e.g., The Weeknd">
+            </div>
+            <div class="input-group">
+                <label>Artist Welcome Message (Shown in Fanbook)</label>
+                <textarea id="artistMessageInput" placeholder="Enter the appreciation message..."></textarea>
+            </div>
+            <button class="btn-save" onclick="saveArtistSettings()">Save Artist Settings</button>
+        </div>
+
+        <!-- SECTION 3: FAN DIRECTORY -->
+        <div class="card">
+            <h2>3. Fan Directory</h2>
+            <p style="color: #9ca3af; margin-bottom: 15px; font-size: 14px;">Edit fan emails and their "Sec Img" text. Changes update the Fanbook instantly.</p>
+            <div class="fan-list" id="fanList">
+                <!-- Fans load here -->
+                <p style="color: #6b7280;">Loading fans...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="toast" id="toast">Changes Saved!</div>
+
+<script>
+    const ADMIN_PASSWORD = "admin123";
+    let isReady = false;
+
+    window.addEventListener('firebaseLoaded', () => {
+        isReady = true;
+    });
+
+    function login() {
+        if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('editorContent').classList.add('active');
+            loadSettings();
+            loadFans();
+        } else {
+            alert("Wrong password");
+        }
+    }
+
+    // --- 1. LOAD GLOBAL SETTINGS ---
+    async function loadSettings() {
+        // Load Support Welcome
+        const supportRef = window.doc(window.db, "app_settings", "support");
+        const supportSnap = await window.getDoc(supportRef);
+        if (supportSnap.exists() && supportSnap.data().welcomeText) {
+            document.getElementById('supportWelcomeInput').value = supportSnap.data().welcomeText;
+        }
+
+        // Load Artist Settings
+        const artistRef = window.doc(window.db, "app_settings", "artist");
+        const artistSnap = await window.getDoc(artistRef);
+        if (artistSnap.exists()) {
+            document.getElementById('artistNameInput').value = artistSnap.data().name || "";
+            document.getElementById('artistMessageInput').value = artistSnap.data().message || "";
+        }
+    }
+
+    // --- 2. SAVE GLOBAL SETTINGS ---
+    async function saveSupportSettings() {
+        const text = document.getElementById('supportWelcomeInput').value;
+        await window.setDoc(window.doc(window.db, "app_settings", "support"), { welcomeText: text });
+        showToast();
+    }
+
+    async function saveArtistSettings() {
+        const name = document.getElementById('artistNameInput').value;
+        const message = document.getElementById('artistMessageInput').value;
+        await window.setDoc(window.doc(window.db, "app_settings", "artist"), { name: name, message: message });
+        showToast();
+    }
+
+    // --- 3. LOAD AND EDIT FANS ---
+    async function loadFans() {
+        const list = document.getElementById('fanList');
+        list.innerHTML = '';
+
+        try {
+            const q = window.query(window.collection(window.db, "users"), window.orderBy("createdAt"));
+            const snapshot = await window.getDocs(q);
+
+            if (snapshot.empty) {
+                list.innerHTML = '<p style="color: #6b7280;">No fans registered yet.</p>';
+                return;
+            }
+
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                const div = document.createElement('div');
+                div.className = 'fan-item';
+                div.innerHTML = `
+                    <input type="text" id="email-${docSnap.id}" value="${data.email || ''}" placeholder="Email">
+                    <input type="text" id="secimg-${docSnap.id}" value="${data.secImg || ''}" placeholder="Sec Img Text">
+                    <button class="btn-update" onclick="updateFan('${docSnap.id}')">Update Fan</button>
+                `;
+                list.appendChild(div);
+            });
+
+        } catch (e) {
+            console.error("Error loading fans:", e);
+            list.innerHTML = '<p style="color: #ef4444;">Error loading fans. Check console.</p>';
+        }
+    }
+
+    async function updateFan(uid) {
+        const email = document.getElementById(`email-${uid}`).value;
+        const secImg = document.getElementById(`secimg-${uid}`).value;
+
+        try {
+            await window.updateDoc(window.doc(window.db, "users", uid), {
+                email: email,
+                secImg: secImg
+            });
+            showToast();
+        } catch (e) {
+            alert("Failed to update fan.");
+        }
+    }
+
+    // --- UTILS ---
+    function showToast() {
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+</script>
+</body>
+</html>
