@@ -12,7 +12,7 @@ layout: false
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-      import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
@@ -34,6 +34,8 @@ layout: false
       window.getDocs = getDocs;
       window.query = query;
       window.orderBy = orderBy;
+      window.addDoc = addDoc;
+      window.deleteDoc = deleteDoc;
       window.updateDoc = updateDoc;
 
       window.firebaseReady = true;
@@ -42,195 +44,336 @@ layout: false
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #111827; color: white; height: 100vh; overflow-y: auto; display: flex; justify-content: center; }
-        
-        .container { width: 100%; max-width: 800px; padding: 40px 20px; }
-        
-        .login-box {
-            background: #1f2937; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            text-align: center; max-width: 400px; margin: 100px auto;
-        }
+        body { background: #111827; color: white; min-height: 100vh; display: flex; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 900px; }
+        .login-box { background: #1f2937; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; max-width: 400px; margin: 100px auto; }
         .login-box h2 { color: #3b82f6; margin-bottom: 20px; }
         .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #374151; border-radius: 8px; font-size: 16px; background: #111827; color: white; text-align: center; }
         .login-box button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-
         .editor-content { display: none; }
         .editor-content.active { display: block; }
-
-        h1 { color: #f3f4f6; margin-bottom: 30px; border-bottom: 2px solid #374151; padding-bottom: 10px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #374151; padding-bottom: 15px; }
+        .header h1 { color: #f3f4f6; }
+        .btn-back { background: #4b5563; color: white; text-decoration: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; font-size: 14px; }
         h2 { color: #60a5fa; margin-bottom: 15px; font-size: 20px; }
-        
-        .card { background: #1f2937; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #374151; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        
+        .card { background: #1f2937; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #374151; }
         .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 13px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
-        .input-group input, .input-group textarea { width: 100%; padding: 12px; background: #111827; border: 1px solid #4b5563; border-radius: 8px; color: white; font-size: 15px; outline: none; }
+        .input-group label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 12px; background: #111827; border: 1px solid #4b5563; border-radius: 8px; color: white; font-size: 14px; outline: none; }
         .input-group textarea { resize: vertical; min-height: 80px; }
-        .input-group input:focus, .input-group textarea:focus { border-color: #3b82f6; }
-
-        .btn-save { background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; width: 100%; transition: 0.2s; }
+        .btn-save { background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .btn-save:hover { background: #059669; }
-
-        /* FAN LIST */
-        .fan-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
-        .fan-item { background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #374151; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .fan-item input { width: 100%; padding: 8px; background: #1f2937; border: 1px solid #4b5563; border-radius: 6px; color: white; }
-        .fan-item .btn-update { background: #3b82f6; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; grid-column: span 2; font-weight: bold;}
-
+        .btn-add { background: #3b82f6; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+        .item-list { display: flex; flex-direction: column; gap: 10px; }
+        .list-item { background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #374151; display: flex; flex-direction: column; gap: 10px; }
+        .list-item-row { display: flex; gap: 10px; align-items: center; }
+        .list-item input, .list-item textarea { flex-grow: 1; padding: 8px; background: #1f2937; border: 1px solid #4b5563; border-radius: 6px; color: white; font-size: 13px;}
+        .btn-update { background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px;}
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px;}
+        .add-form { background: #374151; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none; flex-direction: column; gap: 10px;}
+        .add-form.active { display: flex; }
+        .add-form input, .add-form textarea, .add-form select { padding: 10px; border-radius: 6px; border: none; }
         .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 15px 25px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none; animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN -->
     <div class="login-box" id="loginBox">
         <h2>Master Editor Access</h2>
         <input type="password" id="adminPass" placeholder="Enter admin password">
         <button onclick="login()">Unlock Editor</button>
     </div>
 
-    <!-- EDITOR CONTENT -->
     <div class="container editor-content" id="editorContent">
-        <h1>⚙️ Master Editor</h1>
-
-        <!-- SECTION 1: GLOBAL SETTINGS -->
-        <div class="card">
-            <h2>1. Global Support Settings</h2>
-            <div class="input-group">
-                <label>Support Welcome Message</label>
-                <textarea id="supportWelcomeInput" placeholder="Enter the welcome message fans see when they open support..."></textarea>
-            </div>
-            <button class="btn-save" onclick="saveSupportSettings()">Save Support Settings</button>
+        <div class="header">
+            <h1>⚙️ Master Editor</h1>
+            <a href="/my-website/artists/" target="_blank" class="btn-back">View Directory ↗</a>
         </div>
 
-        <!-- SECTION 2: ARTIST PROFILE -->
+        <!-- 1. APP SETTINGS -->
         <div class="card">
-            <h2>2. Artist Profile & Message</h2>
+            <h2>1. App Settings</h2>
             <div class="input-group">
-                <label>Artist Name</label>
+                <label>Artist Name (Shown in Fanbook)</label>
                 <input type="text" id="artistNameInput" placeholder="e.g., The Weeknd">
             </div>
             <div class="input-group">
-                <label>Artist Welcome Message (Shown in Fanbook)</label>
-                <textarea id="artistMessageInput" placeholder="Enter the appreciation message..."></textarea>
+                <label>Artist Popup Message (Appears when clicking the Brain)</label>
+                <textarea id="artistMessageInput"></textarea>
             </div>
-            <button class="btn-save" onclick="saveArtistSettings()">Save Artist Settings</button>
+            <div class="input-group">
+                <label>Support Chat Welcome Message</label>
+                <textarea id="supportWelcomeInput"></textarea>
+            </div>
+            <div class="input-group">
+                <label>Activation Key (8 Words separated by spaces)</label>
+                <input type="text" id="activationKeyInput" placeholder="e.g., word1 word2 word3 word4 word5 word6 word7 word8">
+            </div>
+            <button class="btn-save" onclick="saveSettings()">Save All Settings</button>
         </div>
 
-        <!-- SECTION 3: FAN DIRECTORY -->
+        <!-- 2. CELEBRITY DIRECTORY -->
+        <div class="card">
+            <h2>2. Celebrity Directory (Page 1)</h2>
+            <button class="btn-add" onclick="toggleAddForm('celeb')">+ Add New Celebrity</button>
+            <div class="add-form" id="celebAddForm">
+                <input type="text" id="newCelebName" placeholder="Celebrity Name (e.g., Rihanna)">
+                <input type="text" id="newCelebInitial" placeholder="Initial Letter (e.g., R)" maxlength="1">
+                <input type="text" id="newCelebColor" placeholder="CSS Color (e.g., linear-gradient(135deg, #ff00cc, #333399))">
+                <textarea id="newCelebMessage" placeholder="Thank you message..."></textarea>
+                <button class="btn-save" onclick="addNewCeleb()">Save Celebrity</button>
+            </div>
+            <div class="item-list" id="celebList"></div>
+        </div>
+
+        <!-- 3. FAN DIRECTORY -->
         <div class="card">
             <h2>3. Fan Directory</h2>
-            <p style="color: #9ca3af; margin-bottom: 15px; font-size: 14px;">Edit fan emails and their "Sec Img" text. Changes update the Fanbook instantly.</p>
-            <div class="fan-list" id="fanList">
-                <!-- Fans load here -->
-                <p style="color: #6b7280;">Loading fans...</p>
+            <button class="btn-add" onclick="toggleAddForm('fan')">+ Add New Fan</button>
+            <div class="add-form" id="fanAddForm">
+                <input type="email" id="newFanEmail" placeholder="Email Address">
+                <input type="text" id="newFanSecImg" placeholder="Sec Img Text (e.g. VIP)">
+                <select id="newFanColor">
+                    <option value="#ffb3ba">Pink</option>
+                    <option value="#bae1ff">Blue</option>
+                    <option value="#baffc9">Green</option>
+                    <option value="#e6b3ff">Purple</option>
+                    <option value="#ffccb3">Orange</option>
+                </select>
+                <button class="btn-save" onclick="addNewFan()">Save Fan</button>
             </div>
+            <div class="item-list" id="fanList"></div>
+        </div>
+
+        <!-- 4. COMMENT TICKER -->
+        <div class="card">
+            <h2>4. Live Comment Ticker</h2>
+            <button class="btn-add" onclick="toggleAddForm('comment')">+ Add New Comment</button>
+            <div class="add-form" id="commentAddForm">
+                <input type="text" id="newCommentUser" placeholder="Username (e.g. Sarah_M)">
+                <input type="text" id="newCommentText" placeholder="Comment text...">
+                <button class="btn-save" onclick="addNewComment()">Save Comment</button>
+            </div>
+            <div class="item-list" id="commentList"></div>
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
     <div class="toast" id="toast">Changes Saved!</div>
 
 <script>
     const ADMIN_PASSWORD = "admin123";
-    let isReady = false;
-
-    window.addEventListener('firebaseLoaded', () => {
-        isReady = true;
-    });
 
     function login() {
         if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('editorContent').classList.add('active');
             loadSettings();
+            loadCelebrities();
             loadFans();
+            loadComments();
         } else {
             alert("Wrong password");
         }
     }
 
-    // --- 1. LOAD GLOBAL SETTINGS ---
-    async function loadSettings() {
-        // Load Support Welcome
-        const supportRef = window.doc(window.db, "app_settings", "support");
-        const supportSnap = await window.getDoc(supportRef);
-        if (supportSnap.exists() && supportSnap.data().welcomeText) {
-            document.getElementById('supportWelcomeInput').value = supportSnap.data().welcomeText;
-        }
+    function toggleAddForm(type) {
+        document.getElementById(type + 'AddForm').classList.toggle('active');
+    }
 
-        // Load Artist Settings
+    // --- SETTINGS ---
+    async function loadSettings() {
         const artistRef = window.doc(window.db, "app_settings", "artist");
         const artistSnap = await window.getDoc(artistRef);
         if (artistSnap.exists()) {
             document.getElementById('artistNameInput').value = artistSnap.data().name || "";
             document.getElementById('artistMessageInput').value = artistSnap.data().message || "";
         }
+        const supportRef = window.doc(window.db, "app_settings", "support");
+        const supportSnap = await window.getDoc(supportRef);
+        if (supportSnap.exists()) {
+            document.getElementById('supportWelcomeInput').value = supportSnap.data().welcomeText || "";
+        }
+        const keyRef = window.doc(window.db, "app_settings", "security");
+        const keySnap = await window.getDoc(keyRef);
+        if (keySnap.exists()) {
+            document.getElementById('activationKeyInput').value = keySnap.data().activationKey || "";
+        }
     }
 
-    // --- 2. SAVE GLOBAL SETTINGS ---
-    async function saveSupportSettings() {
-        const text = document.getElementById('supportWelcomeInput').value;
-        await window.setDoc(window.doc(window.db, "app_settings", "support"), { welcomeText: text });
+    async function saveSettings() {
+        await window.setDoc(window.doc(window.db, "app_settings", "artist"), { 
+            name: document.getElementById('artistNameInput').value, 
+            message: document.getElementById('artistMessageInput').value 
+        });
+        await window.setDoc(window.doc(window.db, "app_settings", "support"), { 
+            welcomeText: document.getElementById('supportWelcomeInput').value 
+        });
+        await window.setDoc(window.doc(window.db, "app_settings", "security"), { 
+            activationKey: document.getElementById('activationKeyInput').value 
+        });
         showToast();
     }
 
-    async function saveArtistSettings() {
-        const name = document.getElementById('artistNameInput').value;
-        const message = document.getElementById('artistMessageInput').value;
-        await window.setDoc(window.doc(window.db, "app_settings", "artist"), { name: name, message: message });
+    // --- CELEBRITIES ---
+    async function loadCelebrities() {
+        const list = document.getElementById('celebList');
+        list.innerHTML = 'Loading...';
+        const snapshot = await window.getDocs(window.collection(window.db, "celebrities"));
+        list.innerHTML = '';
+        if (snapshot.empty) { list.innerHTML = '<p style="color: #6b7280;">No celebrities yet.</p>'; return; }
+
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.innerHTML = `
+                <div class="list-item-row">
+                    <input type="text" id="cname-${docSnap.id}" value="${data.name || ''}" placeholder="Name">
+                    <input type="text" id="cinitial-${docSnap.id}" value="${data.initial || ''}" placeholder="Initial" style="max-width: 60px;">
+                </div>
+                <div class="list-item-row"><input type="text" id="ccolor-${docSnap.id}" value="${data.bgColor || ''}" placeholder="Color"></div>
+                <div class="list-item-row"><textarea id="cmessage-${docSnap.id}" placeholder="Message">${data.message || ''}</textarea></div>
+                <div class="list-item-row">
+                    <button class="btn-update" onclick="updateCeleb('${docSnap.id}')">Save Changes</button>
+                    <button class="btn-delete" onclick="deleteCeleb('${docSnap.id}')">Delete</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    async function updateCeleb(id) {
+        await window.updateDoc(window.doc(window.db, "celebrities", id), {
+            name: document.getElementById(`cname-${id}`).value,
+            initial: document.getElementById(`cinitial-${id}`).value,
+            bgColor: document.getElementById(`ccolor-${id}`).value,
+            message: document.getElementById(`cmessage-${id}`).value
+        });
         showToast();
     }
 
-    // --- 3. LOAD AND EDIT FANS ---
+    async function deleteCeleb(id) {
+        if (confirm("Delete this celebrity?")) {
+            await window.deleteDoc(window.doc(window.db, "celebrities", id));
+            loadCelebrities(); showToast();
+        }
+    }
+
+    async function addNewCeleb() {
+        const name = document.getElementById('newCelebName').value;
+        const initial = document.getElementById('newCelebInitial').value;
+        const bgColor = document.getElementById('newCelebColor').value;
+        const message = document.getElementById('newCelebMessage').value;
+        if (!name || !initial) return alert("Name and Initial are required.");
+        await window.addDoc(window.collection(window.db, "celebrities"), { name, initial, bgColor, message, createdAt: new Date().toISOString() });
+        document.getElementById('newCelebName').value = ""; document.getElementById('newCelebInitial').value = ""; document.getElementById('newCelebColor').value = ""; document.getElementById('newCelebMessage').value = "";
+        toggleAddForm('celeb'); loadCelebrities(); showToast();
+    }
+
+    // --- FANS ---
     async function loadFans() {
         const list = document.getElementById('fanList');
+        list.innerHTML = 'Loading...';
+        const q = window.query(window.collection(window.db, "fans"), window.orderBy("createdAt"));
+        const snapshot = await window.getDocs(q);
         list.innerHTML = '';
+        if (snapshot.empty) { list.innerHTML = '<p style="color: #6b7280;">No fans yet.</p>'; return; }
 
-        try {
-            const q = window.query(window.collection(window.db, "users"), window.orderBy("createdAt"));
-            const snapshot = await window.getDocs(q);
-
-            if (snapshot.empty) {
-                list.innerHTML = '<p style="color: #6b7280;">No fans registered yet.</p>';
-                return;
-            }
-
-            snapshot.forEach(docSnap => {
-                const data = docSnap.data();
-                const div = document.createElement('div');
-                div.className = 'fan-item';
-                div.innerHTML = `
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.innerHTML = `
+                <div class="list-item-row">
                     <input type="text" id="email-${docSnap.id}" value="${data.email || ''}" placeholder="Email">
-                    <input type="text" id="secimg-${docSnap.id}" value="${data.secImg || ''}" placeholder="Sec Img Text">
-                    <button class="btn-update" onclick="updateFan('${docSnap.id}')">Update Fan</button>
-                `;
-                list.appendChild(div);
-            });
+                    <input type="text" id="secimg-${docSnap.id}" value="${data.secImg || ''}" placeholder="Sec Img">
+                </div>
+                <div class="list-item-row">
+                    <button class="btn-update" onclick="updateFan('${docSnap.id}')">Save Changes</button>
+                    <button class="btn-delete" onclick="deleteFan('${docSnap.id}')">Delete</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
 
-        } catch (e) {
-            console.error("Error loading fans:", e);
-            list.innerHTML = '<p style="color: #ef4444;">Error loading fans. Check console.</p>';
+    async function updateFan(id) {
+        await window.updateDoc(window.doc(window.db, "fans", id), {
+            email: document.getElementById(`email-${id}`).value,
+            secImg: document.getElementById(`secimg-${id}`).value
+        });
+        showToast();
+    }
+
+    async function deleteFan(id) {
+        if (confirm("Delete this fan permanently?")) {
+            await window.deleteDoc(window.doc(window.db, "fans", id));
+            loadFans(); showToast();
         }
     }
 
-    async function updateFan(uid) {
-        const email = document.getElementById(`email-${uid}`).value;
-        const secImg = document.getElementById(`secimg-${uid}`).value;
+    async function addNewFan() {
+        const email = document.getElementById('newFanEmail').value;
+        const secImg = document.getElementById('newFanSecImg').value;
+        const color = document.getElementById('newFanColor').value;
+        if (!email) return alert("Email is required.");
+        await window.addDoc(window.collection(window.db, "fans"), { email, secImg, bgColor: color, ringColor: "#d4c4a8", createdAt: new Date().toISOString() });
+        document.getElementById('newFanEmail').value = ""; document.getElementById('newFanSecImg').value = "";
+        toggleAddForm('fan'); loadFans(); showToast();
+    }
 
-        try {
-            await window.updateDoc(window.doc(window.db, "users", uid), {
-                email: email,
-                secImg: secImg
-            });
-            showToast();
-        } catch (e) {
-            alert("Failed to update fan.");
+    // --- COMMENTS ---
+    async function loadComments() {
+        const list = document.getElementById('commentList');
+        list.innerHTML = 'Loading...';
+        const q = window.query(window.collection(window.db, "comments"), window.orderBy("createdAt"));
+        const snapshot = await window.getDocs(q);
+        list.innerHTML = '';
+        if (snapshot.empty) { list.innerHTML = '<p style="color: #6b7280;">No comments yet.</p>'; return; }
+
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.innerHTML = `
+                <div class="list-item-row">
+                    <input type="text" id="user-${docSnap.id}" value="${data.user || ''}" placeholder="User" style="max-width: 120px;">
+                    <input type="text" id="text-${docSnap.id}" value="${data.text || ''}" placeholder="Comment">
+                </div>
+                <div class="list-item-row">
+                    <button class="btn-update" onclick="updateComment('${docSnap.id}')">Save Changes</button>
+                    <button class="btn-delete" onclick="deleteComment('${docSnap.id}')">Delete</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    async function updateComment(id) {
+        await window.updateDoc(window.doc(window.db, "comments", id), {
+            user: document.getElementById(`user-${id}`).value,
+            text: document.getElementById(`text-${id}`).value
+        });
+        showToast();
+    }
+
+    async function deleteComment(id) {
+        if (confirm("Delete this comment?")) {
+            await window.deleteDoc(window.doc(window.db, "comments", id));
+            loadComments(); showToast();
         }
     }
 
-    // --- UTILS ---
+    async function addNewComment() {
+        const user = document.getElementById('newCommentUser').value;
+        const text = document.getElementById('newCommentText').value;
+        if (!user || !text) return alert("Both fields are required.");
+        await window.addDoc(window.collection(window.db, "comments"), { user, text, createdAt: new Date().toISOString() });
+        document.getElementById('newCommentUser').value = ""; document.getElementById('newCommentText').value = "";
+        toggleAddForm('comment'); loadComments(); showToast();
+    }
+
     function showToast() {
         const toast = document.getElementById('toast');
         toast.style.display = 'block';
