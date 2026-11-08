@@ -34,7 +34,6 @@ layout: false
       window.onSnapshot = onSnapshot;
       window.serverTimestamp = serverTimestamp;
 
-      // Signal that Firebase is fully ready
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
     </script>
@@ -43,7 +42,6 @@ layout: false
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #e5e7eb; height: 100vh; display: flex; justify-content: center; align-items: center; }
 
-        /* LOGIN SCREEN */
         .login-screen {
             background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             text-align: center; width: 100%; max-width: 350px;
@@ -58,27 +56,18 @@ layout: false
             border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
         }
 
-        /* DASHBOARD */
-        .dashboard {
-            display: none; width: 100vw; height: 100vh; background: #fff; overflow: hidden;
-        }
+        .dashboard { display: none; width: 100vw; height: 100vh; background: #fff; overflow: hidden; }
         .dashboard.active { display: flex; }
 
-        /* SIDEBAR */
-        .sidebar {
-            width: 300px; background: #f9fafb; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column;
-        }
+        .sidebar { width: 320px; background: #f9fafb; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; }
         .sidebar-header { padding: 20px; background: #ef4444; color: white; font-weight: bold; font-size: 18px; }
         .user-list { flex-grow: 1; overflow-y: auto; }
-        .user-item {
-            padding: 15px 20px; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: 0.2s;
-        }
+        .user-item { padding: 15px 20px; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: 0.2s; }
         .user-item:hover { background: #e5e7eb; }
         .user-item.active { background: #fee2e2; border-left: 4px solid #ef4444; }
         .user-item h4 { font-size: 14px; color: #1f2937; margin-bottom: 4px; }
         .user-item p { font-size: 12px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* MAIN CHAT */
         .chat-main { flex-grow: 1; display: flex; flex-direction: column; background: #f3f4f6; }
         .chat-header { padding: 15px 20px; background: #fff; border-bottom: 1px solid #e5e7eb; font-weight: bold; color: #1f2937; }
         .chat-messages { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
@@ -94,20 +83,16 @@ layout: false
 </head>
 <body>
 
-    <!-- LOGIN -->
     <div class="login-screen" id="loginScreen">
         <h2>Admin Access</h2>
         <input type="password" id="adminPass" placeholder="Enter password">
         <button onclick="login()">Login</button>
     </div>
 
-    <!-- DASHBOARD -->
     <div class="dashboard" id="dashboard">
         <div class="sidebar">
             <div class="sidebar-header">Support Inbox</div>
-            <div class="user-list" id="userList">
-                <!-- Users load here -->
-            </div>
+            <div class="user-list" id="userList"></div>
         </div>
         <div class="chat-main">
             <div class="chat-header" id="chatHeader">Select a conversation</div>
@@ -121,14 +106,12 @@ layout: false
 
 <script>
     const ADMIN_PASSWORD = "admin123"; 
-    let currentChatUser = null;
+    let currentRoomId = null;
     let allMessages = [];
     let isFirebaseReady = false;
 
-    // 1. Wait for Firebase to load BEFORE doing anything
     window.addEventListener('firebaseLoaded', () => {
         isFirebaseReady = true;
-        // If they already logged in while Firebase was loading, load chats now
         if (document.getElementById('dashboard').classList.contains('active')) {
             startListening();
         }
@@ -139,21 +122,13 @@ layout: false
         if (pass === ADMIN_PASSWORD) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboard').classList.add('active');
-            
-            if (isFirebaseReady) {
-                startListening();
-            } else {
-                document.getElementById('userList').innerHTML = '<div style="padding:20px; color:#888;">Connecting to Firebase...</div>';
-            }
+            if (isFirebaseReady) startListening();
         } else {
             alert("Wrong password");
         }
     }
 
-    // 2. Listen to Firebase
     function startListening() {
-        document.getElementById('userList').innerHTML = '<div style="padding:20px; color:#888;">Loading messages...</div>';
-        
         const q = window.query(window.collection(window.db, "support_messages"), window.orderBy("timestamp"));
         
         window.onSnapshot(q, (snapshot) => {
@@ -161,40 +136,51 @@ layout: false
             snapshot.forEach(doc => {
                 allMessages.push({ id: doc.id, ...doc.data() });
             });
-
             updateUserList();
-            
-            if (currentChatUser) {
-                renderChat();
-            }
-        }, (error) => {
-            console.error("Firebase Error: ", error);
-            document.getElementById('userList').innerHTML = '<div style="padding:20px; color:red;">Error loading. Check console.</div>';
+            if (currentRoomId) renderChat();
         });
     }
 
     function updateUserList() {
         const list = document.getElementById('userList');
-        
-        if (allMessages.length === 0) {
+        list.innerHTML = '';
+
+        // Group messages by roomId
+        const rooms = {};
+        allMessages.forEach(msg => {
+            // If a message is from an agent and we don't know the room, we can't group it easily
+            // For now, we assume messages have roomId. (Agent replies will get the roomId from the currently open chat)
+            if (!rooms[msg.roomId]) {
+                rooms[msg.roomId] = [];
+            }
+            rooms[msg.roomId].push(msg);
+        });
+
+        const roomIds = Object.keys(rooms);
+        if (roomIds.length === 0) {
             list.innerHTML = '<div style="padding:20px; color:#888;">No messages yet.</div>';
             return;
         }
 
-        const lastMsg = allMessages[allMessages.length - 1].text;
-        list.innerHTML = `
-            <div class="user-item active" onclick="selectUser('general')">
-                <h4>General Support</h4>
+        roomIds.forEach(id => {
+            const roomMessages = rooms[id];
+            const lastMsg = roomMessages[roomMessages.length - 1].text;
+            
+            const div = document.createElement('div');
+            div.className = `user-item ${currentRoomId === id ? 'active' : ''}`;
+            div.onclick = () => selectRoom(id);
+            div.innerHTML = `
+                <h4>Fan #${id}</h4>
                 <p>${lastMsg}</p>
-            </div>
-        `;
-        
-        if (!currentChatUser) selectUser('general');
+            `;
+            list.appendChild(div);
+        });
     }
 
-    function selectUser(userId) {
-        currentChatUser = userId;
-        document.getElementById('chatHeader').textContent = "General Support Chat";
+    function selectRoom(roomId) {
+        currentRoomId = roomId;
+        document.getElementById('chatHeader').textContent = `Chatting with Fan #${roomId}`;
+        updateUserList(); // Update active highlight
         renderChat();
     }
 
@@ -202,7 +188,10 @@ layout: false
         const chatArea = document.getElementById('chatMessages');
         chatArea.innerHTML = '';
         
-        allMessages.forEach(msg => {
+        // Filter messages for this room only
+        const roomMessages = allMessages.filter(msg => msg.roomId === currentRoomId);
+        
+        roomMessages.forEach(msg => {
             const div = document.createElement('div');
             div.className = `message msg-${msg.sender}`;
             div.textContent = msg.text;
@@ -213,6 +202,8 @@ layout: false
     }
 
     async function sendAdminReply() {
+        if (!currentRoomId) return alert("Select a fan first!");
+        
         const input = document.getElementById('adminInput');
         const text = input.value.trim();
         if (text === "") return;
@@ -223,11 +214,11 @@ layout: false
             await window.addDoc(window.collection(window.db, "support_messages"), {
                 text: text,
                 sender: "agent", 
+                roomId: currentRoomId, // Tag the reply with the fan's room ID!
                 timestamp: window.serverTimestamp()
             });
         } catch (e) {
             console.error("Error sending reply: ", e);
-            alert("Failed to send reply.");
         }
     }
 

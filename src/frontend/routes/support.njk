@@ -12,7 +12,7 @@ layout: false
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-      import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
@@ -33,6 +33,7 @@ layout: false
       window.orderBy = orderBy;
       window.onSnapshot = onSnapshot;
       window.serverTimestamp = serverTimestamp;
+      window.where = where; // Imported 'where' for filtering
 
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
@@ -44,8 +45,8 @@ layout: false
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
 
         body {
-            background: #e5e7eb; /* Grey background like OPay behind the chat */
-            height: 100dvh; /* Dynamic Viewport Height for mobile */
+            background: #e5e7eb; 
+            height: 100dvh; 
             width: 100vw;
             display: flex;
             justify-content: center;
@@ -64,7 +65,7 @@ layout: false
 
         /* --- OPAY STYLE HEADER --- */
         .chat-header {
-            background: #ef4444; /* OPay Red */
+            background: #ef4444; 
             color: white;
             padding: 15px 20px;
             display: flex;
@@ -143,7 +144,7 @@ layout: false
 
         .msg-user {
             align-self: flex-end;
-            background: #ef4444; /* OPay Red for user messages */
+            background: #ef4444; 
             color: #fff;
             border-top-right-radius: 4px;
         }
@@ -167,8 +168,8 @@ layout: false
             gap: 10px;
             align-items: center;
             border-top: 1px solid #e5e7eb;
-            flex-shrink: 0; /* Prevents it from shrinking on mobile */
-            padding-bottom: calc(12px + env(safe-area-inset-bottom)); /* Handles iPhone home bar */
+            flex-shrink: 0; 
+            padding-bottom: calc(12px + env(safe-area-inset-bottom)); 
         }
 
         .attach-btn {
@@ -253,16 +254,26 @@ layout: false
     const chatArea = document.getElementById('chatArea');
     const chatInput = document.getElementById('chatInput');
     
-    // Hardcoded user for now. Later this will be dynamic based on who is logged in.
+    // --- RANDOM ID GENERATOR ---
+    let fanRoomId = localStorage.getItem('fanRoomId');
+    if (!fanRoomId) {
+        fanRoomId = Math.floor(100000 + Math.random() * 900000).toString();
+        localStorage.setItem('fanRoomId', fanRoomId);
+    }
+    
     const userName = "Fan";
-    const userId = "8472"; 
+    const userId = fanRoomId; 
 
     window.addEventListener('firebaseLoaded', () => {
-        // 1. Listen for real-time messages from Firebase
-        const q = window.query(window.collection(window.db, "support_messages"), window.orderBy("timestamp"));
+        // Filter messages so this fan ONLY sees messages for their roomId
+        const q = window.query(
+            window.collection(window.db, "support_messages"), 
+            window.where("roomId", "==", fanRoomId),
+            window.orderBy("timestamp")
+        );
         
         window.onSnapshot(q, (snapshot) => {
-            chatArea.innerHTML = ''; // Clear area
+            chatArea.innerHTML = ''; 
             let hasMessages = false;
 
             snapshot.forEach((doc) => {
@@ -272,7 +283,7 @@ layout: false
             });
 
             if (!hasMessages) {
-                // Professional OPay-style greeting
+                // Professional OPay-style greeting with their ID
                 const welcomeMsg = `Hello, welcome <b>${userName}</b> (ID: ${userId}). <br><br>How can I help you today?`;
                 renderMessage(welcomeMsg, "agent", null);
             }
@@ -304,30 +315,16 @@ layout: false
         if (text === "") return;
 
         chatInput.value = "";
-
-        // TESTING FEATURE: If you type "ADMIN: message", it simulates an admin reply
-        if (text.startsWith("ADMIN:")) {
-            const adminText = text.replace("ADMIN:", "").trim();
-            try {
-                await window.addDoc(window.collection(window.db, "support_messages"), {
-                    text: adminText,
-                    sender: "agent",
-                    timestamp: window.serverTimestamp()
-                });
-            } catch (e) {
-                console.error("Error saving admin message: ", e);
-            }
-        } else {
-            // Normal user message
-            try {
-                await window.addDoc(window.collection(window.db, "support_messages"), {
-                    text: text,
-                    sender: "user",
-                    timestamp: window.serverTimestamp()
-                });
-            } catch (e) {
-                console.error("Error saving user message: ", e);
-            }
+        
+        try {
+            await window.addDoc(window.collection(window.db, "support_messages"), {
+                text: text,
+                sender: "user",
+                roomId: fanRoomId, // Tag with the fan's unique ID
+                timestamp: window.serverTimestamp()
+            });
+        } catch (e) {
+            console.error("Error saving user message: ", e);
         }
     }
 
