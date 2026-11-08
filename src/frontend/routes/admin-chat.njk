@@ -12,7 +12,7 @@ layout: false
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-      import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
@@ -33,9 +33,8 @@ layout: false
       window.orderBy = orderBy;
       window.onSnapshot = onSnapshot;
       window.serverTimestamp = serverTimestamp;
-      window.doc = doc;
-      window.updateDoc = updateDoc;
 
+      // Signal that Firebase is fully ready
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
     </script>
@@ -108,7 +107,6 @@ layout: false
             <div class="sidebar-header">Support Inbox</div>
             <div class="user-list" id="userList">
                 <!-- Users load here -->
-                <div style="padding: 20px; color: #888;">Loading chats...</div>
             </div>
         </div>
         <div class="chat-main">
@@ -122,54 +120,75 @@ layout: false
     </div>
 
 <script>
-    const ADMIN_PASSWORD = "admin123"; // Change this later
+    const ADMIN_PASSWORD = "admin123"; 
     let currentChatUser = null;
     let allMessages = [];
+    let isFirebaseReady = false;
+
+    // 1. Wait for Firebase to load BEFORE doing anything
+    window.addEventListener('firebaseLoaded', () => {
+        isFirebaseReady = true;
+        // If they already logged in while Firebase was loading, load chats now
+        if (document.getElementById('dashboard').classList.contains('active')) {
+            startListening();
+        }
+    });
 
     function login() {
         const pass = document.getElementById('adminPass').value;
         if (pass === ADMIN_PASSWORD) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboard').classList.add('active');
-            loadChats();
+            
+            if (isFirebaseReady) {
+                startListening();
+            } else {
+                document.getElementById('userList').innerHTML = '<div style="padding:20px; color:#888;">Connecting to Firebase...</div>';
+            }
         } else {
             alert("Wrong password");
         }
     }
 
-    // Listen to all support messages in real-time
-    function loadChats() {
-        window.addEventListener('firebaseLoaded', () => {
-            const q = window.query(window.collection(window.db, "support_messages"), window.orderBy("timestamp"));
-            
-            window.onSnapshot(q, (snapshot) => {
-                allMessages = [];
-                snapshot.forEach(doc => {
-                    allMessages.push({ id: doc.id, ...doc.data() });
-                });
-
-                // Group messages by a fake "User". 
-                // Since we only have one chat right now, we just use "General Fan"
-                // Later, we will group by real user IDs.
-                updateUserList();
-                
-                if (currentChatUser) {
-                    renderChat();
-                }
+    // 2. Listen to Firebase
+    function startListening() {
+        document.getElementById('userList').innerHTML = '<div style="padding:20px; color:#888;">Loading messages...</div>';
+        
+        const q = window.query(window.collection(window.db, "support_messages"), window.orderBy("timestamp"));
+        
+        window.onSnapshot(q, (snapshot) => {
+            allMessages = [];
+            snapshot.forEach(doc => {
+                allMessages.push({ id: doc.id, ...doc.data() });
             });
+
+            updateUserList();
+            
+            if (currentChatUser) {
+                renderChat();
+            }
+        }, (error) => {
+            console.error("Firebase Error: ", error);
+            document.getElementById('userList').innerHTML = '<div style="padding:20px; color:red;">Error loading. Check console.</div>';
         });
     }
 
     function updateUserList() {
         const list = document.getElementById('userList');
-        // For now, everyone goes to one chat. Later, we will split by user ID.
+        
+        if (allMessages.length === 0) {
+            list.innerHTML = '<div style="padding:20px; color:#888;">No messages yet.</div>';
+            return;
+        }
+
+        const lastMsg = allMessages[allMessages.length - 1].text;
         list.innerHTML = `
             <div class="user-item active" onclick="selectUser('general')">
                 <h4>General Support</h4>
-                <p>${allMessages.length > 0 ? allMessages[allMessages.length - 1].text : 'No messages yet'}</p>
+                <p>${lastMsg}</p>
             </div>
         `;
-        // Auto select
+        
         if (!currentChatUser) selectUser('general');
     }
 
@@ -203,7 +222,7 @@ layout: false
         try {
             await window.addDoc(window.collection(window.db, "support_messages"), {
                 text: text,
-                sender: "agent", // This makes it appear as a white bubble for the fan
+                sender: "agent", 
                 timestamp: window.serverTimestamp()
             });
         } catch (e) {
