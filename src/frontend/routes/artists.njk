@@ -10,7 +10,6 @@ layout: false
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Select Your Celebrity</title>
     
-    <!-- Firebase Setup -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
       import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
@@ -47,7 +46,9 @@ layout: false
         .list-area { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         .artist-list-item { display: flex; align-items: center; gap: 20px; background: rgba(255, 255, 255, 0.6); padding: 15px; border-radius: 12px; border: 1px solid #d4c4a8; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .artist-list-item:hover { background: #fff; transform: translateX(5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        .artist-list-avatar { width: 70px; height: 70px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 28px; color: white; font-weight: bold; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; }
+        
+        .artist-list-avatar { width: 70px; height: 70px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 28px; color: white; font-weight: bold; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; background-size: cover; background-position: center; }
+        
         .artist-list-info h3 { font-size: 22px; color: #4a3b32; font-family: 'Caveat', cursive; margin-bottom: 5px; }
         .artist-list-info p { font-size: 13px; color: #8a7b72; font-family: sans-serif; }
         .transition-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 15, 30, 0.95); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; color: white; text-align: center; padding: 20px; }
@@ -59,7 +60,7 @@ layout: false
         .reveal-card { display: none; flex-direction: column; align-items: center; animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .reveal-card.active { display: flex; }
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .reveal-avatar { width: 150px; height: 150px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: white; font-weight: bold; border: 6px solid #fff; box-shadow: 0 0 30px rgba(255, 0, 204, 0.6); margin-bottom: 20px; animation: glow 2s infinite alternate; }
+        .reveal-avatar { width: 150px; height: 150px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: white; font-weight: bold; border: 6px solid #fff; box-shadow: 0 0 30px rgba(255, 0, 204, 0.6); margin-bottom: 20px; animation: glow 2s infinite alternate; background-size: cover; background-position: center;}
         @keyframes glow { from { box-shadow: 0 0 20px rgba(255, 0, 204, 0.4); } to { box-shadow: 0 0 40px rgba(255, 0, 204, 0.9); } }
         .reveal-name { font-family: 'Caveat', cursive; font-size: 42px; color: #fff; margin-bottom: 15px; }
         .reveal-message { font-family: 'Playfair Display', serif; font-size: 18px; color: #e0e0e0; max-width: 400px; line-height: 1.6; margin-bottom: 30px; font-style: italic; }
@@ -101,14 +102,12 @@ layout: false
     </div>
 
 <script>
-    // --- EMBEDDED TRANSLATIONS (No 404 errors possible) ---
     const translations = {
         en: { select_celebrity: "Select Your Celebrity" },
         pl: { select_celebrity: "Wybierz swoją gwiazdę" },
         hu: { select_celebrity: "Válassza ki a hírességét" }
     };
 
-    // --- APPLY TRANSLATION ---
     function applyTranslation() {
         const userLang = navigator.language || navigator.userLanguage;
         let langCode = "en";
@@ -123,21 +122,17 @@ layout: false
             titleElement.textContent = translations[langCode].select_celebrity;
         }
         
-        // Update dropdown to match
         const select = document.getElementById('langSelect');
         if (select) select.value = langCode;
     }
 
-    // Run translation immediately on load
     document.addEventListener("DOMContentLoaded", applyTranslation);
 
-    // --- LANGUAGE SWITCHER ---
     function changeLanguage(lang) {
         localStorage.setItem('selectedLanguage', lang);
         location.reload();
     }
 
-    // --- FIREBASE DATA LOADING ---
     window.addEventListener('firebaseLoaded', async () => {
         const list = document.getElementById('artistList');
         list.innerHTML = '';
@@ -155,13 +150,19 @@ layout: false
                     item.className = 'artist-list-item';
                     item.onclick = () => selectArtist(artist);
 
+                    // Check if image exists, otherwise fallback to initial letter
+                    const avatarHTML = artist.imageUrl 
+                        ? `<div class="artist-list-avatar" style="background-image: url('${artist.imageUrl}');"></div>`
+                        : `<div class="artist-list-avatar" style="background: ${artist.bgColor || '#3a7bd5'};">${artist.name.charAt(0).toUpperCase()}</div>`;
+
+                    // Use custom text if provided, otherwise fallback
+                    const subtitle = artist.customText || "Enter Fanbook";
+
                     item.innerHTML = `
-                        <div class="artist-list-avatar" style="background: ${artist.bgColor || '#3a7bd5'};">
-                            ${artist.initial || 'A'}
-                        </div>
+                        ${avatarHTML}
                         <div class="artist-list-info">
                             <h3>${artist.name}</h3>
-                            <p>Enter Fanbook</p>
+                            <p>${subtitle}</p>
                         </div>
                     `;
 
@@ -174,7 +175,6 @@ layout: false
             list.innerHTML = '<p style="text-align: center; color: red;">Failed to load. Check console.</p>';
         }
 
-        // Force translation again after data loads just to be safe
         applyTranslation(); 
     });
 
@@ -192,8 +192,16 @@ layout: false
         setTimeout(() => {
             loading.style.display = 'none';
             
-            document.getElementById('revealAvatar').textContent = artist.initial || 'A';
-            document.getElementById('revealAvatar').style.background = artist.bgColor || '#3a7bd5';
+            const avatarElement = document.getElementById('revealAvatar');
+            if (artist.imageUrl) {
+                avatarElement.style.backgroundImage = `url('${artist.imageUrl}')`;
+                avatarElement.textContent = "";
+            } else {
+                avatarElement.style.backgroundImage = "none";
+                avatarElement.style.background = artist.bgColor || '#3a7bd5';
+                avatarElement.textContent = artist.name.charAt(0).toUpperCase();
+            }
+
             document.getElementById('revealName').textContent = artist.name;
             document.getElementById('revealMessage').textContent = artist.message || "Thank you for being a fan!";
 
