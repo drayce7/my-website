@@ -10,12 +10,7 @@ layout: false
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Select Your Celebrity</title>
     
-    <!-- Load Language Files (Updated Path) -->
-    <script src="/assets/locales/en.js"></script>
-    <script src="/assets/locales/pl.js"></script>
-    <script src="/assets/locales/hu.js"></script>
-    <script src="/assets/locales/translator.js"></script>
-
+    <!-- Firebase Setup -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
       import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
@@ -78,7 +73,7 @@ layout: false
     <div class="app-wrapper">
         <!-- HEADER WITH DROPDOWN -->
         <div class="header">
-            <span data-translate="select_celebrity">Select Your Celebrity</span>
+            <span id="headerTitle">Select Your Celebrity</span>
             <select id="langSelect" class="lang-select" onchange="changeLanguage(this.value)">
                 <option value="en">EN</option>
                 <option value="pl">PL</option>
@@ -106,24 +101,43 @@ layout: false
     </div>
 
 <script>
-    // 1. Set the dropdown to match the current language
-    window.addEventListener('DOMContentLoaded', () => {
-        const currentLang = localStorage.getItem('selectedLanguage') || navigator.language.substring(0, 2);
-        const select = document.getElementById('langSelect');
-        if (currentLang === 'pl' || currentLang === 'hu') {
-            select.value = currentLang;
-        } else {
-            select.value = 'en';
-        }
-    });
+    // --- EMBEDDED TRANSLATIONS (No 404 errors possible) ---
+    const translations = {
+        en: { select_celebrity: "Select Your Celebrity" },
+        pl: { select_celebrity: "Wybierz swoją gwiazdę" },
+        hu: { select_celebrity: "Válassza ki a hírességét" }
+    };
 
-    // 2. Function to change language manually
+    // --- APPLY TRANSLATION ---
+    function applyTranslation() {
+        const userLang = navigator.language || navigator.userLanguage;
+        let langCode = "en";
+        if (userLang.startsWith("pl")) langCode = "pl";
+        if (userLang.startsWith("hu")) langCode = "hu";
+        
+        const savedLang = localStorage.getItem('selectedLanguage');
+        if (savedLang) langCode = savedLang;
+
+        const titleElement = document.getElementById('headerTitle');
+        if (translations[langCode]) {
+            titleElement.textContent = translations[langCode].select_celebrity;
+        }
+        
+        // Update dropdown to match
+        const select = document.getElementById('langSelect');
+        if (select) select.value = langCode;
+    }
+
+    // Run translation immediately on load
+    document.addEventListener("DOMContentLoaded", applyTranslation);
+
+    // --- LANGUAGE SWITCHER ---
     function changeLanguage(lang) {
         localStorage.setItem('selectedLanguage', lang);
         location.reload();
     }
 
-    // 3. Load Celebrities from Firebase
+    // --- FIREBASE DATA LOADING ---
     window.addEventListener('firebaseLoaded', async () => {
         const list = document.getElementById('artistList');
         list.innerHTML = '';
@@ -160,7 +174,7 @@ layout: false
             list.innerHTML = '<p style="text-align: center; color: red;">Failed to load. Check console.</p>';
         }
 
-        // 4. FORCE TRANSLATION AFTER DATA LOADS
+        // Force translation again after data loads just to be safe
         applyTranslation(); 
     });
 
