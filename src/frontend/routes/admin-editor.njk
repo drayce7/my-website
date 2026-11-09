@@ -115,12 +115,13 @@ layout: false
 
         <!-- 2. CELEBRITY DIRECTORY -->
         <div class="card">
-            <h2>2. Celebrity Directory (Page 1)</h2>
+            <h2>2. Celebrity Directory</h2>
             <button class="btn-add" onclick="toggleAddForm('celeb')">+ Add New Celebrity</button>
             <div class="add-form" id="celebAddForm">
                 <input type="text" id="newCelebName" placeholder="Celebrity Name (e.g., Rihanna)">
-                <input type="text" id="newCelebInitial" placeholder="Initial Letter (e.g., R)" maxlength="1">
-                <input type="text" id="newCelebColor" placeholder="CSS Color (e.g., linear-gradient(135deg, #ff00cc, #333399))">
+                <input type="text" id="newCelebImage" placeholder="Image URL (e.g., https://.../image.jpg)">
+                <input type="text" id="newCelebCustomText" placeholder="Custom Text (e.g., Enter Fanbook, Official Fanbase)">
+                <input type="text" id="newCelebColor" placeholder="Fallback Color (e.g., #3a7bd5)">
                 <textarea id="newCelebMessage" placeholder="Thank you message..."></textarea>
                 <button class="btn-save" onclick="addNewCeleb()">Save Celebrity</button>
             </div>
@@ -230,9 +231,16 @@ layout: false
             div.innerHTML = `
                 <div class="list-item-row">
                     <input type="text" id="cname-${docSnap.id}" value="${data.name || ''}" placeholder="Name">
-                    <input type="text" id="cinitial-${docSnap.id}" value="${data.initial || ''}" placeholder="Initial" style="max-width: 60px;">
                 </div>
-                <div class="list-item-row"><input type="text" id="ccolor-${docSnap.id}" value="${data.bgColor || ''}" placeholder="Color"></div>
+                <div class="list-item-row">
+                    <input type="text" id="cimage-${docSnap.id}" value="${data.imageUrl || ''}" placeholder="Image URL">
+                </div>
+                <div class="list-item-row">
+                    <input type="text" id="ccustom-${docSnap.id}" value="${data.customText || ''}" placeholder="Custom Text (e.g. Enter Fanbook)">
+                </div>
+                <div class="list-item-row">
+                    <input type="text" id="ccolor-${docSnap.id}" value="${data.bgColor || ''}" placeholder="Fallback Color">
+                </div>
                 <div class="list-item-row"><textarea id="cmessage-${docSnap.id}" placeholder="Message">${data.message || ''}</textarea></div>
                 <div class="list-item-row">
                     <button class="btn-update" onclick="updateCeleb('${docSnap.id}')">Save Changes</button>
@@ -246,7 +254,8 @@ layout: false
     async function updateCeleb(id) {
         await window.updateDoc(window.doc(window.db, "celebrities", id), {
             name: document.getElementById(`cname-${id}`).value,
-            initial: document.getElementById(`cinitial-${id}`).value,
+            imageUrl: document.getElementById(`cimage-${id}`).value,
+            customText: document.getElementById(`ccustom-${id}`).value,
             bgColor: document.getElementById(`ccolor-${id}`).value,
             message: document.getElementById(`cmessage-${id}`).value
         });
@@ -262,12 +271,20 @@ layout: false
 
     async function addNewCeleb() {
         const name = document.getElementById('newCelebName').value;
-        const initial = document.getElementById('newCelebInitial').value;
+        const imageUrl = document.getElementById('newCelebImage').value;
+        const customText = document.getElementById('newCelebCustomText').value;
         const bgColor = document.getElementById('newCelebColor').value;
         const message = document.getElementById('newCelebMessage').value;
-        if (!name || !initial) return alert("Name and Initial are required.");
-        await window.addDoc(window.collection(window.db, "celebrities"), { name, initial, bgColor, message, createdAt: new Date().toISOString() });
-        document.getElementById('newCelebName').value = ""; document.getElementById('newCelebInitial').value = ""; document.getElementById('newCelebColor').value = ""; document.getElementById('newCelebMessage').value = "";
+        if (!name) return alert("Name is required.");
+        await window.addDoc(window.collection(window.db, "celebrities"), { 
+            name, imageUrl, customText, bgColor, message, 
+            createdAt: new Date().toISOString() 
+        });
+        document.getElementById('newCelebName').value = ""; 
+        document.getElementById('newCelebImage').value = ""; 
+        document.getElementById('newCelebCustomText').value = ""; 
+        document.getElementById('newCelebColor').value = ""; 
+        document.getElementById('newCelebMessage').value = "";
         toggleAddForm('celeb'); loadCelebrities(); showToast();
     }
 
