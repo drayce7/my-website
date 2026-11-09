@@ -1,5 +1,5 @@
 ---
-title: "Artist Directory"
+title: "Select Your Celebrity"
 permalink: "/artists/"
 layout: false
 ---
@@ -10,344 +10,156 @@ layout: false
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Select Your Celebrity</title>
     
+    <!-- Load Language Files -->
+    <script src="/locales/en.js"></script>
+    <script src="/locales/pl.js"></script>
+    <script src="/locales/hu.js"></script>
+    
+    <!-- Load Translator Script -->
+    <script src="/locales/translator.js"></script>
+
     <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
+        authDomain: "clbomb.firebaseapp.com",
+        projectId: "clbomb",
+        storageBucket: "clbomb.firebasestorage.app",
+        messagingSenderId: "515939060816",
+        appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      window.db = getFirestore(app);
+      window.collection = collection;
+      window.getDocs = getDocs;
+
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
     </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background: #2a1b18; 
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            font-family: 'Playfair Display', serif;
-        }
-
-        /* --- MAIN APP CONTAINER --- */
-        .app-wrapper {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: #fdf6e3; 
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
-        }
-
-        /* --- HEADER (Modified) --- */
-        .header {
-            width: 100%;
-            padding: 20px;
-            background: rgba(20, 15, 30, 0.95);
-            color: white;
-            text-align: center;
-            font-family: 'Caveat', cursive;
-            font-size: 28px; /* Reduced from 32px to fit longer text */
-            border-bottom: 2px solid #d4c4a8;
-            z-index: 10;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        /* --- ARTIST LIST AREA --- */
-        .list-area {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        /* --- ARTIST LIST ITEM --- */
-        .artist-list-item {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            background: rgba(255, 255, 255, 0.6);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #d4c4a8;
-            cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-
-        .artist-list-item:hover {
-            background: #fff;
-            transform: translateX(5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
-
-        .artist-list-avatar {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 28px;
-            color: white;
-            font-weight: bold;
-            border: 4px solid #fff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            flex-shrink: 0;
-        }
-
-        .artist-list-info h3 {
-            font-size: 22px;
-            color: #4a3b32;
-            font-family: 'Caveat', cursive;
-            margin-bottom: 5px;
-        }
-
-        .artist-list-info p {
-            font-size: 13px;
-            color: #8a7b72;
-            font-family: sans-serif;
-        }
-
-        /* --- TRANSITION OVERLAY --- */
-        .transition-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(20, 15, 30, 0.95);
-            backdrop-filter: blur(10px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            flex-direction: column;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
+        body { background: #2a1b18; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Playfair Display', serif; }
+        .app-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #fdf6e3; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>'); }
+        .header { width: 100%; padding: 20px; background: rgba(20, 15, 30, 0.95); color: white; text-align: center; font-family: 'Caveat', cursive; font-size: 28px; border-bottom: 2px solid #d4c4a8; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .list-area { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .artist-list-item { display: flex; align-items: center; gap: 20px; background: rgba(255, 255, 255, 0.6); padding: 15px; border-radius: 12px; border: 1px solid #d4c4a8; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .artist-list-item:hover { background: #fff; transform: translateX(5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .artist-list-avatar { width: 70px; height: 70px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 28px; color: white; font-weight: bold; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; }
+        .artist-list-info h3 { font-size: 22px; color: #4a3b32; font-family: 'Caveat', cursive; margin-bottom: 5px; }
+        .artist-list-info p { font-size: 13px; color: #8a7b72; font-family: sans-serif; }
+        .transition-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 15, 30, 0.95); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; color: white; text-align: center; padding: 20px; }
         .transition-overlay.active { display: flex; }
-
-        /* LOADING SPINNER */
-        .loader {
-            border: 4px solid rgba(255,255,255,0.1);
-            border-left-color: #00d2ff;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
+        .loader { border: 4px solid rgba(255,255,255,0.1); border-left-color: #00d2ff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .loading-text {
-            font-family: 'Caveat', cursive;
-            font-size: 32px;
-            color: #00d2ff;
-            animation: pulse 1.5s infinite alternate;
-        }
+        .loading-text { font-family: 'Caveat', cursive; font-size: 32px; color: #00d2ff; animation: pulse 1.5s infinite alternate; }
         @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
-
-        /* --- ARTIST REVEAL CARD --- */
-        .reveal-card {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
+        .reveal-card { display: none; flex-direction: column; align-items: center; animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .reveal-card.active { display: flex; }
-
-        @keyframes popIn {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .reveal-avatar {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 60px;
-            color: white;
-            font-weight: bold;
-            border: 6px solid #fff;
-            box-shadow: 0 0 30px rgba(255, 0, 204, 0.6);
-            margin-bottom: 20px;
-            animation: glow 2s infinite alternate;
-        }
-
-        @keyframes glow {
-            from { box-shadow: 0 0 20px rgba(255, 0, 204, 0.4); }
-            to { box-shadow: 0 0 40px rgba(255, 0, 204, 0.9); }
-        }
-
-        .reveal-name {
-            font-family: 'Caveat', cursive;
-            font-size: 42px;
-            color: #fff;
-            margin-bottom: 15px;
-        }
-
-        .reveal-message {
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            color: #e0e0e0;
-            max-width: 400px;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            font-style: italic;
-        }
-
-        .btn-okay {
-            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
-            color: white;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
-            transition: 0.2s;
-            font-family: sans-serif;
-        }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .reveal-avatar { width: 150px; height: 150px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: white; font-weight: bold; border: 6px solid #fff; box-shadow: 0 0 30px rgba(255, 0, 204, 0.6); margin-bottom: 20px; animation: glow 2s infinite alternate; }
+        @keyframes glow { from { box-shadow: 0 0 20px rgba(255, 0, 204, 0.4); } to { box-shadow: 0 0 40px rgba(255, 0, 204, 0.9); } }
+        .reveal-name { font-family: 'Caveat', cursive; font-size: 42px; color: #fff; margin-bottom: 15px; }
+        .reveal-message { font-family: 'Playfair Display', serif; font-size: 18px; color: #e0e0e0; max-width: 400px; line-height: 1.6; margin-bottom: 30px; font-style: italic; }
+        .btn-okay { background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white; padding: 15px 40px; border: none; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4); transition: 0.2s; font-family: sans-serif; }
         .btn-okay:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 210, 255, 0.7); }
-
-        @media (min-width: 769px) {
-            .app-wrapper { max-width: 600px; height: 90vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        }
+        @media (min-width: 769px) { .app-wrapper { max-width: 600px; height: 90vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); } }
     </style>
 </head>
 <body>
 
     <div class="app-wrapper">
-        
-        <!-- HEADER (Modified Text) -->
-        <div class="header">Select Your Celebrity</div>
-
-        <!-- ARTIST LIST AREA -->
+        <div class="header" data-translate="select_celebrity">Select Your Celebrity</div>
         <div class="list-area" id="artistList">
-            <!-- Artists injected by JS -->
+            <p style="text-align: center; color: #888;">Loading celebrities...</p>
         </div>
     </div>
 
-    <!-- TRANSITION OVERLAY -->
     <div class="transition-overlay" id="transitionOverlay">
-        
-        <!-- Loading State -->
         <div id="loadingState">
             <div class="loader"></div>
             <div class="loading-text">Connecting to Fanbase...</div>
         </div>
 
-        <!-- Reveal State -->
         <div class="reveal-card" id="revealCard">
             <div class="reveal-avatar" id="revealAvatar">A</div>
             <div class="reveal-name" id="revealName">Artist Name</div>
             <div class="reveal-message" id="revealMessage"></div>
             <button class="btn-okay" onclick="goToFanbook()">Okay</button>
         </div>
-
     </div>
 
 <script>
-    // List of Celebrities
-    const artistsData = [
-        { 
-            name: "The Weeknd", 
-            initial: "W", 
-            bgColor: "linear-gradient(135deg, #ff00cc, #333399)",
-            message: "Thank you for being a devoted fan. I truly appreciate the endless support. Please check the next page to see if you have a record with my fanbase."
-        },
-        { 
-            name: "Beyoncé", 
-            initial: "B", 
-            bgColor: "linear-gradient(135deg, #f59e0b, #b45309)",
-            message: "Your loyalty means the world to me. It's an honor to have you in my circle. Please explore the next page to see your record with my fanbase."
-        },
-        { 
-            name: "Drake", 
-            initial: "D", 
-            bgColor: "linear-gradient(135deg, #10b981, #047857)",
-            message: "Thank you for rocking with me. I see every single one of you. Head over to the next page to view your standing in my fanbase."
-        },
-        { 
-            name: "Taylor Swift", 
-            initial: "T", 
-            bgColor: "linear-gradient(135deg, #ef4444, #991b1b)",
-            message: "I appreciate you more than you know. Thank you for being part of this journey. Please check the next page if you have a record with my fanbase."
-        }
-    ];
-
-    // Render the list
-    function renderList() {
+    window.addEventListener('firebaseLoaded', async () => {
         const list = document.getElementById('artistList');
         list.innerHTML = '';
 
-        artistsData.forEach((artist, index) => {
-            const item = document.createElement('div');
-            item.className = 'artist-list-item';
-            item.onclick = () => selectArtist(artist);
+        try {
+            const snapshot = await window.getDocs(window.collection(window.db, "celebrities"));
+            
+            if (snapshot.empty) {
+                list.innerHTML = '<p style="text-align: center; color: #888;">No celebrities added yet. Check the Master Editor.</p>';
+                return;
+            }
 
-            item.innerHTML = `
-                <div class="artist-list-avatar" style="background: ${artist.bgColor};">
-                    ${artist.initial}
-                </div>
-                <div class="artist-list-info">
-                    <h3>${artist.name}</h3>
-                    <p>Enter Fanbook</p>
-                </div>
-            `;
+            snapshot.forEach(docSnap => {
+                const artist = docSnap.data();
+                
+                const item = document.createElement('div');
+                item.className = 'artist-list-item';
+                item.onclick = () => selectArtist(artist);
 
-            list.appendChild(item);
-        });
-    }
+                item.innerHTML = `
+                    <div class="artist-list-avatar" style="background: ${artist.bgColor || '#3a7bd5'};">
+                        ${artist.initial || 'A'}
+                    </div>
+                    <div class="artist-list-info">
+                        <h3>${artist.name}</h3>
+                        <p>Enter Fanbook</p>
+                    </div>
+                `;
 
-    // Handle Celebrity Selection
+                list.appendChild(item);
+            });
+
+        } catch (e) {
+            console.error("Error loading celebrities: ", e);
+            list.innerHTML = '<p style="text-align: center; color: red;">Failed to load. Check console.</p>';
+        }
+    });
+
     function selectArtist(artist) {
         const overlay = document.getElementById('transitionOverlay');
         const loading = document.getElementById('loadingState');
         const reveal = document.getElementById('revealCard');
 
-        // Show Overlay & Loading
         overlay.classList.add('active');
         loading.style.display = 'block';
         reveal.classList.remove('active');
 
-        // Random wait between 3 and 6 seconds
         const delay = Math.floor(Math.random() * 3000) + 3000;
 
         setTimeout(() => {
-            // Hide loading, show reveal
             loading.style.display = 'none';
             
-            // Populate Reveal Card
-            document.getElementById('revealAvatar').textContent = artist.initial;
-            document.getElementById('revealAvatar').style.background = artist.bgColor;
+            document.getElementById('revealAvatar').textContent = artist.initial || 'A';
+            document.getElementById('revealAvatar').style.background = artist.bgColor || '#3a7bd5';
             document.getElementById('revealName').textContent = artist.name;
-            document.getElementById('revealMessage').textContent = artist.message;
+            document.getElementById('revealMessage').textContent = artist.message || "Thank you for being a fan!";
 
-            // Save selected celebrity to session so the fanbook knows who it is
             sessionStorage.setItem('selectedArtist', JSON.stringify(artist));
 
-            // Show reveal
             reveal.classList.add('active');
-
         }, delay);
     }
 
-    // Go to Fanbook
     function goToFanbook() {
         window.location.href = '/my-website/fanbook/';
     }
-
-    // Initial render
-    renderList();
 </script>
 </body>
 </html>
