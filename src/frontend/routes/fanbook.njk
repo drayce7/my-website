@@ -46,6 +46,7 @@ layout: false
         body { background: #2a1b18; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Playfair Display', serif; }
         .app-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #fdf6e3; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>'); }
         .top-region { position: relative; width: 100%; height: 150px; background: rgba(20, 15, 30, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid #d4c4a8; display: flex; flex-direction: column; padding: 15px; z-index: 50; flex-shrink: 0; overflow: hidden; }
+        
         .ticker-container { margin-top: 5px; height: 90px; overflow: hidden; position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 5px; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); }
         .comment-line { font-size: 12px; font-weight: 600; color: #e0e0e0; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: slideUp 0.4s ease-out forwards; font-family: sans-serif; padding: 0 5px; line-height: 1.2; }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -113,7 +114,7 @@ layout: false
         <div class="top-region">
             <div class="ticker-container" id="tickerContainer"></div>
             <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search by email...">
+                <input type="text" id="searchInput" class="search-input" data-translate-placeholder="search_placeholder" placeholder="Search by email...">
                 <button class="search-btn" onclick="searchFan()">🔍</button>
             </div>
         </div>
@@ -135,34 +136,95 @@ layout: false
 
     <div class="key-modal" id="keyModal">
         <div class="key-box">
-            <h2>Enter Activation Key</h2>
-            <input type="text" id="keyInput" class="key-input" placeholder="Enter your key here...">
-            <div class="key-hint" id="keyHint">
+            <h2 data-translate="enter_key_title">Enter Activation Key</h2>
+            <input type="text" id="keyInput" class="key-input" data-translate-placeholder="enter_key_placeholder" placeholder="Enter your key here...">
+            <div class="key-hint" id="keyHint" data-translate="key_hint">
                 Format: 9 letters, 4 letters, 7 letters, 10 letters, 4 letters, 7 letters, 8 letters, 8 letters
             </div>
             <div class="key-actions">
-                <button class="btn-key btn-dismiss" onclick="closeKeyModal()">Dismiss</button>
-                <button class="btn-key btn-proceed" onclick="checkKey()">Proceed</button>
+                <button class="btn-key btn-dismiss" onclick="closeKeyModal()" data-translate="dismiss">Dismiss</button>
+                <button class="btn-key btn-proceed" onclick="checkKey()" data-translate="proceed">Proceed</button>
             </div>
         </div>
     </div>
 
     <div class="brain-modal" id="brainModal">
         <div class="brain-box">
-            <h2>Artist Message</h2>
+            <h2 data-translate="brain_title">Artist Message</h2>
             <p id="brainMessageText">This is a special message from the artist.</p>
-            <button class="btn-okay" onclick="closeBrainModal()">Okay</button>
+            <button class="btn-okay" onclick="closeBrainModal()" data-translate="okay">Okay</button>
         </div>
     </div>
 
 <script>
+    const translations = {
+        en: { 
+            select_celebrity: "Select Your Celebrity",
+            search_placeholder: "Search by email...",
+            enter_key_title: "Enter Activation Key",
+            enter_key_placeholder: "Enter your key here...",
+            key_hint: "Format: 9 letters, 4 letters, 7 letters, 10 letters, 4 letters, 7 letters, 8 letters, 8 letters",
+            dismiss: "Dismiss",
+            proceed: "Proceed",
+            brain_title: "Artist Message",
+            okay: "Okay"
+        },
+        pl: { 
+            select_celebrity: "Wybierz swoją gwiazdę",
+            search_placeholder: "Szukaj po e-mailu...",
+            enter_key_title: "Wpisz klucz aktywacyjny",
+            enter_key_placeholder: "Wpisz swój klucz tutaj...",
+            key_hint: "Format: 9 liter, 4 litery, 7 liter, 10 liter, 4 litery, 7 liter, 8 liter, 8 liter",
+            dismiss: "Odrzuć",
+            proceed: "Kontynuuj",
+            brain_title: "Wiadomość od artysty",
+            okay: "Okay"
+        },
+        hu: { 
+            select_celebrity: "Válassza ki a hírességét",
+            search_placeholder: "Keresés e-mailben...",
+            enter_key_title: "Írja be az aktiválási kulcsot",
+            enter_key_placeholder: "Írja be a kulcsot...",
+            key_hint: "Formátum: 9 betű, 4 betű, 7 betű, 10 betű, 4 betű, 7 betű, 8 betű, 8 betű",
+            dismiss: "Elvetés",
+            proceed: "Tovább",
+            brain_title: "Üzenet a művésztől",
+            okay: "Rendben"
+        }
+    };
+
+    function applyTranslation() {
+        const userLang = navigator.language || navigator.userLanguage;
+        let langCode = "en";
+        if (userLang.startsWith("pl")) langCode = "pl";
+        if (userLang.startsWith("hu")) langCode = "hu";
+        
+        const savedLang = localStorage.getItem('selectedLanguage');
+        if (savedLang) langCode = savedLang;
+
+        document.querySelectorAll('[data-translate]').forEach(element => {
+            const key = element.getAttribute('data-translate');
+            if (translations[langCode] && translations[langCode][key]) {
+                element.textContent = translations[langCode][key];
+            }
+        });
+
+        document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+            const key = element.getAttribute('data-translate-placeholder');
+            if (translations[langCode] && translations[langCode][key]) {
+                element.placeholder = translations[langCode][key];
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", applyTranslation);
+
     let artistWelcomeMessage = "Thank you for being a fan!";
     let realActivationKey = "";
     let allFans = [];
     let allComments = [];
 
     window.addEventListener('firebaseLoaded', async () => {
-        // 1. Fetch Artist Settings
         const artistRef = window.doc(window.db, "app_settings", "artist");
         const artistSnap = await window.getDoc(artistRef);
         if (artistSnap.exists()) {
@@ -174,24 +236,23 @@ layout: false
             }
         }
 
-        // 2. Fetch Security Key
         const keyRef = window.doc(window.db, "app_settings", "security");
         const keySnap = await window.getDoc(keyRef);
         if (keySnap.exists()) {
             realActivationKey = keySnap.data().activationKey || "";
         }
 
-        // 3. Fetch Fans
         const fansSnap = await window.getDocs(window.query(window.collection(window.db, "fans"), window.orderBy("createdAt")));
         allFans = [];
         fansSnap.forEach(doc => allFans.push(doc.data()));
         renderFans();
 
-        // 4. Fetch Comments
         const commentsSnap = await window.getDocs(window.query(window.collection(window.db, "comments"), window.orderBy("createdAt")));
         allComments = [];
         commentsSnap.forEach(doc => allComments.push(doc.data()));
         startTicker();
+        
+        applyTranslation();
     });
 
     function renderFans() {
@@ -225,19 +286,16 @@ layout: false
     }
 
     let tickerIndex = 0;
-    let tickerInterval;
-
     function startTicker() {
         const tickerContainer = document.getElementById('tickerContainer');
         tickerContainer.innerHTML = '';
         if (allComments.length === 0) return;
 
-        // Show first 3 comments initially
         for(let i=0; i < Math.min(3, allComments.length); i++) {
             addCommentToTicker(allComments[i]);
         }
 
-        tickerInterval = setInterval(() => {
+        setInterval(() => {
             tickerIndex = (tickerIndex + 1) % allComments.length;
             addCommentToTicker(allComments[tickerIndex]);
         }, 3000);
@@ -275,11 +333,13 @@ layout: false
                 
                 <div class="focus-sec-row">
                     <div class="focus-sec-img">${fan.secImg}</div>
-                    <div class="brain-text" onclick="openKeyModal()">Brain</div>
+                    <div class="brain-text" onclick="openKeyModal()" data-translate="brain_button">Brain</div>
                 </div>
                 
                 <button class="btn-close" onclick="closeFocusModal()">Close</button>
             `;
+            
+            applyTranslation();
 
             const colors = ['#ff00cc', '#00d2ff', '#ffff33', '#33ff33', '#ff9933'];
             for (let i = 0; i < 20; i++) {
@@ -324,7 +384,6 @@ layout: false
             setTimeout(() => input.classList.remove('shake'), 500);
             alert("Invalid Activation Key!");
         } else {
-            // If correct (or if no key is set yet), grant access
             closeKeyModal();
             openBrainModal();
         }

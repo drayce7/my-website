@@ -61,7 +61,6 @@ layout: false
         .msg-agent .timestamp { color: #6b7280; }
         .msg-user .timestamp { color: #fecaca; }
         .input-area { padding: 12px 15px; background: #fff; display: flex; gap: 10px; align-items: center; border-top: 1px solid #e5e7eb; flex-shrink: 0; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
-        .attach-btn { background: #f3f4f6; color: #6b7280; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 20px; flex-shrink: 0; }
         .chat-input { flex-grow: 1; padding: 12px 15px; border: 1px solid #e5e7eb; border-radius: 25px; font-size: 15px; outline: none; background: #f9fafb; transition: 0.2s; }
         .chat-input:focus { border-color: #ef4444; background: #fff; }
         .send-btn { background: #ef4444; color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 16px; flex-shrink: 0; transition: 0.2s; }
@@ -77,8 +76,8 @@ layout: false
             <div class="agent-info">
                 <div class="agent-avatar">🎧</div>
                 <div class="agent-text">
-                    <h2>Connect Support</h2>
-                    <p><span class="online-dot"></span> Online</p>
+                    <h2 data-translate="support_title">Connect Support</h2>
+                    <p><span class="online-dot"></span> <span data-translate="support_online">Online</span></p>
                 </div>
             </div>
         </div>
@@ -86,43 +85,77 @@ layout: false
         <div class="chat-area" id="chatArea"></div>
 
         <div class="input-area">
-            <button class="attach-btn" onclick="alert('Attachments coming soon!')">+</button>
-            <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." onkeypress="handleEnter(event)">
+            <input type="text" id="chatInput" class="chat-input" data-translate-placeholder="chat_placeholder" placeholder="Type a message..." onkeypress="handleEnter(event)">
             <button class="send-btn" onclick="sendMessage()">➤</button>
         </div>
     </div>
 
 <script>
+    const translations = {
+        en: { 
+            support_title: "Connect Support", 
+            support_online: "Online", 
+            chat_placeholder: "Type a message..." 
+        },
+        pl: { 
+            support_title: "Wsparcie Connect", 
+            support_online: "Online", 
+            chat_placeholder: "Wpisz wiadomość..." 
+        },
+        hu: { 
+            support_title: "Connect Támogatás", 
+            support_online: "Online", 
+            chat_placeholder: "Írjon üzenetet..." 
+        }
+    };
+
+    function applyTranslation() {
+        const userLang = navigator.language || navigator.userLanguage;
+        let langCode = "en";
+        if (userLang.startsWith("pl")) langCode = "pl";
+        if (userLang.startsWith("hu")) langCode = "hu";
+        
+        const savedLang = localStorage.getItem('selectedLanguage');
+        if (savedLang) langCode = savedLang;
+
+        document.querySelectorAll('[data-translate]').forEach(element => {
+            const key = element.getAttribute('data-translate');
+            if (translations[langCode] && translations[langCode][key]) {
+                element.textContent = translations[langCode][key];
+            }
+        });
+
+        document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+            const key = element.getAttribute('data-translate-placeholder');
+            if (translations[langCode] && translations[langCode][key]) {
+                element.placeholder = translations[langCode][key];
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", applyTranslation);
+
     const chatArea = document.getElementById('chatArea');
     const chatInput = document.getElementById('chatInput');
     
-    // 1. Generate/Get Fan ID
     let fanRoomId = localStorage.getItem('fanRoomId');
     if (!fanRoomId) {
         fanRoomId = Math.floor(100000 + Math.random() * 900000).toString();
         localStorage.setItem('fanRoomId', fanRoomId);
     }
     
-    // 2. Variable to hold the welcome text
     let welcomeMessageText = "Hello, welcome <b>Fan</b>. How can I help you today?";
 
     window.addEventListener('firebaseLoaded', async () => {
-        // 3. Fetch Custom Welcome Text from Firebase Settings
         try {
             const settingsRef = window.doc(window.db, "app_settings", "support");
             const settingsSnap = await window.getDoc(settingsRef);
             if (settingsSnap.exists() && settingsSnap.data().welcomeText) {
                 welcomeMessageText = settingsSnap.data().welcomeText;
             }
-        } catch (e) {
-            console.log("Using default welcome message.");
-        }
+        } catch (e) {}
 
-        // 4. Start listening for messages
-        const q = window.query(
-            window.collection(window.db, "support_messages"), 
-            window.orderBy("timestamp")
-        );
+        const q = window.query(window.collection(window.db, "support_messages"), window.orderBy("timestamp"));
         
         window.onSnapshot(q, (snapshot) => {
             chatArea.innerHTML = ''; 
@@ -136,9 +169,7 @@ layout: false
                 }
             });
 
-            // 5. Show the welcome message if no history exists
             if (!hasMessages) {
-                // Replace "Fan" with the actual ID
                 let finalWelcome = welcomeMessageText.replace("Fan", `Fan (ID: ${fanRoomId})`);
                 renderMessage(finalWelcome, "agent", null);
             }
