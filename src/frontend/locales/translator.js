@@ -7,7 +7,7 @@ function applyTranslation() {
     if (userLang.startsWith("pl")) langCode = "pl";
     if (userLang.startsWith("hu")) langCode = "hu";
 
-    // 3. Allow manual override (if they clicked a language button in the future)
+    // 3. Allow manual override (if they clicked a language button)
     const savedLang = localStorage.getItem('selectedLanguage');
     if (savedLang) langCode = savedLang;
 
@@ -21,7 +21,7 @@ function applyTranslation() {
         }
     });
 
-    // 5. Update placeholders on inputs (like search bars or chat inputs)
+    // 5. Update placeholders on inputs
     document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
         const key = element.getAttribute('data-translate-placeholder');
         if (window.translations && window.translations[langCode] && window.translations[langCode][key]) {
@@ -29,6 +29,3 @@ function applyTranslation() {
         }
     });
 }
-
-// Run the translation as soon as the page loads
-document.addEventListener("DOMContentLoaded", applyTranslation);
