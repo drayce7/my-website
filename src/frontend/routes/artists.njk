@@ -135,33 +135,35 @@ layout: false
             
             if (snapshot.empty) {
                 list.innerHTML = '<p style="text-align: center; color: #888;">No celebrities added yet. Check the Master Editor.</p>';
-                return;
+            } else {
+                snapshot.forEach(docSnap => {
+                    const artist = docSnap.data();
+                    
+                    const item = document.createElement('div');
+                    item.className = 'artist-list-item';
+                    item.onclick = () => selectArtist(artist);
+
+                    item.innerHTML = `
+                        <div class="artist-list-avatar" style="background: ${artist.bgColor || '#3a7bd5'};">
+                            ${artist.initial || 'A'}
+                        </div>
+                        <div class="artist-list-info">
+                            <h3>${artist.name}</h3>
+                            <p>Enter Fanbook</p>
+                        </div>
+                    `;
+
+                    list.appendChild(item);
+                });
             }
-
-            snapshot.forEach(docSnap => {
-                const artist = docSnap.data();
-                
-                const item = document.createElement('div');
-                item.className = 'artist-list-item';
-                item.onclick = () => selectArtist(artist);
-
-                item.innerHTML = `
-                    <div class="artist-list-avatar" style="background: ${artist.bgColor || '#3a7bd5'};">
-                        ${artist.initial || 'A'}
-                    </div>
-                    <div class="artist-list-info">
-                        <h3>${artist.name}</h3>
-                        <p>Enter Fanbook</p>
-                    </div>
-                `;
-
-                list.appendChild(item);
-            });
 
         } catch (e) {
             console.error("Error loading celebrities: ", e);
             list.innerHTML = '<p style="text-align: center; color: red;">Failed to load. Check console.</p>';
         }
+
+        // 4. FORCE TRANSLATION AFTER DATA LOADS
+        applyTranslation(); 
     });
 
     function selectArtist(artist) {
