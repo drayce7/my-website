@@ -15,8 +15,7 @@ const ANCHOR_PERMALINK_PLACEMENT = "after";
 const MARKDOWN_BASE_PATH = "src/frontend/components/";
 
 module.exports = function (eleventyConfig) {
-      eleventyConfig.addPassthroughCopy("src/frontend/locales");
-  // ---------------------------------------------------------------------------
+    eleventyConfig.addPassthroughCopy("src/frontend/assets/locales");  // ---------------------------------------------------------------------------
   // Utilities
   // ---------------------------------------------------------------------------
 
