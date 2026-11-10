@@ -71,41 +71,21 @@ layout: false
         .artist-subtitle { font-family: 'Playfair Display', serif; font-style: italic; font-size: 13px; color: #7a6b62; margin-top: 2px; }
         
         .fan-grid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 5px; padding-top: 15px; }
-        .fan-card { display: flex; flex-direction: column; align-items: center; width: 85px; margin-bottom: 5px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+        .fan-card { display: flex; flex-direction: column; align-items: center; width: 85px; margin-bottom: 5px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; opacity: 0; }
+        
+        /* ===== STAGGERED ARRANGE ANIMATION: slide from left, one by one ===== */
+        .fan-card.arranging {
+            animation: arrangeFromLeft 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes arrangeFromLeft {
+            from { opacity: 0; transform: translateX(-40px) scale(0.85); }
+            to   { opacity: 1; }
+        }
+
         .fan-card:hover { transform: scale(1.1) !important; z-index: 100 !important; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .fan-card.new-batch { animation: cardFadeIn 0.5s ease-out forwards; }
-        @keyframes cardFadeIn { from { opacity: 0; transform: translateY(20px) scale(0.9); } to { opacity: 1; } }
         .fan-avatar { width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 24px; color: white; border: 4px solid; box-shadow: 0 4px 8px rgba(0,0,0,0.15); margin-bottom: 3px; background-size: cover; background-position: center; }
         .fan-email { background: #f0e4d0; border: 1px solid #c4b4a8; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 8px; color: #5a4b42; width: 100%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .sec-img { display: inline-block; background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; font-size: 7px; color: #8a7b72; margin-top: 2px; text-transform: uppercase; font-family: sans-serif; letter-spacing: 0.5px; width: auto; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        /* Inline batch loader at bottom of fan grid */
-        .batch-loader {
-            display: flex; justify-content: center; align-items: center; gap: 10px;
-            width: 100%; padding: 20px 0; margin-top: 10px;
-            font-family: 'Caveat', cursive; font-size: 20px; color: #8a7b72;
-            opacity: 0; transition: opacity 0.3s ease;
-        }
-        .batch-loader.active { opacity: 1; }
-        .batch-loader .mini-loader {
-            width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1);
-            border-left-color: #00d2ff; border-radius: 50%; animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Fallback Load More button */
-        .load-more-btn {
-            display: none; margin: 20px auto 10px auto; padding: 12px 30px;
-            background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white;
-            border: none; border-radius: 30px; font-weight: bold; font-size: 15px;
-            cursor: pointer; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
-            transition: 0.2s; font-family: sans-serif;
-        }
-        .load-more-btn.active { display: block; }
-        .load-more-btn:hover { transform: scale(1.05); }
-
-        /* Sentinel element that IntersectionObserver watches */
-        .load-sentinel { width: 100%; height: 20px; margin-top: 10px; }
 
         .btn-support { position: fixed; bottom: 20px; left: 20px; width: 55px; height: 55px; background: #ef4444; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); cursor: pointer; z-index: 100; transition: 0.2s; }
         .btn-support:hover { transform: scale(1.1); background: #dc2626; }
@@ -115,6 +95,7 @@ layout: false
         .focus-card { background: #fdf6e3; border: 3px solid #d4c4a8; border-radius: 20px; padding: 30px; width: 80%; max-width: 300px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; position: relative; overflow: visible; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .loader { border: 4px solid rgba(0,0,0,0.1); border-left-color: #00d2ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-text { font-family: 'Caveat', cursive; font-size: 24px; color: #4a3b32; }
         .spark { position: absolute; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; animation: explode 1.5s ease-out forwards; }
         @keyframes explode { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; } }
@@ -183,12 +164,6 @@ layout: false
                 </div>
             </div>
             <div class="fan-grid" id="fanGrid"></div>
-            <div class="batch-loader" id="batchLoader">
-                <div class="mini-loader"></div>
-                <span data-i18n="loading_more">Loading more fans…</span>
-            </div>
-            <button class="load-more-btn" id="loadMoreBtn" onclick="forceLoadBatch()" data-i18n="load_more_btn">Load more fans</button>
-            <div class="load-sentinel" id="loadSentinel"></div>
         </div>
 
         <div class="btn-support" onclick="showSupportConnecting()">🎧</div>
@@ -244,9 +219,7 @@ layout: false
             fan_not_found: "Fan not found! Try exact email.",
             invalid_key: "Invalid Activation Key!",
             support_headline: "Connecting you to support…",
-            support_sub: "Please wait while we connect you to our team.",
-            loading_more: "Loading more fans…",
-            load_more_btn: "Load more fans"
+            support_sub: "Please wait while we connect you to our team."
         },
         pl: {
             search_placeholder: "Szukaj po e-mailu...",
@@ -263,9 +236,7 @@ layout: false
             fan_not_found: "Nie znaleziono fana! Spróbuj dokładnego e-maila.",
             invalid_key: "Nieprawidłowy klucz aktywacyjny!",
             support_headline: "Łączymy Cię z pomocą…",
-            support_sub: "Proszę czekać, łączymy Cię z naszym zespołem.",
-            loading_more: "Ładowanie kolejnych fanów…",
-            load_more_btn: "Załaduj więcej fanów"
+            support_sub: "Proszę czekać, łączymy Cię z naszym zespołem."
         },
         hu: {
             search_placeholder: "Keresés e-mailben...",
@@ -282,9 +253,7 @@ layout: false
             fan_not_found: "A rajongó nem található! Próbálja a pontos e-mailt.",
             invalid_key: "Érvénytelen aktiválási kulcs!",
             support_headline: "Kapcsolódás az ügyfélszolgálathoz…",
-            support_sub: "Kérjük, várjon, amíg csapatunkhoz kapcsoljuk.",
-            loading_more: "További rajongók betöltése…",
-            load_more_btn: "További rajongók betöltése"
+            support_sub: "Kérjük, várjon, amíg csapatunkhoz kapcsoljuk."
         }
     };
 
@@ -297,15 +266,13 @@ layout: false
     let allComments = [];
 
     /* ===== INFINITE LOOP STATE ===== */
-    const BATCH_SEQUENCE = [6, 3, 4, 5, 6, 6];  // then stays at 6 forever
-    let currentCycle = [];          // current shuffled cycle order
-    let cyclePosition = 0;          // index in current cycle
-    let batchIndex = 0;             // which batch we're on (0 = first, 1 = second...)
+    const BATCH_SEQUENCE = [6, 3, 4, 5, 6, 6];
+    let currentCycle = [];
+    let cyclePosition = 0;
+    let batchIndex = 0;
     let isLoading = false;
-    let lastRenderedCyclePos = -1;
-    let lastFanRendered = null;     // for repeat-adjacent guard
-    let allLoaded = false;          // not used anymore since infinite — kept for safety
-    let searchTarget = null;        // email we're fast-loading to
+    let lastFanRendered = null;
+    let searchTarget = null;
 
     function t(key) {
         if (translations[currentLang] && translations[currentLang][key]) return translations[currentLang][key];
@@ -323,23 +290,19 @@ layout: false
 
     function applyTranslations() {
         currentLang = detectLang();
-
         document.querySelectorAll('[data-i18n]').forEach(el => {
             el.textContent = t(el.getAttribute('data-i18n'));
         });
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
             el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
         });
-
         const hintEl = document.getElementById('keyHint');
         hintEl.textContent = customKeyHint ? customKeyHint : t('default_key_hint');
-
         document.querySelectorAll('.brain-text').forEach(el => {
             el.textContent = customBrainLabel ? customBrainLabel : t('brain_default');
         });
     }
 
-    /* ===== FISHER-YATES SHUFFLE ===== */
     function shuffleArray(arr) {
         const a = arr.slice();
         for (let i = a.length - 1; i > 0; i--) {
@@ -349,20 +312,16 @@ layout: false
         return a;
     }
 
-    /* ===== BUILD NEW CYCLE WITH ADJACENT-REPEAT GUARD ===== */
     function buildNewCycle() {
         if (allFans.length === 0) return [];
         let shuffled = shuffleArray(allFans);
-        // Guard: first fan of new cycle != last fan of previous cycle
         if (lastFanRendered && shuffled.length > 1 && shuffled[0].email === lastFanRendered.email) {
-            // swap first with a random other
             const swapIdx = 1 + Math.floor(Math.random() * (shuffled.length - 1));
             [shuffled[0], shuffled[swapIdx]] = [shuffled[swapIdx], shuffled[0]];
         }
         return shuffled;
     }
 
-    /* ===== LOAD SELECTED ARTIST ===== */
     function loadSelectedArtist() {
         const stored = sessionStorage.getItem('selectedArtist');
         if (!stored) { window.location.href = '/my-website/artists/'; return; }
@@ -388,7 +347,6 @@ layout: false
         } catch (e) { window.location.href = '/my-website/artists/'; }
     }
 
-    /* ===== FIRESTORE LOAD ===== */
     window.addEventListener('firebaseLoaded', async () => {
         loadSelectedArtist();
 
@@ -426,86 +384,50 @@ layout: false
 
         applyTranslations();
 
-        // Kick off first cycle + first batch
         if (allFans.length > 0) {
             currentCycle = buildNewCycle();
             cyclePosition = 0;
             batchIndex = 0;
-            loadNextBatch();
+            await loadNextBatch();
+            // Auto-fill: keep loading until the fan area is scrollable
+            await fillInitialView();
             setupInfiniteScroll();
         }
     });
 
-    /* ===== INFINITE SCROLL SETUP ===== */
-    let observer = null;
+    /* ===== AUTO-FILL: keep loading until page has scrollable height ===== */
+    async function fillInitialView() {
+        const fanArea = document.getElementById('fanArea');
+        let safety = 0;
+        while (fanArea.scrollHeight <= fanArea.clientHeight + 20 && safety < 10 && allFans.length > 0) {
+            await loadNextBatch();
+            safety++;
+        }
+    }
+
+    /* ===== SCROLL-DOWN INFINITE LOADING ===== */
+    let scrollHandlerAttached = false;
     function setupInfiniteScroll() {
-        const sentinel = document.getElementById('loadSentinel');
+        if (scrollHandlerAttached) return;
+        scrollHandlerAttached = true;
         const fanArea = document.getElementById('fanArea');
 
-        observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !isLoading) {
-                    // Only auto-trigger when user is scrolling DOWN
-                    // (we can't detect direction from IntersectionObserver alone,
-                    // but since the sentinel is at the bottom, if it's intersecting
-                    // the user is near the bottom = they scrolled down)
-                    triggerBatchLoad();
-                }
-            });
-        }, {
-            root: fanArea,
-            rootMargin: '200px',  // start loading 200px before sentinel
-            threshold: 0.01
-        });
-        observer.observe(sentinel);
-    }
-
-    /* ===== SCROLL DIRECTION TRACKING (for pause on scroll up) ===== */
-    let lastScrollTop = 0;
-    let scrollUpRecently = false;
-    document.addEventListener('DOMContentLoaded', () => {
-        const fanArea = document.getElementById('fanArea');
-        if (!fanArea) return;
         fanArea.addEventListener('scroll', () => {
-            const st = fanArea.scrollTop;
-            if (st < lastScrollTop - 5) {
-                // user scrolled up
-                scrollUpRecently = true;
-            } else if (st > lastScrollTop + 5) {
-                scrollUpRecently = false;
+            if (isLoading) return;
+            const distanceToBottom = fanArea.scrollHeight - fanArea.scrollTop - fanArea.clientHeight;
+            // When user is within 300px of the bottom → load next batch
+            if (distanceToBottom < 300) {
+                loadNextBatch();
             }
-            lastScrollTop = st;
         }, { passive: true });
-    });
-
-    /* ===== TRIGGER BATCH (auto) ===== */
-    function triggerBatchLoad() {
-        if (isLoading || allFans.length === 0) return;
-        if (scrollUpRecently) return;  // pause if user is scrolling up
-        loadNextBatch();
-    }
-
-    /* ===== FALLBACK BUTTON ===== */
-    function forceLoadBatch() {
-        if (isLoading) return;
-        scrollUpRecently = false;
-        loadNextBatch();
     }
 
     /* ===== CORE: LOAD NEXT BATCH ===== */
     function loadNextBatch() {
-        if (isLoading || allFans.length === 0) return;
-        isLoading = true;
+        return new Promise((resolve) => {
+            if (isLoading || allFans.length === 0) { resolve(); return; }
+            isLoading = true;
 
-        const batchLoader = document.getElementById('batchLoader');
-        const loadMoreBtn = document.getElementById('loadMoreBtn');
-        batchLoader.classList.add('active');
-        loadMoreBtn.classList.remove('active');
-
-        // Simulate network loading time (0.8-1.5s) for the "old Facebook" vibe
-        const fakeDelay = Math.floor(Math.random() * 700) + 800;
-
-        setTimeout(() => {
             const size = batchIndex < BATCH_SEQUENCE.length
                 ? BATCH_SEQUENCE[batchIndex]
                 : 6;
@@ -513,7 +435,6 @@ layout: false
             const batch = [];
             for (let i = 0; i < size; i++) {
                 if (cyclePosition >= currentCycle.length) {
-                    // End of cycle — reshuffle and continue
                     currentCycle = buildNewCycle();
                     cyclePosition = 0;
                 }
@@ -521,28 +442,18 @@ layout: false
                 cyclePosition++;
             }
 
-            renderBatch(batch);
+            renderBatchStaggered(batch);
             batchIndex++;
 
-            batchLoader.classList.remove('active');
-            isLoading = false;
-
-            // If user stopped scrolling and sentinel is still visible, show button
-            setTimeout(() => {
-                const sentinel = document.getElementById('loadSentinel');
-                const rect = sentinel.getBoundingClientRect();
-                const areaRect = document.getElementById('fanArea').getBoundingClientRect();
-                if (rect.top < areaRect.bottom && !isLoading) {
-                    loadMoreBtn.classList.add('active');
-                }
-            }, 300);
-        }, fakeDelay);
+            // Small lock so rapid scroll doesn't double-fire
+            setTimeout(() => { isLoading = false; resolve(); }, 100);
+        });
     }
 
-    /* ===== RENDER A BATCH OF FANS ===== */
-    function renderBatch(fans) {
+    /* ===== RENDER BATCH STAGGERED (slide from left, one by one) ===== */
+    function renderBatchStaggered(fans) {
         const fanGrid = document.getElementById('fanGrid');
-        fans.forEach(fan => {
+        fans.forEach((fan, idx) => {
             lastFanRendered = fan;
 
             const yOffset = (Math.random() * 30) - 15;
@@ -551,9 +462,7 @@ layout: false
             const zIndex = Math.floor(Math.random() * 10);
 
             const card = document.createElement('div');
-            card.className = 'fan-card new-batch';
-            // Use a counter id since emails can repeat across cycles
-            card.id = `fan-${fan.email}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+            card.className = 'fan-card';
             card.dataset.email = fan.email;
             card.style.transform = `translate(${xOffset}px, ${yOffset}px) rotate(${rotation}deg)`;
             card.style.zIndex = zIndex;
@@ -570,6 +479,12 @@ layout: false
                 <div class="sec-img">${fan.secImg}</div>
             `;
             fanGrid.appendChild(card);
+
+            // Staggered arrange animation: one card every 80ms, left to right
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.classList.add('arranging');
+            }, idx * 80);
         });
     }
 
@@ -675,7 +590,6 @@ layout: false
         const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
         if (!searchInput) return;
 
-        // Check currently loaded cards
         const existing = document.querySelector(`.fan-card[data-email="${CSS.escape(searchInput)}"]`);
         if (existing) {
             existing.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -684,14 +598,9 @@ layout: false
             return;
         }
 
-        // Not loaded yet — check if the fan exists at all
         const fanExists = allFans.some(f => f.email.toLowerCase() === searchInput);
-        if (!fanExists) {
-            alert(t('fan_not_found'));
-            return;
-        }
+        if (!fanExists) { alert(t('fan_not_found')); return; }
 
-        // Fast-load batches until found
         searchTarget = searchInput;
         fastLoadToSearch();
     }
@@ -706,12 +615,6 @@ layout: false
             searchTarget = null;
             return;
         }
-        // Force-load one batch immediately, then re-check
-        if (isLoading) {
-            setTimeout(fastLoadToSearch, 300);
-            return;
-        }
-        // Temporarily disable fake delay for search speed
         const size = 10;
         const batch = [];
         for (let i = 0; i < size; i++) {
@@ -722,7 +625,7 @@ layout: false
             batch.push(currentCycle[cyclePosition]);
             cyclePosition++;
         }
-        renderBatch(batch);
+        renderBatchStaggered(batch);
         setTimeout(fastLoadToSearch, 200);
     }
 
