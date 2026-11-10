@@ -33,24 +33,38 @@ layout: false
     </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Inter:wght@400;600;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #2a1b18; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Playfair Display', serif; }
+        body { background: #2a1b18; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Inter', sans-serif; }
         .app-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #fdf6e3; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>'); }
         
-        /* HEADER WITH LANGUAGE DROPDOWN */
         .header { width: 100%; padding: 20px; background: rgba(20, 15, 30, 0.95); color: white; text-align: center; font-family: 'Caveat', cursive; font-size: 28px; border-bottom: 2px solid #d4c4a8; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; }
         .lang-select { background: transparent; color: #d4c4a8; border: 1px solid #d4c4a8; padding: 5px 10px; border-radius: 5px; font-family: sans-serif; font-size: 14px; cursor: pointer; outline: none; }
         .lang-select option { background: #1e1e2f; color: white; }
         
         .list-area { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .artist-list-item { display: flex; align-items: center; gap: 20px; background: rgba(255, 255, 255, 0.6); padding: 15px; border-radius: 12px; border: 1px solid #d4c4a8; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        
+        .artist-list-item { display: flex; align-items: center; gap: 20px; background: rgba(255, 255, 255, 0.7); padding: 15px; border-radius: 12px; border: 1px solid #d4c4a8; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .artist-list-item:hover { background: #fff; transform: translateX(5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
         
-        .artist-list-avatar { width: 70px; height: 70px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 28px; color: white; font-weight: bold; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; background-size: cover; background-position: center; }
+        .artist-list-avatar { width: 70px; height: 70px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 28px; color: white; font-weight: bold; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; background-size: cover; background-position: center; background-color: #3a7bd5;}
         
-        .artist-list-info h3 { font-size: 22px; color: #4a3b32; font-family: 'Caveat', cursive; margin-bottom: 5px; }
-        .artist-list-info p { font-size: 13px; color: #8a7b72; font-family: sans-serif; }
+        .artist-list-info { flex-grow: 1; }
+        .artist-list-info h3 { font-size: 20px; color: #1f2937; font-weight: 700; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;}
+        .artist-list-info p { font-size: 14px; color: #6b7280; font-weight: 500;}
+        
+        /* Blue Verification Badge */
+        .verified-badge { width: 18px; height: 18px; fill: #1d9bf0; }
+
+        /* GATED OVERLAY */
+        .gate-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 15, 30, 0.95); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; color: white; text-align: center; padding: 20px; }
+        .gate-overlay.active { display: flex; }
+        .gate-box { background: #1f2937; padding: 40px; border-radius: 20px; max-width: 350px; border: 2px solid #ef4444; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        .gate-box h2 { color: #ef4444; margin-bottom: 15px; font-size: 24px; }
+        .gate-box p { color: #9ca3af; line-height: 1.6; margin-bottom: 25px; }
+        .btn-gate-close { background: #4b5563; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* REVEAL OVERLAY */
         .transition-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 15, 30, 0.95); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; color: white; text-align: center; padding: 20px; }
         .transition-overlay.active { display: flex; }
         .loader { border: 4px solid rgba(255,255,255,0.1); border-left-color: #00d2ff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
@@ -60,7 +74,7 @@ layout: false
         .reveal-card { display: none; flex-direction: column; align-items: center; animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .reveal-card.active { display: flex; }
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .reveal-avatar { width: 150px; height: 150px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: white; font-weight: bold; border: 6px solid #fff; box-shadow: 0 0 30px rgba(255, 0, 204, 0.6); margin-bottom: 20px; animation: glow 2s infinite alternate; background-size: cover; background-position: center;}
+        .reveal-avatar { width: 150px; height: 150px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: white; font-weight: bold; border: 6px solid #fff; box-shadow: 0 0 30px rgba(255, 0, 204, 0.6); margin-bottom: 20px; animation: glow 2s infinite alternate; background-size: cover; background-position: center; }
         @keyframes glow { from { box-shadow: 0 0 20px rgba(255, 0, 204, 0.4); } to { box-shadow: 0 0 40px rgba(255, 0, 204, 0.9); } }
         .reveal-name { font-family: 'Caveat', cursive; font-size: 42px; color: #fff; margin-bottom: 15px; }
         .reveal-message { font-family: 'Playfair Display', serif; font-size: 18px; color: #e0e0e0; max-width: 400px; line-height: 1.6; margin-bottom: 30px; font-style: italic; }
@@ -72,7 +86,6 @@ layout: false
 <body>
 
     <div class="app-wrapper">
-        <!-- HEADER WITH DROPDOWN -->
         <div class="header">
             <span id="headerTitle">Select Your Celebrity</span>
             <select id="langSelect" class="lang-select" onchange="changeLanguage(this.value)">
@@ -87,12 +100,21 @@ layout: false
         </div>
     </div>
 
+    <!-- GATE MODAL -->
+    <div class="gate-overlay" id="gateOverlay">
+        <div class="gate-box">
+            <h2>Access Denied</h2>
+            <p>We are sorry, but you do not have an active record with this artist. Please check your membership status or contact support.</p>
+            <button class="btn-gate-close" onclick="closeGate()">Understood</button>
+        </div>
+    </div>
+
+    <!-- REVEAL MODAL -->
     <div class="transition-overlay" id="transitionOverlay">
         <div id="loadingState">
             <div class="loader"></div>
             <div class="loading-text">Connecting to Fanbase...</div>
         </div>
-
         <div class="reveal-card" id="revealCard">
             <div class="reveal-avatar" id="revealAvatar">A</div>
             <div class="reveal-name" id="revealName">Artist Name</div>
@@ -113,25 +135,17 @@ layout: false
         let langCode = "en";
         if (userLang.startsWith("pl")) langCode = "pl";
         if (userLang.startsWith("hu")) langCode = "hu";
-        
         const savedLang = localStorage.getItem('selectedLanguage');
         if (savedLang) langCode = savedLang;
 
         const titleElement = document.getElementById('headerTitle');
-        if (translations[langCode]) {
-            titleElement.textContent = translations[langCode].select_celebrity;
-        }
-        
+        if (translations[langCode]) titleElement.textContent = translations[langCode].select_celebrity;
         const select = document.getElementById('langSelect');
         if (select) select.value = langCode;
     }
 
     document.addEventListener("DOMContentLoaded", applyTranslation);
-
-    function changeLanguage(lang) {
-        localStorage.setItem('selectedLanguage', lang);
-        location.reload();
-    }
+    function changeLanguage(lang) { localStorage.setItem('selectedLanguage', lang); location.reload(); }
 
     window.addEventListener('firebaseLoaded', async () => {
         const list = document.getElementById('artistList');
@@ -145,38 +159,52 @@ layout: false
             } else {
                 snapshot.forEach(docSnap => {
                     const artist = docSnap.data();
-                    
                     const item = document.createElement('div');
                     item.className = 'artist-list-item';
-                    item.onclick = () => selectArtist(artist);
+                    item.onclick = () => handleArtistClick(artist);
 
-                    // Check if image exists, otherwise fallback to initial letter
                     const avatarHTML = artist.imageUrl 
                         ? `<div class="artist-list-avatar" style="background-image: url('${artist.imageUrl}');"></div>`
-                        : `<div class="artist-list-avatar" style="background: ${artist.bgColor || '#3a7bd5'};">${artist.name.charAt(0).toUpperCase()}</div>`;
+                        : `<div class="artist-list-avatar">${artist.name.charAt(0).toUpperCase()}</div>`;
 
-                    // Use custom text if provided, otherwise fallback
                     const subtitle = artist.customText || "Enter Fanbook";
+                    
+                    // Add blue tick if verified
+                    const verifiedHTML = artist.isVerified 
+                        ? `<svg class="verified-badge" viewBox="0 0 24 24"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .495.083.965.238 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z"/></svg>` 
+                        : '';
 
                     item.innerHTML = `
                         ${avatarHTML}
                         <div class="artist-list-info">
-                            <h3>${artist.name}</h3>
+                            <h3>${artist.name} ${verifiedHTML}</h3>
                             <p>${subtitle}</p>
                         </div>
                     `;
-
                     list.appendChild(item);
                 });
             }
-
         } catch (e) {
             console.error("Error loading celebrities: ", e);
             list.innerHTML = '<p style="text-align: center; color: red;">Failed to load. Check console.</p>';
         }
-
         applyTranslation(); 
     });
+
+    function handleArtistClick(artist) {
+        // Check if the artist is GATED
+        if (artist.access === 'gated') {
+            document.getElementById('gateOverlay').classList.add('active');
+            return;
+        }
+        
+        // Otherwise, proceed to reveal
+        selectArtist(artist);
+    }
+
+    function closeGate() {
+        document.getElementById('gateOverlay').classList.remove('active');
+    }
 
     function selectArtist(artist) {
         const overlay = document.getElementById('transitionOverlay');
@@ -206,7 +234,6 @@ layout: false
             document.getElementById('revealMessage').textContent = artist.message || "Thank you for being a fan!";
 
             sessionStorage.setItem('selectedArtist', JSON.stringify(artist));
-
             reveal.classList.add('active');
         }, delay);
     }
