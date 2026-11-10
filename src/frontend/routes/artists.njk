@@ -7,7 +7,8 @@ layout: false
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
     <title>Select Your Celebrity</title>
     
     <script type="module">
@@ -36,9 +37,10 @@ layout: false
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Inter:wght@400;600;700&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #2a1b18; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Inter', sans-serif; }
-        .app-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #fdf6e3; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>'); }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; overscroll-behavior: none; }
+        body { background: #2a1b18; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Inter', sans-serif; touch-action: manipulation; }
+        .app-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #fdf6e3; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>'); overflow: hidden; }
         
         .header { width: 100%; padding: 20px; background: rgba(20, 15, 30, 0.95); color: white; text-align: center; font-family: 'Caveat', cursive; font-size: 28px; border-bottom: 2px solid #d4c4a8; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; }
         .lang-select { background: transparent; color: #d4c4a8; border: 1px solid #d4c4a8; padding: 5px 10px; border-radius: 5px; font-family: sans-serif; font-size: 14px; cursor: pointer; outline: none; }
@@ -79,10 +81,99 @@ layout: false
         .reveal-message { font-family: 'Playfair Display', serif; font-size: 18px; color: #e0e0e0; max-width: 400px; line-height: 1.6; margin-bottom: 30px; font-style: italic; }
         .btn-okay { background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white; padding: 15px 40px; border: none; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4); transition: 0.2s; font-family: sans-serif; }
         .btn-okay:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 210, 255, 0.7); }
+
+        /* ===== NEW: PREMIUM PAGE LOAD OVERLAY ===== */
+        .page-load-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1a1226 0%, #2a1b18 60%, #1a1226 100%);
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            z-index: 3000; padding: 30px;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .page-load-overlay.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+        .page-load-box {
+            text-align: center; max-width: 380px; width: 90%;
+            animation: fadeUp 0.8s ease-out;
+        }
+        @keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .page-load-emblem {
+            width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 30px auto;
+            background: linear-gradient(135deg, #ff00cc, #333399, #00d2ff);
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Caveat', cursive; font-size: 50px; color: white;
+            box-shadow: 0 0 40px rgba(255, 0, 204, 0.6);
+            animation: emblemGlow 2s infinite alternate;
+            position: relative;
+        }
+        .page-load-emblem::before {
+            content: ''; position: absolute; inset: -8px; border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: #00d2ff; border-right-color: #ff00cc;
+            animation: spin 1.5s linear infinite;
+        }
+        @keyframes emblemGlow {
+            from { box-shadow: 0 0 25px rgba(255, 0, 204, 0.4); }
+            to { box-shadow: 0 0 55px rgba(0, 210, 255, 0.8); }
+        }
+        .page-load-title {
+            font-family: 'Caveat', cursive; font-size: 36px; color: #fff;
+            margin-bottom: 10px; text-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+        }
+        .page-load-sub {
+            font-family: 'Playfair Display', serif; font-style: italic;
+            font-size: 15px; color: #d4c4a8; line-height: 1.6; margin-bottom: 30px;
+        }
+        .page-load-progress {
+            width: 100%; height: 6px; background: rgba(255,255,255,0.1);
+            border-radius: 3px; overflow: hidden;
+        }
+        .page-load-bar {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #00d2ff, #ff00cc, #00d2ff);
+            background-size: 200% 100%;
+            animation: shimmer 2s linear infinite;
+            transition: width 0.3s linear; border-radius: 3px;
+        }
+        @keyframes shimmer { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+        .page-load-pct {
+            font-family: sans-serif; font-size: 12px; color: #d4c4a8;
+            margin-top: 12px; letter-spacing: 2px;
+        }
+
+        /* ===== NEW: GATE CHECK LOADING (shorter) ===== */
+        .gate-loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(20, 15, 30, 0.97); backdrop-filter: blur(12px);
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+            z-index: 2500; padding: 30px;
+        }
+        .gate-loading-overlay.active { display: flex; }
+        .gate-loading-box { text-align: center; max-width: 340px; width: 90%; }
+        .gate-loading-box .loader { border-left-color: #ef4444; }
+        .gate-loading-title {
+            font-family: 'Caveat', cursive; font-size: 32px; color: #fff;
+            margin-bottom: 10px;
+        }
+        .gate-loading-sub {
+            font-family: 'Playfair Display', serif; font-style: italic;
+            font-size: 14px; color: #d4c4a8; line-height: 1.6;
+        }
+
         @media (min-width: 769px) { .app-wrapper { max-width: 600px; height: 90vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); } }
     </style>
 </head>
 <body>
+
+    <!-- ===== PREMIUM PAGE LOAD OVERLAY (7-10s) ===== -->
+    <div class="page-load-overlay" id="pageLoadOverlay">
+        <div class="page-load-box">
+            <div class="page-load-emblem">★</div>
+            <div class="page-load-title" id="pageLoadTitle">Preparing your experience</div>
+            <div class="page-load-sub" id="pageLoadSub">Connecting to the artist network…</div>
+            <div class="page-load-progress"><div class="page-load-bar" id="pageLoadBar"></div></div>
+            <div class="page-load-pct" id="pageLoadPct">0%</div>
+        </div>
+    </div>
 
     <div class="app-wrapper">
         <div class="header">
@@ -99,9 +190,18 @@ layout: false
         </div>
     </div>
 
+    <!-- ===== GATE LOADING OVERLAY (3-5s before Access Denied) ===== -->
+    <div class="gate-loading-overlay" id="gateLoadingOverlay">
+        <div class="gate-loading-box">
+            <div class="loader"></div>
+            <div class="gate-loading-title" id="gateLoadingTitle">Checking your record</div>
+            <div class="gate-loading-sub" id="gateLoadingSub">Verifying membership status…</div>
+        </div>
+    </div>
+
     <div class="gate-overlay" id="gateOverlay">
         <div class="gate-box">
-            <h2>Access Denied</h2>
+            <h2 id="gateTitle">Access Denied</h2>
             <p id="gateMessageText">We are sorry, but you do not have an active record with this artist. Please check your membership status or contact support.</p>
             <button class="btn-gate-close" onclick="closeGate()">Understood</button>
         </div>
@@ -124,27 +224,93 @@ layout: false
     let customGateMessage = "We are sorry, but you do not have an active record with this artist. Please check your membership status or contact support.";
 
     const translations = {
-        en: { select_celebrity: "Select Your Celebrity" },
-        pl: { select_celebrity: "Wybierz swoją gwiazdę" },
-        hu: { select_celebrity: "Válassza ki a hírességét" }
+        en: {
+            select_celebrity: "Select Your Celebrity",
+            page_load_title: "Preparing your experience",
+            page_load_sub: "Connecting to the artist network…",
+            gate_loading_title: "Checking your record",
+            gate_loading_sub: "Verifying membership status…",
+            gate_title: "Access Denied",
+            gate_btn: "Understood"
+        },
+        pl: {
+            select_celebrity: "Wybierz swoją gwiazdę",
+            page_load_title: "Przygotowujemy Twoje doświadczenie",
+            page_load_sub: "Łączenie z siecią artystów…",
+            gate_loading_title: "Sprawdzanie Twojego rekordu",
+            gate_loading_sub: "Weryfikacja statusu członkostwa…",
+            gate_title: "Odmowa dostępu",
+            gate_btn: "Rozumiem"
+        },
+        hu: {
+            select_celebrity: "Válassza ki a hírességét",
+            page_load_title: "Előkészítjük az élményt",
+            page_load_sub: "Kapcsolódás a művész hálózathoz…",
+            gate_loading_title: "Rekord ellenőrzése",
+            gate_loading_sub: "Tagsági állapot ellenőrzése…",
+            gate_title: "Hozzáférés megtagadva",
+            gate_btn: "Értem"
+        }
     };
 
-    function applyTranslation() {
-        const userLang = navigator.language || navigator.userLanguage;
-        let langCode = "en";
-        if (userLang.startsWith("pl")) langCode = "pl";
-        if (userLang.startsWith("hu")) langCode = "hu";
-        const savedLang = localStorage.getItem('selectedLanguage');
-        if (savedLang) langCode = savedLang;
+    let currentLang = "en";
+    function t(key) {
+        if (translations[currentLang] && translations[currentLang][key]) return translations[currentLang][key];
+        return translations.en[key] || key;
+    }
 
+    function detectLang() {
+        const saved = localStorage.getItem('selectedLanguage');
+        if (saved && translations[saved]) return saved;
+        const nav = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+        if (nav.startsWith("pl")) return "pl";
+        if (nav.startsWith("hu")) return "hu";
+        return "en";
+    }
+
+    function applyTranslation() {
+        currentLang = detectLang();
         const titleElement = document.getElementById('headerTitle');
-        if (translations[langCode]) titleElement.textContent = translations[langCode].select_celebrity;
+        if (titleElement) titleElement.textContent = t('select_celebrity');
         const select = document.getElementById('langSelect');
-        if (select) select.value = langCode;
+        if (select) select.value = currentLang;
+        document.getElementById('pageLoadTitle').textContent = t('page_load_title');
+        document.getElementById('pageLoadSub').textContent = t('page_load_sub');
+        document.getElementById('gateLoadingTitle').textContent = t('gate_loading_title');
+        document.getElementById('gateLoadingSub').textContent = t('gate_loading_sub');
+        document.getElementById('gateTitle').textContent = t('gate_title');
+        document.querySelector('.btn-gate-close').textContent = t('gate_btn');
     }
 
     document.addEventListener("DOMContentLoaded", applyTranslation);
     function changeLanguage(lang) { localStorage.setItem('selectedLanguage', lang); location.reload(); }
+
+    /* ===== PREMIUM PAGE LOAD (7-10s) ===== */
+    function runPageLoad() {
+        const overlay = document.getElementById('pageLoadOverlay');
+        const bar = document.getElementById('pageLoadBar');
+        const pctEl = document.getElementById('pageLoadPct');
+
+        // Random duration: 7000 - 10000 ms
+        const totalMs = Math.floor(Math.random() * 3000) + 7000;
+        const start = Date.now();
+
+        const timer = setInterval(() => {
+            const elapsed = Date.now() - start;
+            const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
+            bar.style.width = pct + '%';
+            pctEl.textContent = pct + '%';
+            if (elapsed >= totalMs) {
+                clearInterval(timer);
+                overlay.classList.add('hide');
+                // Remove from DOM after fade
+                setTimeout(() => overlay.remove(), 900);
+            }
+        }, 100);
+    }
+
+    // Fire the page load immediately — runs parallel with Firebase fetch
+    document.addEventListener("DOMContentLoaded", runPageLoad);
 
     window.addEventListener('firebaseLoaded', async () => {
         try {
@@ -197,12 +363,28 @@ layout: false
         applyTranslation(); 
     });
 
+    /* ===== GATED ARTIST — LOADING THEN ACCESS DENIED ===== */
     function handleArtistClick(artist) {
         if (artist.access === 'gated') {
-            document.getElementById('gateOverlay').classList.add('active');
+            showGateSequence();
             return;
         }
         selectArtist(artist);
+    }
+
+    function showGateSequence() {
+        const gateLoading = document.getElementById('gateLoadingOverlay');
+        const gateOverlay = document.getElementById('gateOverlay');
+
+        gateLoading.classList.add('active');
+
+        // Premium 3-5 second wait before showing Access Denied
+        const totalMs = Math.floor(Math.random() * 2000) + 3000;
+
+        setTimeout(() => {
+            gateLoading.classList.remove('active');
+            gateOverlay.classList.add('active');
+        }, totalMs);
     }
 
     function closeGate() {
