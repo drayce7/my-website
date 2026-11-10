@@ -27,16 +27,10 @@ layout: false
       const db = getFirestore(app);
 
       window.db = db;
-      window.doc = doc;
-      window.getDoc = getDoc;
-      window.setDoc = setDoc;
-      window.collection = collection;
-      window.getDocs = getDocs;
-      window.query = query;
-      window.orderBy = orderBy;
-      window.addDoc = addDoc;
-      window.deleteDoc = deleteDoc;
-      window.updateDoc = updateDoc;
+      window.doc = doc; window.getDoc = getDoc; window.setDoc = setDoc;
+      window.collection = collection; window.getDocs = getDocs;
+      window.query = query; window.orderBy = orderBy;
+      window.addDoc = addDoc; window.deleteDoc = deleteDoc; window.updateDoc = updateDoc;
 
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
@@ -82,6 +76,7 @@ layout: false
         .toast.error { background: #ef4444; }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
         .avatar-preview { width: 60px; height: 60px; border-radius: 50%; background: #374151; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #9ca3af; border: 3px solid #4b5563; flex-shrink: 0; background-size: cover; background-position: center; }
+        .avatar-preview.small { width: 50px; height: 50px; font-size: 20px; }
         .empty-state { color: #6b7280; text-align: center; padding: 20px; font-style: italic; }
     </style>
 </head>
@@ -105,12 +100,16 @@ layout: false
         <!-- SECTION 1 -->
         <div class="card">
             <h2>1. Global Settings</h2>
-            <p class="section-help">These control the artist display and access messages across the fanbook and directory pages.</p>
+            <p class="section-help">Artist identity + access messages across the fanbook and directory pages.</p>
             
             <div class="input-group">
-                <label>Artist Name (Shown in Fanbook Header)</label>
+                <label>Artist Name (Fanbook Header)</label>
                 <input type="text" id="artistNameInput" placeholder="e.g., The Weeknd">
-                <div class="help-text">This appears as the sticky header on the fanbook page.</div>
+            </div>
+            <div class="input-group">
+                <label>Artist Subtitle (Small text under name on Fanbook)</label>
+                <input type="text" id="artistSubtitleInput" placeholder="e.g., Official Fanbook · 2025">
+                <div class="help-text">Optional. Leave blank to hide the subtitle line.</div>
             </div>
             <div class="input-group">
                 <label>Artist Popup Message (Brain Click)</label>
@@ -119,7 +118,7 @@ layout: false
             <div class="input-group">
                 <label>⚠️ Access Denied Message (Gate on /artists/)</label>
                 <textarea id="accessDeniedInput" placeholder="e.g., You do not have a record with this artist."></textarea>
-                <div class="help-text">This text appears when a fan clicks a celebrity marked as "Restricted" on the /artists/ selection page.</div>
+                <div class="help-text">Appears when a fan clicks a celebrity marked "Restricted" on /artists/.</div>
             </div>
             <div class="input-group">
                 <label>Support Chat Welcome Message</label>
@@ -128,7 +127,6 @@ layout: false
             <div class="input-group">
                 <label>Activation Key (For Brain Access)</label>
                 <input type="text" id="activationKeyInput" placeholder="e.g., word1 word2 word3...">
-                <div class="help-text">Fans must type this key to unlock the artist message on the fanbook.</div>
             </div>
             <button class="btn-save" id="saveSettingsBtn" onclick="saveSettings()">Save All Settings</button>
         </div>
@@ -136,12 +134,12 @@ layout: false
         <!-- SECTION 2 -->
         <div class="card">
             <h2>2. Celebrity Directory</h2>
-            <p class="section-help">These are the artists shown on the /artists/ selection page. Upload photos to Postimages.org and paste the direct link below.</p>
+            <p class="section-help">Shown on the /artists/ selection page. Upload photos to Postimages.org and paste the direct link below.</p>
             
             <button class="btn-add" onclick="toggleAddForm('celeb')">+ Add New Celebrity</button>
             <div class="add-form" id="celebAddForm">
                 <input type="text" id="newCelebName" placeholder="Celebrity Name">
-                <input type="text" id="newCelebImage" placeholder="Image URL (paste direct link from Postimages)" oninput="previewNewAvatar(this.value)">
+                <input type="text" id="newCelebImage" placeholder="Image URL (direct link from Postimages)" oninput="previewNewAvatar(this.value)">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <div class="avatar-preview" id="newAvatarPreview">?</div>
                     <span style="font-size:12px; color:#9ca3af;">Live preview</span>
@@ -164,12 +162,17 @@ layout: false
         <!-- SECTION 3 -->
         <div class="card">
             <h2>3. Fan Directory</h2>
-            <p class="section-help">Fans displayed in the fanbook grid. Each fan gets a colored avatar and a secImg tag.</p>
+            <p class="section-help">Fans displayed in the fanbook grid. You can upload a photo on their behalf — paste a Postimages direct link in the Photo URL field. Fans cannot change this themselves.</p>
             
             <button class="btn-add" onclick="toggleAddForm('fan')">+ Add New Fan</button>
             <div class="add-form" id="fanAddForm">
                 <input type="email" id="newFanEmail" placeholder="Email Address">
                 <input type="text" id="newFanSecImg" placeholder="Sec Img Text (e.g., VIP, GOLD)">
+                <input type="text" id="newFanPhoto" placeholder="Photo URL (optional — direct link)" oninput="previewNewFanPhoto(this.value)">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="avatar-preview small" id="newFanPreview">?</div>
+                    <span style="font-size:12px; color:#9ca3af;">Fan photo preview (falls back to initial)</span>
+                </div>
                 <select id="newFanColor">
                     <option value="#ffb3ba">Pink</option>
                     <option value="#bae1ff">Blue</option>
@@ -185,7 +188,7 @@ layout: false
         <!-- SECTION 4 -->
         <div class="card">
             <h2>4. Live Comment Ticker</h2>
-            <p class="section-help">Comments that scroll at the top of the fanbook page.</p>
+            <p class="section-help">Comments that scroll at the top of the fanbook page. The ticker now continues from where it left off (saved in the visitor's browser).</p>
             
             <button class="btn-add" onclick="toggleAddForm('comment')">+ Add New Comment</button>
             <div class="add-form" id="commentAddForm">
@@ -219,14 +222,29 @@ layout: false
     function toggleAddForm(type) { document.getElementById(type + 'AddForm').classList.toggle('active'); }
 
     function previewNewAvatar(url) {
-        const preview = document.getElementById('newAvatarPreview');
-        if (url && url.startsWith('http')) {
-            preview.style.backgroundImage = `url('${url}')`;
-            preview.textContent = '';
-        } else {
-            preview.style.backgroundImage = 'none';
-            preview.textContent = '?';
-        }
+        const el = document.getElementById('newAvatarPreview');
+        if (url && url.startsWith('http')) { el.style.backgroundImage = `url('${url}')`; el.textContent = ''; }
+        else { el.style.backgroundImage = 'none'; el.textContent = '?'; }
+    }
+
+    function previewNewFanPhoto(url) {
+        const el = document.getElementById('newFanPreview');
+        if (url && url.startsWith('http')) { el.style.backgroundImage = `url('${url}')`; el.textContent = ''; }
+        else { el.style.backgroundImage = 'none'; el.textContent = '?'; }
+    }
+
+    function previewAvatar(id, url) {
+        const el = document.getElementById('preview-' + id);
+        if (!el) return;
+        if (url && url.startsWith('http')) { el.style.backgroundImage = `url('${url}')`; el.textContent = ''; }
+        else { el.style.backgroundImage = 'none'; el.textContent = '?'; }
+    }
+
+    function previewFanAvatar(id, url, initial) {
+        const el = document.getElementById('fanpreview-' + id);
+        if (!el) return;
+        if (url && url.startsWith('http')) { el.style.backgroundImage = `url('${url}')`; el.textContent = ''; }
+        else { el.style.backgroundImage = 'none'; el.textContent = initial || '?'; }
     }
 
     function showToast(message, isError = false) {
@@ -239,31 +257,29 @@ layout: false
 
     async function loadSettings() {
         try {
-            const artistRef = window.doc(window.db, "app_settings", "artist");
-            const artistSnap = await window.getDoc(artistRef);
+            const artistSnap = await window.getDoc(window.doc(window.db, "app_settings", "artist"));
             if (artistSnap.exists()) {
                 document.getElementById('artistNameInput').value = artistSnap.data().name || "";
+                document.getElementById('artistSubtitleInput').value = artistSnap.data().title || "";
                 document.getElementById('artistMessageInput').value = artistSnap.data().message || "";
             }
-            const supportRef = window.doc(window.db, "app_settings", "support");
-            const supportSnap = await window.getDoc(supportRef);
+            const supportSnap = await window.getDoc(window.doc(window.db, "app_settings", "support"));
             if (supportSnap.exists()) { 
                 document.getElementById('supportWelcomeInput').value = supportSnap.data().welcomeText || ""; 
                 document.getElementById('accessDeniedInput').value = supportSnap.data().accessDenied || "";
             }
-            const keyRef = window.doc(window.db, "app_settings", "security");
-            const keySnap = await window.getDoc(keyRef);
+            const keySnap = await window.getDoc(window.doc(window.db, "app_settings", "security"));
             if (keySnap.exists()) { document.getElementById('activationKeyInput').value = keySnap.data().activationKey || ""; }
         } catch (e) { showToast("Error loading settings: " + e.message, true); }
     }
 
     async function saveSettings() {
         const btn = document.getElementById('saveSettingsBtn');
-        btn.textContent = "Saving...";
-        btn.disabled = true;
+        btn.textContent = "Saving..."; btn.disabled = true;
         try {
             await window.setDoc(window.doc(window.db, "app_settings", "artist"), { 
                 name: document.getElementById('artistNameInput').value, 
+                title: document.getElementById('artistSubtitleInput').value,
                 message: document.getElementById('artistMessageInput').value 
             });
             await window.setDoc(window.doc(window.db, "app_settings", "support"), { 
@@ -275,8 +291,7 @@ layout: false
             });
             showToast("Settings saved!");
         } catch (e) { showToast("Error: " + e.message, true); }
-        btn.textContent = "Save All Settings";
-        btn.disabled = false;
+        btn.textContent = "Save All Settings"; btn.disabled = false;
     }
 
     async function loadCelebrities() {
@@ -318,57 +333,39 @@ layout: false
         } catch (e) { list.innerHTML = '<p class="empty-state">Error loading celebrities.</p>'; showToast("Error: " + e.message, true); }
     }
 
-    function previewAvatar(id, url) {
-        const el = document.getElementById('preview-' + id);
-        if (!el) return;
-        if (url && url.startsWith('http')) {
-            el.style.backgroundImage = `url('${url}')`;
-            el.textContent = '';
-        } else {
-            el.style.backgroundImage = 'none';
-            el.textContent = '?';
-        }
-    }
-
     async function updateCeleb(id, btnElement) {
-        btnElement.textContent = "Saving...";
-        btnElement.disabled = true;
+        btnElement.textContent = "Saving..."; btnElement.disabled = true;
         try {
-            const isVerified = document.getElementById(`cverified-${id}`).value === 'true';
-            const access = document.getElementById(`caccess-${id}`).value;
             await window.updateDoc(window.doc(window.db, "celebrities", id), {
                 name: document.getElementById(`cname-${id}`).value,
                 imageUrl: document.getElementById(`cimage-${id}`).value,
                 customText: document.getElementById(`ccustom-${id}`).value,
-                isVerified: isVerified,
-                access: access,
+                isVerified: document.getElementById(`cverified-${id}`).value === 'true',
+                access: document.getElementById(`caccess-${id}`).value,
                 message: document.getElementById(`cmessage-${id}`).value
             });
             showToast("Celebrity updated!");
         } catch (e) { showToast("Error: " + e.message, true); }
-        btnElement.textContent = "Save";
-        btnElement.disabled = false;
+        btnElement.textContent = "Save"; btnElement.disabled = false;
     }
 
     async function deleteCeleb(id) {
         if (!confirm("Delete this celebrity?")) return;
-        try {
-            await window.deleteDoc(window.doc(window.db, "celebrities", id));
-            loadCelebrities(); showToast("Celebrity deleted.");
-        } catch (e) { showToast("Error: " + e.message, true); }
+        try { await window.deleteDoc(window.doc(window.db, "celebrities", id)); loadCelebrities(); showToast("Celebrity deleted."); }
+        catch (e) { showToast("Error: " + e.message, true); }
     }
 
     async function addNewCeleb() {
         const name = document.getElementById('newCelebName').value;
-        const imageUrl = document.getElementById('newCelebImage').value;
-        const customText = document.getElementById('newCelebCustomText').value;
-        const isVerified = document.getElementById('newCelebVerified').value === 'true';
-        const access = document.getElementById('newCelebAccess').value;
-        const message = document.getElementById('newCelebMessage').value;
         if (!name) return alert("Name is required.");
         try {
             await window.addDoc(window.collection(window.db, "celebrities"), { 
-                name, imageUrl, customText, isVerified, access, message, 
+                name,
+                imageUrl: document.getElementById('newCelebImage').value,
+                customText: document.getElementById('newCelebCustomText').value,
+                isVerified: document.getElementById('newCelebVerified').value === 'true',
+                access: document.getElementById('newCelebAccess').value,
+                message: document.getElementById('newCelebMessage').value,
                 createdAt: new Date().toISOString() 
             });
             document.getElementById('newCelebName').value = "";
@@ -393,14 +390,19 @@ layout: false
             if (snapshot.empty) { list.innerHTML = '<p class="empty-state">No fans yet.</p>'; return; }
             snapshot.forEach(docSnap => {
                 const data = docSnap.data();
+                const initial = data.email ? data.email.charAt(0).toUpperCase() : '?';
                 const div = document.createElement('div');
                 div.className = 'list-item';
                 div.innerHTML = `
                     <div class="list-item-row">
+                        <div class="avatar-preview small" id="fanpreview-${docSnap.id}" style="${data.photoUrl ? `background-image:url('${data.photoUrl}');` : `background:${data.bgColor || '#ffb3ba'};`}">${!data.photoUrl ? initial : ''}</div>
                         <input type="text" id="email-${docSnap.id}" value="${data.email || ''}" placeholder="Email">
-                        <input type="text" id="secimg-${docSnap.id}" value="${data.secImg || ''}" placeholder="Sec Img">
                     </div>
                     <div class="list-item-row">
+                        <input type="text" id="photo-${docSnap.id}" value="${data.photoUrl || ''}" placeholder="Photo URL (optional)" oninput="previewFanAvatar('${docSnap.id}', this.value, '${initial}')">
+                    </div>
+                    <div class="list-item-row">
+                        <input type="text" id="secimg-${docSnap.id}" value="${data.secImg || ''}" placeholder="Sec Img">
                         <select id="color-${docSnap.id}">
                             <option value="#ffb3ba" ${data.bgColor === '#ffb3ba' ? 'selected' : ''}>Pink</option>
                             <option value="#bae1ff" ${data.bgColor === '#bae1ff' ? 'selected' : ''}>Blue</option>
@@ -423,7 +425,8 @@ layout: false
             await window.updateDoc(window.doc(window.db, "fans", id), {
                 email: document.getElementById(`email-${id}`).value,
                 secImg: document.getElementById(`secimg-${id}`).value,
-                bgColor: document.getElementById(`color-${id}`).value
+                bgColor: document.getElementById(`color-${id}`).value,
+                photoUrl: document.getElementById(`photo-${id}`).value
             });
             showToast("Fan updated!");
         } catch (e) { showToast("Error: " + e.message, true); }
@@ -432,24 +435,28 @@ layout: false
 
     async function deleteFan(id) {
         if (!confirm("Delete this fan permanently?")) return;
-        try {
-            await window.deleteDoc(window.doc(window.db, "fans", id));
-            loadFans(); showToast("Fan deleted.");
-        } catch (e) { showToast("Error: " + e.message, true); }
+        try { await window.deleteDoc(window.doc(window.db, "fans", id)); loadFans(); showToast("Fan deleted."); }
+        catch (e) { showToast("Error: " + e.message, true); }
     }
 
     async function addNewFan() {
         const email = document.getElementById('newFanEmail').value;
-        const secImg = document.getElementById('newFanSecImg').value;
-        const color = document.getElementById('newFanColor').value;
         if (!email) return alert("Email is required.");
         try {
             await window.addDoc(window.collection(window.db, "fans"), { 
-                email, secImg, bgColor: color, ringColor: "#d4c4a8", createdAt: new Date().toISOString() 
+                email,
+                secImg: document.getElementById('newFanSecImg').value,
+                photoUrl: document.getElementById('newFanPhoto').value,
+                bgColor: document.getElementById('newFanColor').value,
+                ringColor: "#d4c4a8",
+                createdAt: new Date().toISOString() 
             });
             document.getElementById('newFanEmail').value = "";
             document.getElementById('newFanSecImg').value = "";
+            document.getElementById('newFanPhoto').value = "";
             document.getElementById('newFanColor').value = "#ffb3ba";
+            document.getElementById('newFanPreview').style.backgroundImage = 'none';
+            document.getElementById('newFanPreview').textContent = '?';
             toggleAddForm('fan'); loadFans(); showToast("Fan added!");
         } catch (e) { showToast("Error: " + e.message, true); }
     }
@@ -495,10 +502,8 @@ layout: false
 
     async function deleteComment(id) {
         if (!confirm("Delete this comment?")) return;
-        try {
-            await window.deleteDoc(window.doc(window.db, "comments", id));
-            loadComments(); showToast("Comment deleted.");
-        } catch (e) { showToast("Error: " + e.message, true); }
+        try { await window.deleteDoc(window.doc(window.db, "comments", id)); loadComments(); showToast("Comment deleted."); }
+        catch (e) { showToast("Error: " + e.message, true); }
     }
 
     async function addNewComment() {

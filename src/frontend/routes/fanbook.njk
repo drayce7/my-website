@@ -7,7 +7,9 @@ layout: false
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- FIX: prevent zoom on app, keep normal desktop scaling -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
     <title>Artist Fanbook</title>
     
     <script type="module">
@@ -27,14 +29,10 @@ layout: false
       const app = initializeApp(firebaseConfig);
       window.auth = getAuth(app);
       window.db = getFirestore(app);
-      
       window.onAuthStateChanged = onAuthStateChanged;
-      window.doc = doc;
-      window.getDoc = getDoc;
-      window.collection = collection;
-      window.getDocs = getDocs;
-      window.query = query;
-      window.orderBy = orderBy;
+      window.doc = doc; window.getDoc = getDoc;
+      window.collection = collection; window.getDocs = getDocs;
+      window.query = query; window.orderBy = orderBy;
 
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
@@ -42,8 +40,10 @@ layout: false
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #2a1b18; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Playfair Display', serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; overscroll-behavior: none; }
+        /* FIX zoom: lock the app shell, prevent double-tap zoom */
+        body { background: #2a1b18; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Playfair Display', serif; touch-action: manipulation; }
         .app-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #fdf6e3; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>'); overflow: hidden; }
         
         .top-region { position: relative; width: 100%; height: 150px; background: rgba(20, 15, 30, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid #d4c4a8; display: flex; flex-direction: column; padding: 15px; z-index: 50; flex-shrink: 0; overflow: hidden; }
@@ -57,10 +57,9 @@ layout: false
         .search-input::placeholder { color: #888; }
         .search-btn { background: transparent; border: none; color: #00d2ff; font-size: 16px; cursor: pointer; margin-left: 5px; }
 
-        /* SCROLLABLE AREA WITH STICKY HEADER */
-        .fan-area { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 0 10px 100px 10px; }
+        .fan-area { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 0 10px 100px 10px; -webkit-overflow-scrolling: touch; }
         
-        /* STICKY ARTIST HEADER */
+        /* STICKY ARTIST HEADER + SUBTITLE */
         .artist-sticky-header {
             position: sticky;
             top: 0;
@@ -75,12 +74,14 @@ layout: false
             flex-shrink: 0;
         }
         .artist-circle { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #ff00cc, #333399); display: flex; justify-content: center; align-items: center; font-size: 24px; color: white; font-weight: bold; border: 4px solid #fff; box-shadow: 0 0 15px rgba(255, 0, 204, 0.5); flex-shrink: 0; background-size: cover; background-position: center; }
+        .artist-text-col { display: flex; flex-direction: column; }
         .artist-label { font-family: 'Caveat', cursive; font-size: 24px; color: #4a3b32; font-weight: bold; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .artist-subtitle { font-family: 'Playfair Display', serif; font-style: italic; font-size: 13px; color: #7a6b62; margin-top: 2px; }
         
         .fan-grid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 5px; padding-top: 15px; }
         .fan-card { display: flex; flex-direction: column; align-items: center; width: 85px; margin-bottom: 5px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
         .fan-card:hover { transform: scale(1.1) !important; z-index: 100 !important; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .fan-avatar { width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 24px; color: white; border: 4px solid; box-shadow: 0 4px 8px rgba(0,0,0,0.15); margin-bottom: 3px; }
+        .fan-avatar { width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 24px; color: white; border: 4px solid; box-shadow: 0 4px 8px rgba(0,0,0,0.15); margin-bottom: 3px; background-size: cover; background-position: center; }
         .fan-email { background: #f0e4d0; border: 1px solid #c4b4a8; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 8px; color: #5a4b42; width: 100%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .sec-img { display: inline-block; background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; font-size: 7px; color: #8a7b72; margin-top: 2px; text-transform: uppercase; font-family: sans-serif; letter-spacing: 0.5px; width: auto; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .btn-support { position: fixed; bottom: 20px; left: 20px; width: 55px; height: 55px; background: #ef4444; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); cursor: pointer; z-index: 100; transition: 0.2s; }
@@ -94,7 +95,7 @@ layout: false
         .loading-text { font-family: 'Caveat', cursive; font-size: 24px; color: #4a3b32; }
         .spark { position: absolute; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; animation: explode 1.5s ease-out forwards; }
         @keyframes explode { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; } }
-        .focus-avatar { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 15px auto; display: flex; justify-content: center; align-items: center; font-size: 40px; font-weight: bold; color: white; border: 6px solid; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .focus-avatar { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 15px auto; display: flex; justify-content: center; align-items: center; font-size: 40px; font-weight: bold; color: white; border: 6px solid; box-shadow: 0 10px 20px rgba(0,0,0,0.2); background-size: cover; background-position: center; }
         .focus-email { font-family: monospace; font-size: 14px; color: #5a4b42; background: #f0e4d0; padding: 8px; border-radius: 6px; border: 1px solid #c4b4a8; margin-bottom: 10px; word-break: break-all; }
         .focus-sec-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .focus-sec-img { display: inline-block; background: rgba(0,0,0,0.05); padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #8a7b72; text-transform: uppercase; letter-spacing: 1px; }
@@ -139,10 +140,13 @@ layout: false
         </div>
 
         <div class="fan-area" id="fanArea">
-            <!-- STICKY ARTIST HEADER -->
+            <!-- STICKY ARTIST HEADER + SUBTITLE -->
             <div class="artist-sticky-header">
                 <div class="artist-circle" id="artistAvatar">A</div>
-                <div class="artist-label" id="artistNameLabel">The Artist</div>
+                <div class="artist-text-col">
+                    <div class="artist-label" id="artistNameLabel">The Artist</div>
+                    <div class="artist-subtitle" id="artistSubtitle" style="display:none;"></div>
+                </div>
             </div>
             <div class="fan-grid" id="fanGrid"></div>
         </div>
@@ -182,33 +186,20 @@ layout: false
     let allFans = [];
     let allComments = [];
 
-    // LOAD SELECTED ARTIST FROM SESSION STORAGE
+    /* ===== Load selected artist + badge + subtitle ===== */
     function loadSelectedArtist() {
         const stored = sessionStorage.getItem('selectedArtist');
-        if (!stored) {
-            // No artist selected — redirect back to selection page
-            window.location.href = '/my-website/artists/';
-            return;
-        }
+        if (!stored) { window.location.href = '/my-website/artists/'; return; }
         try {
             const artist = JSON.parse(stored);
-            
-            // Set avatar (photo or fallback)
             const avatarEl = document.getElementById('artistAvatar');
-            if (artist.imageUrl) {
-                avatarEl.style.backgroundImage = `url('${artist.imageUrl}')`;
-                avatarEl.textContent = "";
-            } else {
-                avatarEl.style.background = artist.bgColor || 'linear-gradient(135deg, #ff00cc, #333399)';
-                avatarEl.textContent = artist.name ? artist.name.charAt(0).toUpperCase() : 'A';
-            }
-            
-            // Set name + verified badge
+            if (artist.imageUrl) { avatarEl.style.backgroundImage = `url('${artist.imageUrl}')`; avatarEl.textContent = ""; }
+            else { avatarEl.style.background = artist.bgColor || 'linear-gradient(135deg, #ff00cc, #333399)'; avatarEl.textContent = artist.name ? artist.name.charAt(0).toUpperCase() : 'A'; }
+
             const nameEl = document.getElementById('artistNameLabel');
             nameEl.innerHTML = '';
-            const nameText = document.createTextNode(artist.name || 'The Artist');
-            nameEl.appendChild(nameText);
-            
+            nameEl.appendChild(document.createTextNode(artist.name || 'The Artist'));
+
             if (artist.isVerified) {
                 const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                 svg.setAttribute("class", "verified-badge");
@@ -218,88 +209,93 @@ layout: false
                 svg.appendChild(path);
                 nameEl.appendChild(svg);
             }
-        } catch (e) {
-            window.location.href = '/my-website/artists/';
-        }
+        } catch (e) { window.location.href = '/my-website/artists/'; }
     }
 
     window.addEventListener('firebaseLoaded', async () => {
-        // Load selected artist FIRST (handles avatar + blue tick)
         loadSelectedArtist();
 
         try {
-            const artistRef = window.doc(window.db, "app_settings", "artist");
-            const artistSnap = await window.getDoc(artistRef);
+            const artistSnap = await window.getDoc(window.doc(window.db, "app_settings", "artist"));
             if (artistSnap.exists()) {
                 const data = artistSnap.data();
+                if (data.title) {
+                    const subEl = document.getElementById('artistSubtitle');
+                    subEl.textContent = data.title;
+                    subEl.style.display = 'block';
+                }
                 if (data.message) {
                     artistWelcomeMessage = data.message;
                     document.getElementById('brainMessageText').textContent = data.message;
                 }
             }
 
-            const keyRef = window.doc(window.db, "app_settings", "security");
-            const keySnap = await window.getDoc(keyRef);
-            if (keySnap.exists()) {
-                realActivationKey = keySnap.data().activationKey || "";
-            }
+            const keySnap = await window.getDoc(window.doc(window.db, "app_settings", "security"));
+            if (keySnap.exists()) realActivationKey = keySnap.data().activationKey || "";
 
             const fansSnap = await window.getDocs(window.query(window.collection(window.db, "fans"), window.orderBy("createdAt")));
             allFans = [];
-            fansSnap.forEach(doc => allFans.push(doc.data()));
+            fansSnap.forEach(d => allFans.push(d.data()));
             renderFans();
 
             const commentsSnap = await window.getDocs(window.query(window.collection(window.db, "comments"), window.orderBy("createdAt")));
             allComments = [];
-            commentsSnap.forEach(doc => allComments.push(doc.data()));
+            commentsSnap.forEach(d => allComments.push(d.data()));
             startTicker();
-        } catch (e) {
-            console.error("Firestore load error:", e);
-        }
+        } catch (e) { console.error("Firestore load error:", e); }
     });
 
     function renderFans() {
         const fanGrid = document.getElementById('fanGrid');
         fanGrid.innerHTML = '';
-
-        allFans.forEach((fan, index) => {
-            const yOffset = (Math.random() * 30) - 15; 
-            const rotation = (Math.random() * 14) - 7; 
-            const xOffset = (Math.random() * 10) - 5; 
+        allFans.forEach((fan) => {
+            const yOffset = (Math.random() * 30) - 15;
+            const rotation = (Math.random() * 14) - 7;
+            const xOffset = (Math.random() * 10) - 5;
             const zIndex = Math.floor(Math.random() * 10);
 
             const card = document.createElement('div');
             card.className = 'fan-card';
-            card.id = `fan-${fan.email}`; 
+            card.id = `fan-${fan.email}`;
             card.style.transform = `translate(${xOffset}px, ${yOffset}px) rotate(${rotation}deg)`;
             card.style.zIndex = zIndex;
-            
             card.onclick = (e) => openFocusModal(fan, e);
 
+            const initial = fan.email.charAt(0).toUpperCase();
+            const avatarStyle = fan.photoUrl
+                ? `background-image:url('${fan.photoUrl}'); border-color:${fan.ringColor};`
+                : `background:${fan.bgColor}; border-color:${fan.ringColor};`;
+
             card.innerHTML = `
-                <div class="fan-avatar" style="background: ${fan.bgColor}; border-color: ${fan.ringColor};">
-                    ${fan.email.charAt(0).toUpperCase()}
-                </div>
+                <div class="fan-avatar" style="${avatarStyle}">${!fan.photoUrl ? initial : ''}</div>
                 <div class="fan-email">${fan.email}</div>
                 <div class="sec-img">${fan.secImg}</div>
             `;
-
             fanGrid.appendChild(card);
         });
     }
 
+    /* ===== Continuing ticker (persists index in localStorage) ===== */
     let tickerIndex = 0;
     function startTicker() {
         const tickerContainer = document.getElementById('tickerContainer');
         tickerContainer.innerHTML = '';
         if (allComments.length === 0) return;
 
-        for(let i=0; i < Math.min(3, allComments.length); i++) {
-            addCommentToTicker(allComments[i]);
+        // restore last shown index (continuation), not reset to 0
+        const saved = parseInt(localStorage.getItem('tickerIndex') || '0', 10);
+        tickerIndex = isNaN(saved) ? 0 : saved % allComments.length;
+
+        // prime 3 lines ending at tickerIndex
+        const startAt = (tickerIndex - 2 + allComments.length * 2) % allComments.length;
+        for (let i = 0; i < Math.min(3, allComments.length); i++) {
+            const idx = (startAt + i) % allComments.length;
+            addCommentToTicker(allComments[idx]);
         }
 
         setInterval(() => {
             tickerIndex = (tickerIndex + 1) % allComments.length;
+            localStorage.setItem('tickerIndex', tickerIndex);
             addCommentToTicker(allComments[tickerIndex]);
         }, 3000);
     }
@@ -308,37 +304,31 @@ layout: false
         const tickerContainer = document.getElementById('tickerContainer');
         const line = document.createElement('div');
         line.className = 'comment-line';
-        line.innerHTML = `
-            <span class="rainbow-username">${comment.user}:</span> 
-            <span>${comment.text}</span>
-        `;
+        line.innerHTML = `<span class="rainbow-username">${comment.user}:</span> <span>${comment.text}</span>`;
         tickerContainer.appendChild(line);
-        if (tickerContainer.children.length > 3) {
-            tickerContainer.removeChild(tickerContainer.firstChild);
-        }
+        if (tickerContainer.children.length > 3) tickerContainer.removeChild(tickerContainer.firstChild);
     }
 
-    function openFocusModal(fan, event) {
+    function openFocusModal(fan) {
         const overlay = document.getElementById('focusOverlay');
         const card = document.getElementById('focusCard');
-        
         card.innerHTML = `<div class="loader"></div><div class="loading-text">Summoning fan details...</div>`;
         overlay.classList.add('active');
 
         const delay = Math.floor(Math.random() * 8000) + 5000;
-
         setTimeout(() => {
+            const initial = fan.email.charAt(0).toUpperCase();
+            const avatarStyle = fan.photoUrl
+                ? `background-image:url('${fan.photoUrl}'); border-color:${fan.ringColor};`
+                : `background:${fan.bgColor}; border-color:${fan.ringColor};`;
+
             card.innerHTML = `
-                <div class="focus-avatar" style="background: ${fan.bgColor}; border-color: ${fan.ringColor};">
-                    ${fan.email.charAt(0).toUpperCase()}
-                </div>
+                <div class="focus-avatar" style="${avatarStyle}">${!fan.photoUrl ? initial : ''}</div>
                 <div class="focus-email">${fan.email}</div>
-                
                 <div class="focus-sec-row">
                     <div class="focus-sec-img">${fan.secImg}</div>
                     <div class="brain-text" onclick="openKeyModal()">Brain</div>
                 </div>
-                
                 <button class="btn-close" onclick="closeFocusModal()">Close</button>
             `;
 
@@ -347,56 +337,33 @@ layout: false
                 const spark = document.createElement('div');
                 spark.className = 'spark';
                 const angle = Math.random() * Math.PI * 2;
-                const distance = 80 + Math.random() * 120; 
+                const distance = 80 + Math.random() * 120;
                 spark.style.setProperty('--x', `${Math.cos(angle) * distance}px`);
                 spark.style.setProperty('--y', `${Math.sin(angle) * distance}px`);
                 spark.style.background = colors[Math.floor(Math.random() * colors.length)];
-                spark.style.left = '50%';
-                spark.style.top = '50%';
+                spark.style.left = '50%'; spark.style.top = '50%';
                 card.appendChild(spark);
                 setTimeout(() => spark.remove(), 1500);
             }
         }, delay);
     }
 
-    function closeFocusModal() {
-        document.getElementById('focusOverlay').classList.remove('active');
-    }
-
-    function openKeyModal() {
-        document.getElementById('keyModal').classList.add('active');
-        document.getElementById('keyInput').value = "";
-        document.getElementById('keyInput').classList.remove('shake');
-    }
-
-    function closeKeyModal() {
-        document.getElementById('keyModal').classList.remove('active');
-    }
+    function closeFocusModal() { document.getElementById('focusOverlay').classList.remove('active'); }
+    function openKeyModal() { document.getElementById('keyModal').classList.add('active'); document.getElementById('keyInput').value = ""; document.getElementById('keyInput').classList.remove('shake'); }
+    function closeKeyModal() { document.getElementById('keyModal').classList.remove('active'); }
 
     function checkKey() {
         const input = document.getElementById('keyInput');
         const val = input.value.trim().toLowerCase();
-
-        if (val === "") {
-            input.classList.add('shake');
-            setTimeout(() => input.classList.remove('shake'), 500);
-        } else if (realActivationKey && val !== realActivationKey.toLowerCase()) {
-            input.classList.add('shake');
-            setTimeout(() => input.classList.remove('shake'), 500);
+        if (val === "") { input.classList.add('shake'); setTimeout(() => input.classList.remove('shake'), 500); }
+        else if (realActivationKey && val !== realActivationKey.toLowerCase()) {
+            input.classList.add('shake'); setTimeout(() => input.classList.remove('shake'), 500);
             alert("Invalid Activation Key!");
-        } else {
-            closeKeyModal();
-            openBrainModal();
-        }
+        } else { closeKeyModal(); openBrainModal(); }
     }
 
-    function openBrainModal() {
-        document.getElementById('brainModal').classList.add('active');
-    }
-
-    function closeBrainModal() {
-        document.getElementById('brainModal').classList.remove('active');
-    }
+    function openBrainModal() { document.getElementById('brainModal').classList.add('active'); }
+    function closeBrainModal() { document.getElementById('brainModal').classList.remove('active'); }
 
     function searchFan() {
         const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -406,9 +373,7 @@ layout: false
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             targetCard.style.boxShadow = "0 0 20px 5px #00d2ff";
             setTimeout(() => { targetCard.style.boxShadow = "none"; }, 3000);
-        } else {
-            alert("Fan not found! Try exact email.");
-        }
+        } else { alert("Fan not found! Try exact email."); }
     }
 </script>
 </body>
