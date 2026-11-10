@@ -25,13 +25,11 @@ layout: false
 
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
-
       window.db = db;
       window.doc = doc; window.getDoc = getDoc; window.setDoc = setDoc;
       window.collection = collection; window.getDocs = getDocs;
       window.query = query; window.orderBy = orderBy;
       window.addDoc = addDoc; window.deleteDoc = deleteDoc; window.updateDoc = updateDoc;
-
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
     </script>
@@ -78,6 +76,7 @@ layout: false
         .avatar-preview { width: 60px; height: 60px; border-radius: 50%; background: #374151; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #9ca3af; border: 3px solid #4b5563; flex-shrink: 0; background-size: cover; background-position: center; }
         .avatar-preview.small { width: 50px; height: 50px; font-size: 20px; }
         .empty-state { color: #6b7280; text-align: center; padding: 20px; font-style: italic; }
+        .badge-new { background: #10b981; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: bold; vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -97,7 +96,6 @@ layout: false
             </div>
         </div>
 
-        <!-- SECTION 1 -->
         <div class="card">
             <h2>1. Global Settings</h2>
             <p class="section-help">Artist identity + access messages across the fanbook and directory pages.</p>
@@ -128,10 +126,19 @@ layout: false
                 <label>Activation Key (For Brain Access)</label>
                 <input type="text" id="activationKeyInput" placeholder="e.g., word1 word2 word3...">
             </div>
+            <div class="input-group">
+                <label>Key Hint Text <span class="badge-new">NEW</span></label>
+                <textarea id="keyHintInput" placeholder="e.g., Enter the 8-word phrase from your welcome email..."></textarea>
+                <div class="help-text">This replaces the default "Format: 9 letters, 4 letters..." line under the activation input.</div>
+            </div>
+            <div class="input-group">
+                <label>"Brain" Button Label <span class="badge-new">NEW</span></label>
+                <input type="text" id="brainLabelInput" placeholder="e.g., Brain, Mind, 🔓, Secret…">
+                <div class="help-text">Changes the word "Brain" on the fan detail card. Emojis welcome.</div>
+            </div>
             <button class="btn-save" id="saveSettingsBtn" onclick="saveSettings()">Save All Settings</button>
         </div>
 
-        <!-- SECTION 2 -->
         <div class="card">
             <h2>2. Celebrity Directory</h2>
             <p class="section-help">Shown on the /artists/ selection page. Upload photos to Postimages.org and paste the direct link below.</p>
@@ -159,7 +166,6 @@ layout: false
             <div class="item-list" id="celebList"></div>
         </div>
 
-        <!-- SECTION 3 -->
         <div class="card">
             <h2>3. Fan Directory</h2>
             <p class="section-help">Fans displayed in the fanbook grid. You can upload a photo on their behalf — paste a Postimages direct link in the Photo URL field. Fans cannot change this themselves.</p>
@@ -185,10 +191,9 @@ layout: false
             <div class="item-list" id="fanList"></div>
         </div>
 
-        <!-- SECTION 4 -->
         <div class="card">
             <h2>4. Live Comment Ticker</h2>
-            <p class="section-help">Comments that scroll at the top of the fanbook page. The ticker now continues from where it left off (saved in the visitor's browser).</p>
+            <p class="section-help">Comments that scroll at the top of the fanbook page. The ticker continues from where it left off (saved in the visitor's browser).</p>
             
             <button class="btn-add" onclick="toggleAddForm('comment')">+ Add New Comment</button>
             <div class="add-form" id="commentAddForm">
@@ -220,33 +225,28 @@ layout: false
     }
 
     function toggleAddForm(type) { document.getElementById(type + 'AddForm').classList.toggle('active'); }
-
     function previewNewAvatar(url) {
         const el = document.getElementById('newAvatarPreview');
         if (url && url.startsWith('http')) { el.style.backgroundImage = `url('${url}')`; el.textContent = ''; }
         else { el.style.backgroundImage = 'none'; el.textContent = '?'; }
     }
-
     function previewNewFanPhoto(url) {
         const el = document.getElementById('newFanPreview');
         if (url && url.startsWith('http')) { el.style.backgroundImage = `url('${url}')`; el.textContent = ''; }
         else { el.style.backgroundImage = 'none'; el.textContent = '?'; }
     }
-
     function previewAvatar(id, url) {
         const el = document.getElementById('preview-' + id);
         if (!el) return;
         if (url && url.startsWith('http')) { el.style.backgroundImage = `url('${url}')`; el.textContent = ''; }
         else { el.style.backgroundImage = 'none'; el.textContent = '?'; }
     }
-
     function previewFanAvatar(id, url, initial) {
         const el = document.getElementById('fanpreview-' + id);
         if (!el) return;
         if (url && url.startsWith('http')) { el.style.backgroundImage = `url('${url}')`; el.textContent = ''; }
         else { el.style.backgroundImage = 'none'; el.textContent = initial || '?'; }
     }
-
     function showToast(message, isError = false) {
         const toast = document.getElementById('toast');
         toast.textContent = message;
@@ -262,6 +262,7 @@ layout: false
                 document.getElementById('artistNameInput').value = artistSnap.data().name || "";
                 document.getElementById('artistSubtitleInput').value = artistSnap.data().title || "";
                 document.getElementById('artistMessageInput').value = artistSnap.data().message || "";
+                document.getElementById('brainLabelInput').value = artistSnap.data().brainLabel || "";
             }
             const supportSnap = await window.getDoc(window.doc(window.db, "app_settings", "support"));
             if (supportSnap.exists()) { 
@@ -269,7 +270,10 @@ layout: false
                 document.getElementById('accessDeniedInput').value = supportSnap.data().accessDenied || "";
             }
             const keySnap = await window.getDoc(window.doc(window.db, "app_settings", "security"));
-            if (keySnap.exists()) { document.getElementById('activationKeyInput').value = keySnap.data().activationKey || ""; }
+            if (keySnap.exists()) {
+                document.getElementById('activationKeyInput').value = keySnap.data().activationKey || "";
+                document.getElementById('keyHintInput').value = keySnap.data().keyHint || "";
+            }
         } catch (e) { showToast("Error loading settings: " + e.message, true); }
     }
 
@@ -280,14 +284,16 @@ layout: false
             await window.setDoc(window.doc(window.db, "app_settings", "artist"), { 
                 name: document.getElementById('artistNameInput').value, 
                 title: document.getElementById('artistSubtitleInput').value,
-                message: document.getElementById('artistMessageInput').value 
+                message: document.getElementById('artistMessageInput').value,
+                brainLabel: document.getElementById('brainLabelInput').value
             });
             await window.setDoc(window.doc(window.db, "app_settings", "support"), { 
                 welcomeText: document.getElementById('supportWelcomeInput').value,
                 accessDenied: document.getElementById('accessDeniedInput').value
             });
             await window.setDoc(window.doc(window.db, "app_settings", "security"), { 
-                activationKey: document.getElementById('activationKeyInput').value 
+                activationKey: document.getElementById('activationKeyInput').value,
+                keyHint: document.getElementById('keyHintInput').value
             });
             showToast("Settings saved!");
         } catch (e) { showToast("Error: " + e.message, true); }

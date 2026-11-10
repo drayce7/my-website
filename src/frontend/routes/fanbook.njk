@@ -7,7 +7,6 @@ layout: false
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- FIX: prevent zoom on app, keep normal desktop scaling -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="format-detection" content="telephone=no">
     <title>Artist Fanbook</title>
@@ -42,7 +41,6 @@ layout: false
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         html, body { height: 100%; overscroll-behavior: none; }
-        /* FIX zoom: lock the app shell, prevent double-tap zoom */
         body { background: #2a1b18; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Playfair Display', serif; touch-action: manipulation; }
         .app-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #fdf6e3; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>'); overflow: hidden; }
         
@@ -59,19 +57,13 @@ layout: false
 
         .fan-area { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 0 10px 100px 10px; -webkit-overflow-scrolling: touch; }
         
-        /* STICKY ARTIST HEADER + SUBTITLE */
         .artist-sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 40;
+            position: sticky; top: 0; z-index: 40;
             background: #fdf6e3;
             padding: 15px 10px 12px 10px;
             margin: 0 -10px 0 -10px;
             border-bottom: 2px dashed #d4c4a8;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-shrink: 0;
+            display: flex; align-items: center; gap: 15px; flex-shrink: 0;
         }
         .artist-circle { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #ff00cc, #333399); display: flex; justify-content: center; align-items: center; font-size: 24px; color: white; font-weight: bold; border: 4px solid #fff; box-shadow: 0 0 15px rgba(255, 0, 204, 0.5); flex-shrink: 0; background-size: cover; background-position: center; }
         .artist-text-col { display: flex; flex-direction: column; }
@@ -125,6 +117,17 @@ layout: false
         .btn-okay { background: #00d2ff; color: black; padding: 12px 30px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
         .btn-okay:hover { background: #00b8e6; transform: scale(1.05); }
         .verified-badge { width: 20px; height: 20px; fill: #1d9bf0; flex-shrink: 0; }
+
+        /* NEW: SUPPORT CONNECTING OVERLAY */
+        .support-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 15, 30, 0.95); backdrop-filter: blur(12px); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 2000; padding: 20px; }
+        .support-overlay.active { display: flex; }
+        .support-box { background: #fdf6e3; border: 3px solid #d4c4a8; border-radius: 20px; padding: 40px 30px; max-width: 360px; width: 90%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .support-box .loader { margin: 0 auto 20px auto; border-left-color: #ef4444; }
+        .support-headline { font-family: 'Caveat', cursive; font-size: 30px; color: #4a3b32; margin-bottom: 10px; }
+        .support-sub { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: #7a6b62; line-height: 1.6; margin-bottom: 20px; }
+        .support-progress { width: 100%; height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px; overflow: hidden; margin-top: 10px; }
+        .support-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #00d2ff, #ef4444); transition: width 0.3s linear; border-radius: 3px; }
+
         @media (min-width: 769px) { .app-wrapper { max-width: 600px; height: 90vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); } }
     </style>
 </head>
@@ -134,13 +137,12 @@ layout: false
         <div class="top-region">
             <div class="ticker-container" id="tickerContainer"></div>
             <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search by email...">
+                <input type="text" id="searchInput" class="search-input" data-i18n-placeholder="search_placeholder" placeholder="Search by email...">
                 <button class="search-btn" onclick="searchFan()">🔍</button>
             </div>
         </div>
 
         <div class="fan-area" id="fanArea">
-            <!-- STICKY ARTIST HEADER + SUBTITLE -->
             <div class="artist-sticky-header">
                 <div class="artist-circle" id="artistAvatar">A</div>
                 <div class="artist-text-col">
@@ -151,7 +153,7 @@ layout: false
             <div class="fan-grid" id="fanGrid"></div>
         </div>
 
-        <div class="btn-support" onclick="window.location.href='/my-website/support/'">🎧</div>
+        <div class="btn-support" onclick="showSupportConnecting()">🎧</div>
     </div>
 
     <div class="focus-overlay" id="focusOverlay" onclick="closeFocusModal()">
@@ -160,33 +162,136 @@ layout: false
 
     <div class="key-modal" id="keyModal">
         <div class="key-box">
-            <h2>Enter Activation Key</h2>
-            <input type="text" id="keyInput" class="key-input" placeholder="Enter your key here...">
-            <div class="key-hint" id="keyHint">
-                Format: 9 letters, 4 letters, 7 letters, 10 letters, 4 letters, 7 letters, 8 letters, 8 letters
-            </div>
+            <h2 data-i18n="enter_key_title">Enter Activation Key</h2>
+            <input type="text" id="keyInput" class="key-input" data-i18n-placeholder="enter_key_placeholder" placeholder="Enter your key here...">
+            <div class="key-hint" id="keyHint"></div>
             <div class="key-actions">
-                <button class="btn-key btn-dismiss" onclick="closeKeyModal()">Dismiss</button>
-                <button class="btn-key btn-proceed" onclick="checkKey()">Proceed</button>
+                <button class="btn-key btn-dismiss" onclick="closeKeyModal()" data-i18n="dismiss">Dismiss</button>
+                <button class="btn-key btn-proceed" onclick="checkKey()" data-i18n="proceed">Proceed</button>
             </div>
         </div>
     </div>
 
     <div class="brain-modal" id="brainModal">
         <div class="brain-box">
-            <h2>Artist Message</h2>
+            <h2 data-i18n="brain_title">Artist Message</h2>
             <p id="brainMessageText">This is a special message from the artist.</p>
-            <button class="btn-okay" onclick="closeBrainModal()">Okay</button>
+            <button class="btn-okay" onclick="closeBrainModal()" data-i18n="okay">Okay</button>
+        </div>
+    </div>
+
+    <!-- NEW: SUPPORT CONNECTING OVERLAY -->
+    <div class="support-overlay" id="supportOverlay">
+        <div class="support-box">
+            <div class="loader"></div>
+            <div class="support-headline" data-i18n="support_headline">Connecting you to support…</div>
+            <div class="support-sub" data-i18n="support_sub">Please wait while we connect you to our team.</div>
+            <div class="support-progress"><div class="support-progress-bar" id="supportProgressBar"></div></div>
         </div>
     </div>
 
 <script>
+    /* ============ TRANSLATIONS ============ */
+    const translations = {
+        en: {
+            search_placeholder: "Search by email...",
+            enter_key_title: "Enter Activation Key",
+            enter_key_placeholder: "Enter your key here...",
+            default_key_hint: "Format: 9 letters, 4 letters, 7 letters, 10 letters, 4 letters, 7 letters, 8 letters, 8 letters",
+            dismiss: "Dismiss",
+            proceed: "Proceed",
+            brain_title: "Artist Message",
+            brain_default: "Brain",
+            okay: "Okay",
+            summoning: "Summoning fan details...",
+            close: "Close",
+            fan_not_found: "Fan not found! Try exact email.",
+            invalid_key: "Invalid Activation Key!",
+            support_headline: "Connecting you to support…",
+            support_sub: "Please wait while we connect you to our team."
+        },
+        pl: {
+            search_placeholder: "Szukaj po e-mailu...",
+            enter_key_title: "Wpisz klucz aktywacyjny",
+            enter_key_placeholder: "Wpisz swój klucz tutaj...",
+            default_key_hint: "Format: 9 liter, 4 litery, 7 liter, 10 liter, 4 litery, 7 liter, 8 liter, 8 liter",
+            dismiss: "Odrzuć",
+            proceed: "Kontynuuj",
+            brain_title: "Wiadomość od artysty",
+            brain_default: "Mózg",
+            okay: "Okay",
+            summoning: "Przywoływanie danych fana...",
+            close: "Zamknij",
+            fan_not_found: "Nie znaleziono fana! Spróbuj dokładnego e-maila.",
+            invalid_key: "Nieprawidłowy klucz aktywacyjny!",
+            support_headline: "Łączymy Cię z pomocą…",
+            support_sub: "Proszę czekać, łączymy Cię z naszym zespołem."
+        },
+        hu: {
+            search_placeholder: "Keresés e-mailben...",
+            enter_key_title: "Írja be az aktiválási kulcsot",
+            enter_key_placeholder: "Írja be a kulcsot...",
+            default_key_hint: "Formátum: 9 betű, 4 betű, 7 betű, 10 betű, 4 betű, 7 betű, 8 betű, 8 betű",
+            dismiss: "Elvetés",
+            proceed: "Tovább",
+            brain_title: "Üzenet a művésztől",
+            brain_default: "Agy",
+            okay: "Rendben",
+            summoning: "Rajongói adatok előhívása...",
+            close: "Bezárás",
+            fan_not_found: "A rajongó nem található! Próbálja a pontos e-mailt.",
+            invalid_key: "Érvénytelen aktiválási kulcs!",
+            support_headline: "Kapcsolódás az ügyfélszolgálathoz…",
+            support_sub: "Kérjük, várjon, amíg csapatunkhoz kapcsoljuk."
+        }
+    };
+
+    let currentLang = "en";
+    let customKeyHint = "";
+    let customBrainLabel = "";
     let artistWelcomeMessage = "Thank you for being a fan!";
     let realActivationKey = "";
     let allFans = [];
     let allComments = [];
 
-    /* ===== Load selected artist + badge + subtitle ===== */
+    function t(key) {
+        if (translations[currentLang] && translations[currentLang][key]) return translations[currentLang][key];
+        return translations.en[key] || key;
+    }
+
+    function detectLang() {
+        const saved = localStorage.getItem('selectedLanguage');
+        if (saved && translations[saved]) return saved;
+        const nav = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+        if (nav.startsWith("pl")) return "pl";
+        if (nav.startsWith("hu")) return "hu";
+        return "en";
+    }
+
+    function applyTranslations() {
+        currentLang = detectLang();
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            el.textContent = t(key);
+        });
+
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            el.placeholder = t(key);
+        });
+
+        // Key hint: prefer admin-set custom text, fallback to translation
+        const hintEl = document.getElementById('keyHint');
+        hintEl.textContent = customKeyHint ? customKeyHint : t('default_key_hint');
+
+        // Brain label: prefer admin-set custom label, fallback to translation
+        document.querySelectorAll('.brain-text').forEach(el => {
+            el.textContent = customBrainLabel ? customBrainLabel : t('brain_default');
+        });
+    }
+
+    /* ============ LOAD SELECTED ARTIST ============ */
     function loadSelectedArtist() {
         const stored = sessionStorage.getItem('selectedArtist');
         if (!stored) { window.location.href = '/my-website/artists/'; return; }
@@ -212,6 +317,7 @@ layout: false
         } catch (e) { window.location.href = '/my-website/artists/'; }
     }
 
+    /* ============ FIRESTORE LOAD ============ */
     window.addEventListener('firebaseLoaded', async () => {
         loadSelectedArtist();
 
@@ -228,10 +334,14 @@ layout: false
                     artistWelcomeMessage = data.message;
                     document.getElementById('brainMessageText').textContent = data.message;
                 }
+                if (data.brainLabel) customBrainLabel = data.brainLabel;
             }
 
             const keySnap = await window.getDoc(window.doc(window.db, "app_settings", "security"));
-            if (keySnap.exists()) realActivationKey = keySnap.data().activationKey || "";
+            if (keySnap.exists()) {
+                realActivationKey = keySnap.data().activationKey || "";
+                if (keySnap.data().keyHint) customKeyHint = keySnap.data().keyHint;
+            }
 
             const fansSnap = await window.getDocs(window.query(window.collection(window.db, "fans"), window.orderBy("createdAt")));
             allFans = [];
@@ -243,8 +353,12 @@ layout: false
             commentsSnap.forEach(d => allComments.push(d.data()));
             startTicker();
         } catch (e) { console.error("Firestore load error:", e); }
+
+        // Apply translations AFTER data load so custom fields override defaults
+        applyTranslations();
     });
 
+    /* ============ FAN RENDER ============ */
     function renderFans() {
         const fanGrid = document.getElementById('fanGrid');
         fanGrid.innerHTML = '';
@@ -275,18 +389,16 @@ layout: false
         });
     }
 
-    /* ===== Continuing ticker (persists index in localStorage) ===== */
+    /* ============ CONTINUING TICKER ============ */
     let tickerIndex = 0;
     function startTicker() {
         const tickerContainer = document.getElementById('tickerContainer');
         tickerContainer.innerHTML = '';
         if (allComments.length === 0) return;
 
-        // restore last shown index (continuation), not reset to 0
         const saved = parseInt(localStorage.getItem('tickerIndex') || '0', 10);
         tickerIndex = isNaN(saved) ? 0 : saved % allComments.length;
 
-        // prime 3 lines ending at tickerIndex
         const startAt = (tickerIndex - 2 + allComments.length * 2) % allComments.length;
         for (let i = 0; i < Math.min(3, allComments.length); i++) {
             const idx = (startAt + i) % allComments.length;
@@ -309,10 +421,11 @@ layout: false
         if (tickerContainer.children.length > 3) tickerContainer.removeChild(tickerContainer.firstChild);
     }
 
+    /* ============ FOCUS MODAL ============ */
     function openFocusModal(fan) {
         const overlay = document.getElementById('focusOverlay');
         const card = document.getElementById('focusCard');
-        card.innerHTML = `<div class="loader"></div><div class="loading-text">Summoning fan details...</div>`;
+        card.innerHTML = `<div class="loader"></div><div class="loading-text">${t('summoning')}</div>`;
         overlay.classList.add('active');
 
         const delay = Math.floor(Math.random() * 8000) + 5000;
@@ -322,14 +435,16 @@ layout: false
                 ? `background-image:url('${fan.photoUrl}'); border-color:${fan.ringColor};`
                 : `background:${fan.bgColor}; border-color:${fan.ringColor};`;
 
+            const brainLabel = customBrainLabel ? customBrainLabel : t('brain_default');
+
             card.innerHTML = `
                 <div class="focus-avatar" style="${avatarStyle}">${!fan.photoUrl ? initial : ''}</div>
                 <div class="focus-email">${fan.email}</div>
                 <div class="focus-sec-row">
                     <div class="focus-sec-img">${fan.secImg}</div>
-                    <div class="brain-text" onclick="openKeyModal()">Brain</div>
+                    <div class="brain-text" onclick="openKeyModal()">${brainLabel}</div>
                 </div>
-                <button class="btn-close" onclick="closeFocusModal()">Close</button>
+                <button class="btn-close" onclick="closeFocusModal()">${t('close')}</button>
             `;
 
             const colors = ['#ff00cc', '#00d2ff', '#ffff33', '#33ff33', '#ff9933'];
@@ -349,7 +464,13 @@ layout: false
     }
 
     function closeFocusModal() { document.getElementById('focusOverlay').classList.remove('active'); }
-    function openKeyModal() { document.getElementById('keyModal').classList.add('active'); document.getElementById('keyInput').value = ""; document.getElementById('keyInput').classList.remove('shake'); }
+    function openKeyModal() {
+        document.getElementById('keyModal').classList.add('active');
+        document.getElementById('keyInput').value = "";
+        document.getElementById('keyInput').classList.remove('shake');
+        const hintEl = document.getElementById('keyHint');
+        hintEl.textContent = customKeyHint ? customKeyHint : t('default_key_hint');
+    }
     function closeKeyModal() { document.getElementById('keyModal').classList.remove('active'); }
 
     function checkKey() {
@@ -358,7 +479,7 @@ layout: false
         if (val === "") { input.classList.add('shake'); setTimeout(() => input.classList.remove('shake'), 500); }
         else if (realActivationKey && val !== realActivationKey.toLowerCase()) {
             input.classList.add('shake'); setTimeout(() => input.classList.remove('shake'), 500);
-            alert("Invalid Activation Key!");
+            alert(t('invalid_key'));
         } else { closeKeyModal(); openBrainModal(); }
     }
 
@@ -373,7 +494,34 @@ layout: false
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             targetCard.style.boxShadow = "0 0 20px 5px #00d2ff";
             setTimeout(() => { targetCard.style.boxShadow = "none"; }, 3000);
-        } else { alert("Fan not found! Try exact email."); }
+        } else { alert(t('fan_not_found')); }
+    }
+
+    /* ============ NEW: SUPPORT CONNECTING (10–15s) ============ */
+    function showSupportConnecting() {
+        const overlay = document.getElementById('supportOverlay');
+        const bar = document.getElementById('supportProgressBar');
+        overlay.classList.add('active');
+        bar.style.width = '0%';
+
+        // Pick a random duration between 10 and 15 seconds
+        const totalMs = (Math.floor(Math.random() * 5000) + 10000);
+        const start = Date.now();
+
+        // Smooth progress bar
+        const progressTimer = setInterval(() => {
+            const elapsed = Date.now() - start;
+            const pct = Math.min(100, (elapsed / totalMs) * 100);
+            bar.style.width = pct + '%';
+            if (elapsed >= totalMs) clearInterval(progressTimer);
+        }, 100);
+
+        // Redirect when done
+        setTimeout(() => {
+            clearInterval(progressTimer);
+            bar.style.width = '100%';
+            window.location.href = '/my-website/support/';
+        }, totalMs);
     }
 </script>
 </body>
