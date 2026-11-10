@@ -109,6 +109,10 @@ layout: false
                 <textarea id="artistMessageInput"></textarea>
             </div>
             <div class="input-group">
+                <label>Access Denied Message (Shown when clicking a Gated Artist)</label>
+                <textarea id="accessDeniedInput" placeholder="e.g., You do not have a record with this artist."></textarea>
+            </div>
+            <div class="input-group">
                 <label>Support Chat Welcome Message</label>
                 <textarea id="supportWelcomeInput"></textarea>
             </div>
@@ -194,9 +198,13 @@ layout: false
             document.getElementById('artistNameInput').value = artistSnap.data().name || "";
             document.getElementById('artistMessageInput').value = artistSnap.data().message || "";
         }
+        
         const supportRef = window.doc(window.db, "app_settings", "support");
         const supportSnap = await window.getDoc(supportRef);
-        if (supportSnap.exists()) { document.getElementById('supportWelcomeInput').value = supportSnap.data().welcomeText || ""; }
+        if (supportSnap.exists()) { 
+            document.getElementById('supportWelcomeInput').value = supportSnap.data().welcomeText || ""; 
+            document.getElementById('accessDeniedInput').value = supportSnap.data().accessDenied || "";
+        }
         
         const keyRef = window.doc(window.db, "app_settings", "security");
         const keySnap = await window.getDoc(keyRef);
@@ -209,7 +217,10 @@ layout: false
         btn.disabled = true;
         
         await window.setDoc(window.doc(window.db, "app_settings", "artist"), { name: document.getElementById('artistNameInput').value, message: document.getElementById('artistMessageInput').value });
-        await window.setDoc(window.doc(window.db, "app_settings", "support"), { welcomeText: document.getElementById('supportWelcomeInput').value });
+        await window.setDoc(window.doc(window.db, "app_settings", "support"), { 
+            welcomeText: document.getElementById('supportWelcomeInput').value,
+            accessDenied: document.getElementById('accessDeniedInput').value
+        });
         await window.setDoc(window.doc(window.db, "app_settings", "security"), { activationKey: document.getElementById('activationKeyInput').value });
         
         btn.textContent = "Save All Settings";
