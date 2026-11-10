@@ -55,9 +55,8 @@ layout: false
         .artist-list-info h3 { font-size: 20px; color: #1f2937; font-weight: 700; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;}
         .artist-list-info p { font-size: 14px; color: #6b7280; font-weight: 500;}
         
-        .verified-badge { width: 18px; height: 18px; fill: #1d9bf0; }
+        .verified-badge { width: 18px; height: 18px; fill: #1d9bf0; flex-shrink: 0; }
 
-        /* GATED OVERLAY */
         .gate-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 15, 30, 0.95); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; color: white; text-align: center; padding: 20px; }
         .gate-overlay.active { display: flex; }
         .gate-box { background: #1f2937; padding: 40px; border-radius: 20px; max-width: 350px; border: 2px solid #ef4444; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
@@ -65,7 +64,6 @@ layout: false
         .gate-box p { color: #9ca3af; line-height: 1.6; margin-bottom: 25px; }
         .btn-gate-close { background: #4b5563; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        /* REVEAL OVERLAY */
         .transition-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 15, 30, 0.95); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; color: white; text-align: center; padding: 20px; }
         .transition-overlay.active { display: flex; }
         .loader { border: 4px solid rgba(255,255,255,0.1); border-left-color: #00d2ff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
@@ -77,7 +75,7 @@ layout: false
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .reveal-avatar { width: 150px; height: 150px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: white; font-weight: bold; border: 6px solid #fff; box-shadow: 0 0 30px rgba(255, 0, 204, 0.6); margin-bottom: 20px; animation: glow 2s infinite alternate; background-size: cover; background-position: center; }
         @keyframes glow { from { box-shadow: 0 0 20px rgba(255, 0, 204, 0.4); } to { box-shadow: 0 0 40px rgba(255, 0, 204, 0.9); } }
-        .reveal-name { font-family: 'Caveat', cursive; font-size: 42px; color: #fff; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;}
+        .reveal-name { font-family: 'Caveat', cursive; font-size: 42px; color: #fff; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;}
         .reveal-message { font-family: 'Playfair Display', serif; font-size: 18px; color: #e0e0e0; max-width: 400px; line-height: 1.6; margin-bottom: 30px; font-style: italic; }
         .btn-okay { background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white; padding: 15px 40px; border: none; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4); transition: 0.2s; font-family: sans-serif; }
         .btn-okay:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 210, 255, 0.7); }
@@ -101,7 +99,6 @@ layout: false
         </div>
     </div>
 
-    <!-- GATE MODAL -->
     <div class="gate-overlay" id="gateOverlay">
         <div class="gate-box">
             <h2>Access Denied</h2>
@@ -110,7 +107,6 @@ layout: false
         </div>
     </div>
 
-    <!-- REVEAL MODAL -->
     <div class="transition-overlay" id="transitionOverlay">
         <div id="loadingState">
             <div class="loader"></div>
@@ -151,7 +147,6 @@ layout: false
     function changeLanguage(lang) { localStorage.setItem('selectedLanguage', lang); location.reload(); }
 
     window.addEventListener('firebaseLoaded', async () => {
-        // Fetch the custom Access Denied message from the database
         try {
             const supportRef = window.doc(window.db, "app_settings", "support");
             const supportSnap = await window.getDoc(supportRef);
@@ -178,7 +173,7 @@ layout: false
 
                     const avatarHTML = artist.imageUrl 
                         ? `<div class="artist-list-avatar" style="background-image: url('${artist.imageUrl}');"></div>`
-                        : `<div class="artist-list-avatar">${artist.name.charAt(0).toUpperCase()}</div>`;
+                        : `<div class="artist-list-avatar" style="background:${artist.bgColor || '#3a7bd5'}">${artist.name.charAt(0).toUpperCase()}</div>`;
 
                     const subtitle = artist.customText || "Enter Fanbook";
                     const verifiedHTML = artist.isVerified 

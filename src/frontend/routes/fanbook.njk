@@ -44,7 +44,8 @@ layout: false
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #2a1b18; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Playfair Display', serif; }
-        .app-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #fdf6e3; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>'); }
+        .app-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #fdf6e3; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>'); overflow: hidden; }
+        
         .top-region { position: relative; width: 100%; height: 150px; background: rgba(20, 15, 30, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid #d4c4a8; display: flex; flex-direction: column; padding: 15px; z-index: 50; flex-shrink: 0; overflow: hidden; }
         
         .ticker-container { margin-top: 5px; height: 90px; overflow: hidden; position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 5px; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); }
@@ -55,11 +56,28 @@ layout: false
         .search-input { background: transparent; border: none; color: white; font-size: 12px; width: 100%; outline: none; }
         .search-input::placeholder { color: #888; }
         .search-btn { background: transparent; border: none; color: #00d2ff; font-size: 16px; cursor: pointer; margin-left: 5px; }
-        .fan-area { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 15px 10px 100px 10px; }
-        .artist-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px dashed #d4c4a8; width: 100%; }
-        .artist-circle { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #ff00cc, #333399); display: flex; justify-content: center; align-items: center; font-size: 32px; color: white; font-weight: bold; border: 4px solid #fff; box-shadow: 0 0 15px rgba(255, 0, 204, 0.5); flex-shrink: 0; }
-        .artist-label { font-family: 'Caveat', cursive; font-size: 24px; color: #4a3b32; font-weight: bold; }
-        .fan-grid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 5px; }
+
+        /* SCROLLABLE AREA WITH STICKY HEADER */
+        .fan-area { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 0 10px 100px 10px; }
+        
+        /* STICKY ARTIST HEADER */
+        .artist-sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: #fdf6e3;
+            padding: 15px 10px 12px 10px;
+            margin: 0 -10px 0 -10px;
+            border-bottom: 2px dashed #d4c4a8;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+        .artist-circle { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #ff00cc, #333399); display: flex; justify-content: center; align-items: center; font-size: 24px; color: white; font-weight: bold; border: 4px solid #fff; box-shadow: 0 0 15px rgba(255, 0, 204, 0.5); flex-shrink: 0; background-size: cover; background-position: center; }
+        .artist-label { font-family: 'Caveat', cursive; font-size: 24px; color: #4a3b32; font-weight: bold; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        
+        .fan-grid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 5px; padding-top: 15px; }
         .fan-card { display: flex; flex-direction: column; align-items: center; width: 85px; margin-bottom: 5px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
         .fan-card:hover { transform: scale(1.1) !important; z-index: 100 !important; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .fan-avatar { width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 24px; color: white; border: 4px solid; box-shadow: 0 4px 8px rgba(0,0,0,0.15); margin-bottom: 3px; }
@@ -105,6 +123,7 @@ layout: false
         .brain-box p { color: #5a4b42; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
         .btn-okay { background: #00d2ff; color: black; padding: 12px 30px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
         .btn-okay:hover { background: #00b8e6; transform: scale(1.05); }
+        .verified-badge { width: 20px; height: 20px; fill: #1d9bf0; flex-shrink: 0; }
         @media (min-width: 769px) { .app-wrapper { max-width: 600px; height: 90vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); } }
     </style>
 </head>
@@ -114,13 +133,14 @@ layout: false
         <div class="top-region">
             <div class="ticker-container" id="tickerContainer"></div>
             <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" data-translate-placeholder="search_placeholder" placeholder="Search by email...">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by email...">
                 <button class="search-btn" onclick="searchFan()">🔍</button>
             </div>
         </div>
 
         <div class="fan-area" id="fanArea">
-            <div class="artist-row">
+            <!-- STICKY ARTIST HEADER -->
+            <div class="artist-sticky-header">
                 <div class="artist-circle" id="artistAvatar">A</div>
                 <div class="artist-label" id="artistNameLabel">The Artist</div>
             </div>
@@ -136,123 +156,106 @@ layout: false
 
     <div class="key-modal" id="keyModal">
         <div class="key-box">
-            <h2 data-translate="enter_key_title">Enter Activation Key</h2>
-            <input type="text" id="keyInput" class="key-input" data-translate-placeholder="enter_key_placeholder" placeholder="Enter your key here...">
-            <div class="key-hint" id="keyHint" data-translate="key_hint">
+            <h2>Enter Activation Key</h2>
+            <input type="text" id="keyInput" class="key-input" placeholder="Enter your key here...">
+            <div class="key-hint" id="keyHint">
                 Format: 9 letters, 4 letters, 7 letters, 10 letters, 4 letters, 7 letters, 8 letters, 8 letters
             </div>
             <div class="key-actions">
-                <button class="btn-key btn-dismiss" onclick="closeKeyModal()" data-translate="dismiss">Dismiss</button>
-                <button class="btn-key btn-proceed" onclick="checkKey()" data-translate="proceed">Proceed</button>
+                <button class="btn-key btn-dismiss" onclick="closeKeyModal()">Dismiss</button>
+                <button class="btn-key btn-proceed" onclick="checkKey()">Proceed</button>
             </div>
         </div>
     </div>
 
     <div class="brain-modal" id="brainModal">
         <div class="brain-box">
-            <h2 data-translate="brain_title">Artist Message</h2>
+            <h2>Artist Message</h2>
             <p id="brainMessageText">This is a special message from the artist.</p>
-            <button class="btn-okay" onclick="closeBrainModal()" data-translate="okay">Okay</button>
+            <button class="btn-okay" onclick="closeBrainModal()">Okay</button>
         </div>
     </div>
 
 <script>
-    const translations = {
-        en: { 
-            select_celebrity: "Select Your Celebrity",
-            search_placeholder: "Search by email...",
-            enter_key_title: "Enter Activation Key",
-            enter_key_placeholder: "Enter your key here...",
-            key_hint: "Format: 9 letters, 4 letters, 7 letters, 10 letters, 4 letters, 7 letters, 8 letters, 8 letters",
-            dismiss: "Dismiss",
-            proceed: "Proceed",
-            brain_title: "Artist Message",
-            okay: "Okay"
-        },
-        pl: { 
-            select_celebrity: "Wybierz swoją gwiazdę",
-            search_placeholder: "Szukaj po e-mailu...",
-            enter_key_title: "Wpisz klucz aktywacyjny",
-            enter_key_placeholder: "Wpisz swój klucz tutaj...",
-            key_hint: "Format: 9 liter, 4 litery, 7 liter, 10 liter, 4 litery, 7 liter, 8 liter, 8 liter",
-            dismiss: "Odrzuć",
-            proceed: "Kontynuuj",
-            brain_title: "Wiadomość od artysty",
-            okay: "Okay"
-        },
-        hu: { 
-            select_celebrity: "Válassza ki a hírességét",
-            search_placeholder: "Keresés e-mailben...",
-            enter_key_title: "Írja be az aktiválási kulcsot",
-            enter_key_placeholder: "Írja be a kulcsot...",
-            key_hint: "Formátum: 9 betű, 4 betű, 7 betű, 10 betű, 4 betű, 7 betű, 8 betű, 8 betű",
-            dismiss: "Elvetés",
-            proceed: "Tovább",
-            brain_title: "Üzenet a művésztől",
-            okay: "Rendben"
-        }
-    };
-
-    function applyTranslation() {
-        const userLang = navigator.language || navigator.userLanguage;
-        let langCode = "en";
-        if (userLang.startsWith("pl")) langCode = "pl";
-        if (userLang.startsWith("hu")) langCode = "hu";
-        
-        const savedLang = localStorage.getItem('selectedLanguage');
-        if (savedLang) langCode = savedLang;
-
-        document.querySelectorAll('[data-translate]').forEach(element => {
-            const key = element.getAttribute('data-translate');
-            if (translations[langCode] && translations[langCode][key]) {
-                element.textContent = translations[langCode][key];
-            }
-        });
-
-        document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
-            const key = element.getAttribute('data-translate-placeholder');
-            if (translations[langCode] && translations[langCode][key]) {
-                element.placeholder = translations[langCode][key];
-            }
-        });
-    }
-
-    document.addEventListener("DOMContentLoaded", applyTranslation);
-
     let artistWelcomeMessage = "Thank you for being a fan!";
     let realActivationKey = "";
     let allFans = [];
     let allComments = [];
 
-    window.addEventListener('firebaseLoaded', async () => {
-        const artistRef = window.doc(window.db, "app_settings", "artist");
-        const artistSnap = await window.getDoc(artistRef);
-        if (artistSnap.exists()) {
-            const data = artistSnap.data();
-            if (data.name) document.getElementById('artistNameLabel').textContent = data.name;
-            if (data.message) {
-                artistWelcomeMessage = data.message;
-                document.getElementById('brainMessageText').textContent = data.message;
+    // LOAD SELECTED ARTIST FROM SESSION STORAGE
+    function loadSelectedArtist() {
+        const stored = sessionStorage.getItem('selectedArtist');
+        if (!stored) {
+            // No artist selected — redirect back to selection page
+            window.location.href = '/my-website/artists/';
+            return;
+        }
+        try {
+            const artist = JSON.parse(stored);
+            
+            // Set avatar (photo or fallback)
+            const avatarEl = document.getElementById('artistAvatar');
+            if (artist.imageUrl) {
+                avatarEl.style.backgroundImage = `url('${artist.imageUrl}')`;
+                avatarEl.textContent = "";
+            } else {
+                avatarEl.style.background = artist.bgColor || 'linear-gradient(135deg, #ff00cc, #333399)';
+                avatarEl.textContent = artist.name ? artist.name.charAt(0).toUpperCase() : 'A';
             }
+            
+            // Set name + verified badge
+            const nameEl = document.getElementById('artistNameLabel');
+            nameEl.innerHTML = '';
+            const nameText = document.createTextNode(artist.name || 'The Artist');
+            nameEl.appendChild(nameText);
+            
+            if (artist.isVerified) {
+                const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.setAttribute("class", "verified-badge");
+                svg.setAttribute("viewBox", "0 0 24 24");
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", "M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .495.083.965.238 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z");
+                svg.appendChild(path);
+                nameEl.appendChild(svg);
+            }
+        } catch (e) {
+            window.location.href = '/my-website/artists/';
         }
+    }
 
-        const keyRef = window.doc(window.db, "app_settings", "security");
-        const keySnap = await window.getDoc(keyRef);
-        if (keySnap.exists()) {
-            realActivationKey = keySnap.data().activationKey || "";
+    window.addEventListener('firebaseLoaded', async () => {
+        // Load selected artist FIRST (handles avatar + blue tick)
+        loadSelectedArtist();
+
+        try {
+            const artistRef = window.doc(window.db, "app_settings", "artist");
+            const artistSnap = await window.getDoc(artistRef);
+            if (artistSnap.exists()) {
+                const data = artistSnap.data();
+                if (data.message) {
+                    artistWelcomeMessage = data.message;
+                    document.getElementById('brainMessageText').textContent = data.message;
+                }
+            }
+
+            const keyRef = window.doc(window.db, "app_settings", "security");
+            const keySnap = await window.getDoc(keyRef);
+            if (keySnap.exists()) {
+                realActivationKey = keySnap.data().activationKey || "";
+            }
+
+            const fansSnap = await window.getDocs(window.query(window.collection(window.db, "fans"), window.orderBy("createdAt")));
+            allFans = [];
+            fansSnap.forEach(doc => allFans.push(doc.data()));
+            renderFans();
+
+            const commentsSnap = await window.getDocs(window.query(window.collection(window.db, "comments"), window.orderBy("createdAt")));
+            allComments = [];
+            commentsSnap.forEach(doc => allComments.push(doc.data()));
+            startTicker();
+        } catch (e) {
+            console.error("Firestore load error:", e);
         }
-
-        const fansSnap = await window.getDocs(window.query(window.collection(window.db, "fans"), window.orderBy("createdAt")));
-        allFans = [];
-        fansSnap.forEach(doc => allFans.push(doc.data()));
-        renderFans();
-
-        const commentsSnap = await window.getDocs(window.query(window.collection(window.db, "comments"), window.orderBy("createdAt")));
-        allComments = [];
-        commentsSnap.forEach(doc => allComments.push(doc.data()));
-        startTicker();
-        
-        applyTranslation();
     });
 
     function renderFans() {
@@ -333,13 +336,11 @@ layout: false
                 
                 <div class="focus-sec-row">
                     <div class="focus-sec-img">${fan.secImg}</div>
-                    <div class="brain-text" onclick="openKeyModal()" data-translate="brain_button">Brain</div>
+                    <div class="brain-text" onclick="openKeyModal()">Brain</div>
                 </div>
                 
                 <button class="btn-close" onclick="closeFocusModal()">Close</button>
             `;
-            
-            applyTranslation();
 
             const colors = ['#ff00cc', '#00d2ff', '#ffff33', '#33ff33', '#ff9933'];
             for (let i = 0; i < 20; i++) {

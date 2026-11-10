@@ -50,37 +50,39 @@ layout: false
         .login-box h2 { color: #3b82f6; margin-bottom: 20px; }
         .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #374151; border-radius: 8px; font-size: 16px; background: #111827; color: white; text-align: center; }
         .login-box button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        
         .editor-content { display: none; }
         .editor-content.active { display: block; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #374151; padding-bottom: 15px; }
-        .header h1 { color: #f3f4f6; }
-        
-        h2 { color: #60a5fa; margin-bottom: 15px; font-size: 20px; display: flex; justify-content: space-between;}
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #374151; padding-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .header h1 { color: #f3f4f6; font-size: 24px; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-logout { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        h2 { color: #60a5fa; margin-bottom: 10px; font-size: 20px; }
+        .section-help { color: #9ca3af; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
         .card { background: #1f2937; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #374151; }
         .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
+        .input-group label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-group .help-text { font-size: 11px; color: #6b7280; margin-top: 4px; font-style: italic; }
         .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 12px; background: #111827; border: 1px solid #4b5563; border-radius: 8px; color: white; font-size: 14px; outline: none; }
         .input-group textarea { resize: vertical; min-height: 80px; }
-        
         .btn-save { background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .btn-save:hover { background: #059669; }
         .btn-save:disabled { background: #4b5563; cursor: not-allowed; }
-        
         .btn-add { background: #3b82f6; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
         .item-list { display: flex; flex-direction: column; gap: 10px; }
         .list-item { background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #374151; display: flex; flex-direction: column; gap: 10px; }
-        .list-item-row { display: flex; gap: 10px; align-items: center; }
-        .list-item input, .list-item textarea, .list-item select { flex-grow: 1; padding: 8px; background: #1f2937; border: 1px solid #4b5563; border-radius: 6px; color: white; font-size: 13px;}
-        .btn-update { background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; width: 100px;}
-        .btn-delete { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px;}
-        
-        .add-form { background: #374151; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none; flex-direction: column; gap: 10px;}
+        .list-item-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .list-item input, .list-item textarea, .list-item select { flex-grow: 1; padding: 8px; background: #1f2937; border: 1px solid #4b5563; border-radius: 6px; color: white; font-size: 13px; min-width: 120px; }
+        .btn-update { background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .add-form { background: #374151; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none; flex-direction: column; gap: 10px; }
         .add-form.active { display: flex; }
         .add-form input, .add-form textarea, .add-form select { padding: 10px; border-radius: 6px; border: none; }
-        
-        .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 15px 25px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none; animation: slideIn 0.3s ease-out; z-index: 1000;}
+        .toast { position: fixed; bottom: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none; animation: slideIn 0.3s ease-out; z-index: 1000; color: white; }
+        .toast.success { background: #10b981; }
+        .toast.error { background: #ef4444; }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .avatar-preview { width: 60px; height: 60px; border-radius: 50%; background: #374151; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #9ca3af; border: 3px solid #4b5563; flex-shrink: 0; background-size: cover; background-position: center; }
+        .empty-state { color: #6b7280; text-align: center; padding: 20px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -94,77 +96,97 @@ layout: false
     <div class="container editor-content" id="editorContent">
         <div class="header">
             <h1>⚙️ Master Editor</h1>
-            <a href="/my-website/artists/" target="_blank" class="btn-back" style="color:white; text-decoration:none;">View Directory ↗</a>
+            <div class="header-actions">
+                <a href="/my-website/artists/" target="_blank" style="color:#60a5fa; text-decoration:none; font-size:14px;">View Directory ↗</a>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
         </div>
 
-        <!-- 1. APP SETTINGS -->
+        <!-- SECTION 1 -->
         <div class="card">
-            <h2>1. App Settings</h2>
+            <h2>1. Global Settings</h2>
+            <p class="section-help">These control the artist display and access messages across the fanbook and directory pages.</p>
+            
             <div class="input-group">
-                <label>Artist Name (Shown in Fanbook)</label>
+                <label>Artist Name (Shown in Fanbook Header)</label>
                 <input type="text" id="artistNameInput" placeholder="e.g., The Weeknd">
+                <div class="help-text">This appears as the sticky header on the fanbook page.</div>
             </div>
             <div class="input-group">
-                <label>Artist Popup Message (Appears when clicking the Brain)</label>
-                <textarea id="artistMessageInput"></textarea>
+                <label>Artist Popup Message (Brain Click)</label>
+                <textarea id="artistMessageInput" placeholder="Message shown when fans click the Brain icon..."></textarea>
             </div>
             <div class="input-group">
-                <label>Access Denied Message (Shown when clicking a Gated Artist)</label>
+                <label>⚠️ Access Denied Message (Gate on /artists/)</label>
                 <textarea id="accessDeniedInput" placeholder="e.g., You do not have a record with this artist."></textarea>
+                <div class="help-text">This text appears when a fan clicks a celebrity marked as "Restricted" on the /artists/ selection page.</div>
             </div>
             <div class="input-group">
                 <label>Support Chat Welcome Message</label>
                 <textarea id="supportWelcomeInput"></textarea>
             </div>
             <div class="input-group">
-                <label>Activation Key (8 Words separated by spaces)</label>
-                <input type="text" id="activationKeyInput" placeholder="e.g., word1 word2...">
+                <label>Activation Key (For Brain Access)</label>
+                <input type="text" id="activationKeyInput" placeholder="e.g., word1 word2 word3...">
+                <div class="help-text">Fans must type this key to unlock the artist message on the fanbook.</div>
             </div>
             <button class="btn-save" id="saveSettingsBtn" onclick="saveSettings()">Save All Settings</button>
         </div>
 
-        <!-- 2. CELEBRITY DIRECTORY -->
+        <!-- SECTION 2 -->
         <div class="card">
             <h2>2. Celebrity Directory</h2>
+            <p class="section-help">These are the artists shown on the /artists/ selection page. Upload photos to Postimages.org and paste the direct link below.</p>
+            
             <button class="btn-add" onclick="toggleAddForm('celeb')">+ Add New Celebrity</button>
             <div class="add-form" id="celebAddForm">
                 <input type="text" id="newCelebName" placeholder="Celebrity Name">
-                <input type="text" id="newCelebImage" placeholder="Image URL">
-                <input type="text" id="newCelebCustomText" placeholder="Custom Text (e.g., Enter Fanbook)">
+                <input type="text" id="newCelebImage" placeholder="Image URL (paste direct link from Postimages)" oninput="previewNewAvatar(this.value)">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="avatar-preview" id="newAvatarPreview">?</div>
+                    <span style="font-size:12px; color:#9ca3af;">Live preview</span>
+                </div>
+                <input type="text" id="newCelebCustomText" placeholder="Subtitle (e.g., Enter Fanbook)">
                 <select id="newCelebVerified">
                     <option value="false">Standard Artist</option>
-                    <option value="true">Verified Artist (Blue Tick)</option>
+                    <option value="true">Verified (Blue Tick)</option>
                 </select>
                 <select id="newCelebAccess">
-                    <option value="open">Open Access (Fans can enter)</option>
-                    <option value="gated">Restricted (Popup Message)</option>
+                    <option value="open">Open Access</option>
+                    <option value="gated">Restricted (Shows Gate)</option>
                 </select>
-                <textarea id="newCelebMessage" placeholder="Thank you message..."></textarea>
+                <textarea id="newCelebMessage" placeholder="Thank you message shown after selection..."></textarea>
                 <button class="btn-save" onclick="addNewCeleb()">Save Celebrity</button>
             </div>
             <div class="item-list" id="celebList"></div>
         </div>
 
-        <!-- 3. FAN DIRECTORY -->
+        <!-- SECTION 3 -->
         <div class="card">
             <h2>3. Fan Directory</h2>
+            <p class="section-help">Fans displayed in the fanbook grid. Each fan gets a colored avatar and a secImg tag.</p>
+            
             <button class="btn-add" onclick="toggleAddForm('fan')">+ Add New Fan</button>
             <div class="add-form" id="fanAddForm">
                 <input type="email" id="newFanEmail" placeholder="Email Address">
-                <input type="text" id="newFanSecImg" placeholder="Sec Img Text">
+                <input type="text" id="newFanSecImg" placeholder="Sec Img Text (e.g., VIP, GOLD)">
                 <select id="newFanColor">
                     <option value="#ffb3ba">Pink</option>
                     <option value="#bae1ff">Blue</option>
                     <option value="#baffc9">Green</option>
+                    <option value="#ffffba">Yellow</option>
+                    <option value="#d4b3ff">Purple</option>
                 </select>
                 <button class="btn-save" onclick="addNewFan()">Save Fan</button>
             </div>
             <div class="item-list" id="fanList"></div>
         </div>
 
-        <!-- 4. COMMENT TICKER -->
+        <!-- SECTION 4 -->
         <div class="card">
             <h2>4. Live Comment Ticker</h2>
+            <p class="section-help">Comments that scroll at the top of the fanbook page.</p>
+            
             <button class="btn-add" onclick="toggleAddForm('comment')">+ Add New Comment</button>
             <div class="add-form" id="commentAddForm">
                 <input type="text" id="newCommentUser" placeholder="Username">
@@ -175,7 +197,7 @@ layout: false
         </div>
     </div>
 
-    <div class="toast" id="toast">Changes Saved!</div>
+    <div class="toast" id="toast"></div>
 
 <script>
     const ADMIN_PASSWORD = "admin123";
@@ -188,108 +210,152 @@ layout: false
         } else { alert("Wrong password"); }
     }
 
+    function logout() {
+        document.getElementById('loginBox').style.display = 'block';
+        document.getElementById('editorContent').classList.remove('active');
+        document.getElementById('adminPass').value = '';
+    }
+
     function toggleAddForm(type) { document.getElementById(type + 'AddForm').classList.toggle('active'); }
 
-    // --- SETTINGS ---
+    function previewNewAvatar(url) {
+        const preview = document.getElementById('newAvatarPreview');
+        if (url && url.startsWith('http')) {
+            preview.style.backgroundImage = `url('${url}')`;
+            preview.textContent = '';
+        } else {
+            preview.style.backgroundImage = 'none';
+            preview.textContent = '?';
+        }
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast ' + (isError ? 'error' : 'success');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
     async function loadSettings() {
-        const artistRef = window.doc(window.db, "app_settings", "artist");
-        const artistSnap = await window.getDoc(artistRef);
-        if (artistSnap.exists()) {
-            document.getElementById('artistNameInput').value = artistSnap.data().name || "";
-            document.getElementById('artistMessageInput').value = artistSnap.data().message || "";
-        }
-        
-        const supportRef = window.doc(window.db, "app_settings", "support");
-        const supportSnap = await window.getDoc(supportRef);
-        if (supportSnap.exists()) { 
-            document.getElementById('supportWelcomeInput').value = supportSnap.data().welcomeText || ""; 
-            document.getElementById('accessDeniedInput').value = supportSnap.data().accessDenied || "";
-        }
-        
-        const keyRef = window.doc(window.db, "app_settings", "security");
-        const keySnap = await window.getDoc(keyRef);
-        if (keySnap.exists()) { document.getElementById('activationKeyInput').value = keySnap.data().activationKey || ""; }
+        try {
+            const artistRef = window.doc(window.db, "app_settings", "artist");
+            const artistSnap = await window.getDoc(artistRef);
+            if (artistSnap.exists()) {
+                document.getElementById('artistNameInput').value = artistSnap.data().name || "";
+                document.getElementById('artistMessageInput').value = artistSnap.data().message || "";
+            }
+            const supportRef = window.doc(window.db, "app_settings", "support");
+            const supportSnap = await window.getDoc(supportRef);
+            if (supportSnap.exists()) { 
+                document.getElementById('supportWelcomeInput').value = supportSnap.data().welcomeText || ""; 
+                document.getElementById('accessDeniedInput').value = supportSnap.data().accessDenied || "";
+            }
+            const keyRef = window.doc(window.db, "app_settings", "security");
+            const keySnap = await window.getDoc(keyRef);
+            if (keySnap.exists()) { document.getElementById('activationKeyInput').value = keySnap.data().activationKey || ""; }
+        } catch (e) { showToast("Error loading settings: " + e.message, true); }
     }
 
     async function saveSettings() {
         const btn = document.getElementById('saveSettingsBtn');
         btn.textContent = "Saving...";
         btn.disabled = true;
-        
-        await window.setDoc(window.doc(window.db, "app_settings", "artist"), { name: document.getElementById('artistNameInput').value, message: document.getElementById('artistMessageInput').value });
-        await window.setDoc(window.doc(window.db, "app_settings", "support"), { 
-            welcomeText: document.getElementById('supportWelcomeInput').value,
-            accessDenied: document.getElementById('accessDeniedInput').value
-        });
-        await window.setDoc(window.doc(window.db, "app_settings", "security"), { activationKey: document.getElementById('activationKeyInput').value });
-        
+        try {
+            await window.setDoc(window.doc(window.db, "app_settings", "artist"), { 
+                name: document.getElementById('artistNameInput').value, 
+                message: document.getElementById('artistMessageInput').value 
+            });
+            await window.setDoc(window.doc(window.db, "app_settings", "support"), { 
+                welcomeText: document.getElementById('supportWelcomeInput').value,
+                accessDenied: document.getElementById('accessDeniedInput').value
+            });
+            await window.setDoc(window.doc(window.db, "app_settings", "security"), { 
+                activationKey: document.getElementById('activationKeyInput').value 
+            });
+            showToast("Settings saved!");
+        } catch (e) { showToast("Error: " + e.message, true); }
         btn.textContent = "Save All Settings";
         btn.disabled = false;
-        showToast();
     }
 
-    // --- CELEBRITIES ---
     async function loadCelebrities() {
         const list = document.getElementById('celebList');
         list.innerHTML = 'Loading...';
-        const snapshot = await window.getDocs(window.collection(window.db, "celebrities"));
-        list.innerHTML = '';
-        if (snapshot.empty) { list.innerHTML = '<p style="color: #6b7280;">No celebrities yet.</p>'; return; }
+        try {
+            const snapshot = await window.getDocs(window.collection(window.db, "celebrities"));
+            list.innerHTML = '';
+            if (snapshot.empty) { list.innerHTML = '<p class="empty-state">No celebrities yet.</p>'; return; }
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <div class="list-item-row">
+                        <div class="avatar-preview" id="preview-${docSnap.id}" style="${data.imageUrl ? `background-image:url('${data.imageUrl}');` : ''}">${!data.imageUrl ? (data.name ? data.name.charAt(0).toUpperCase() : '?') : ''}</div>
+                        <input type="text" id="cname-${docSnap.id}" value="${data.name || ''}" placeholder="Name">
+                    </div>
+                    <div class="list-item-row"><input type="text" id="cimage-${docSnap.id}" value="${data.imageUrl || ''}" placeholder="Image URL" oninput="previewAvatar('${docSnap.id}', this.value)"></div>
+                    <div class="list-item-row"><input type="text" id="ccustom-${docSnap.id}" value="${data.customText || ''}" placeholder="Custom Text"></div>
+                    <div class="list-item-row">
+                        <select id="cverified-${docSnap.id}">
+                            <option value="false" ${!data.isVerified ? 'selected' : ''}>Standard</option>
+                            <option value="true" ${data.isVerified ? 'selected' : ''}>Verified</option>
+                        </select>
+                        <select id="caccess-${docSnap.id}">
+                            <option value="open" ${data.access !== 'gated' ? 'selected' : ''}>Open</option>
+                            <option value="gated" ${data.access === 'gated' ? 'selected' : ''}>Restricted</option>
+                        </select>
+                    </div>
+                    <div class="list-item-row"><textarea id="cmessage-${docSnap.id}" placeholder="Message">${data.message || ''}</textarea></div>
+                    <div class="list-item-row">
+                        <button class="btn-update" onclick="updateCeleb('${docSnap.id}', this)">Save</button>
+                        <button class="btn-delete" onclick="deleteCeleb('${docSnap.id}')">Delete</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        } catch (e) { list.innerHTML = '<p class="empty-state">Error loading celebrities.</p>'; showToast("Error: " + e.message, true); }
+    }
 
-        snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            const div = document.createElement('div');
-            div.className = 'list-item';
-            div.innerHTML = `
-                <div class="list-item-row"><input type="text" id="cname-${docSnap.id}" value="${data.name || ''}" placeholder="Name"></div>
-                <div class="list-item-row"><input type="text" id="cimage-${docSnap.id}" value="${data.imageUrl || ''}" placeholder="Image URL"></div>
-                <div class="list-item-row"><input type="text" id="ccustom-${docSnap.id}" value="${data.customText || ''}" placeholder="Custom Text"></div>
-                <div class="list-item-row">
-                    <select id="cverified-${docSnap.id}">
-                        <option value="false" ${!data.isVerified ? 'selected' : ''}>Standard Artist</option>
-                        <option value="true" ${data.isVerified ? 'selected' : ''}>Verified (Blue Tick)</option>
-                    </select>
-                    <select id="caccess-${docSnap.id}">
-                        <option value="open" ${data.access !== 'gated' ? 'selected' : ''}>Open Access</option>
-                        <option value="gated" ${data.access === 'gated' ? 'selected' : ''}>Restricted (Popup)</option>
-                    </select>
-                </div>
-                <div class="list-item-row"><textarea id="cmessage-${docSnap.id}" placeholder="Message">${data.message || ''}</textarea></div>
-                <div class="list-item-row">
-                    <button class="btn-update" onclick="updateCeleb('${docSnap.id}', this)">Save</button>
-                    <button class="btn-delete" onclick="deleteCeleb('${docSnap.id}')">Delete</button>
-                </div>
-            `;
-            list.appendChild(div);
-        });
+    function previewAvatar(id, url) {
+        const el = document.getElementById('preview-' + id);
+        if (!el) return;
+        if (url && url.startsWith('http')) {
+            el.style.backgroundImage = `url('${url}')`;
+            el.textContent = '';
+        } else {
+            el.style.backgroundImage = 'none';
+            el.textContent = '?';
+        }
     }
 
     async function updateCeleb(id, btnElement) {
         btnElement.textContent = "Saving...";
         btnElement.disabled = true;
-        
-        const isVerified = document.getElementById(`cverified-${id}`).value === 'true';
-        const access = document.getElementById(`caccess-${id}`).value;
-        
-        await window.updateDoc(window.doc(window.db, "celebrities", id), {
-            name: document.getElementById(`cname-${id}`).value,
-            imageUrl: document.getElementById(`cimage-${id}`).value,
-            customText: document.getElementById(`ccustom-${id}`).value,
-            isVerified: isVerified,
-            access: access,
-            message: document.getElementById(`cmessage-${id}`).value
-        });
-        
+        try {
+            const isVerified = document.getElementById(`cverified-${id}`).value === 'true';
+            const access = document.getElementById(`caccess-${id}`).value;
+            await window.updateDoc(window.doc(window.db, "celebrities", id), {
+                name: document.getElementById(`cname-${id}`).value,
+                imageUrl: document.getElementById(`cimage-${id}`).value,
+                customText: document.getElementById(`ccustom-${id}`).value,
+                isVerified: isVerified,
+                access: access,
+                message: document.getElementById(`cmessage-${id}`).value
+            });
+            showToast("Celebrity updated!");
+        } catch (e) { showToast("Error: " + e.message, true); }
         btnElement.textContent = "Save";
         btnElement.disabled = false;
-        showToast();
     }
 
     async function deleteCeleb(id) {
-        if (confirm("Delete this celebrity?")) {
+        if (!confirm("Delete this celebrity?")) return;
+        try {
             await window.deleteDoc(window.doc(window.db, "celebrities", id));
-            loadCelebrities(); showToast();
-        }
+            loadCelebrities(); showToast("Celebrity deleted.");
+        } catch (e) { showToast("Error: " + e.message, true); }
     }
 
     async function addNewCeleb() {
@@ -299,61 +365,77 @@ layout: false
         const isVerified = document.getElementById('newCelebVerified').value === 'true';
         const access = document.getElementById('newCelebAccess').value;
         const message = document.getElementById('newCelebMessage').value;
-        
         if (!name) return alert("Name is required.");
-        
-        await window.addDoc(window.collection(window.db, "celebrities"), { 
-            name, imageUrl, customText, isVerified, access, message, 
-            createdAt: new Date().toISOString() 
-        });
-        
-        document.getElementById('newCelebName').value = ""; 
-        document.getElementById('newCelebImage').value = ""; 
-        document.getElementById('newCelebCustomText').value = ""; 
-        document.getElementById('newCelebMessage').value = "";
-        toggleAddForm('celeb'); loadCelebrities(); showToast();
+        try {
+            await window.addDoc(window.collection(window.db, "celebrities"), { 
+                name, imageUrl, customText, isVerified, access, message, 
+                createdAt: new Date().toISOString() 
+            });
+            document.getElementById('newCelebName').value = "";
+            document.getElementById('newCelebImage').value = "";
+            document.getElementById('newCelebCustomText').value = "";
+            document.getElementById('newCelebMessage').value = "";
+            document.getElementById('newCelebVerified').value = "false";
+            document.getElementById('newCelebAccess').value = "open";
+            document.getElementById('newAvatarPreview').style.backgroundImage = 'none';
+            document.getElementById('newAvatarPreview').textContent = '?';
+            toggleAddForm('celeb'); loadCelebrities(); showToast("Celebrity added!");
+        } catch (e) { showToast("Error: " + e.message, true); }
     }
 
-    // --- FANS ---
     async function loadFans() {
         const list = document.getElementById('fanList');
         list.innerHTML = 'Loading...';
-        const q = window.query(window.collection(window.db, "fans"), window.orderBy("createdAt"));
-        const snapshot = await window.getDocs(q);
-        list.innerHTML = '';
-        if (snapshot.empty) { list.innerHTML = '<p style="color: #6b7280;">No fans yet.</p>'; return; }
-        snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            const div = document.createElement('div');
-            div.className = 'list-item';
-            div.innerHTML = `
-                <div class="list-item-row">
-                    <input type="text" id="email-${docSnap.id}" value="${data.email || ''}" placeholder="Email">
-                    <input type="text" id="secimg-${docSnap.id}" value="${data.secImg || ''}" placeholder="Sec Img">
-                </div>
-                <div class="list-item-row">
-                    <button class="btn-update" onclick="updateFan('${docSnap.id}', this)">Save</button>
-                    <button class="btn-delete" onclick="deleteFan('${docSnap.id}')">Delete</button>
-                </div>
-            `;
-            list.appendChild(div);
-        });
+        try {
+            const q = window.query(window.collection(window.db, "fans"), window.orderBy("createdAt"));
+            const snapshot = await window.getDocs(q);
+            list.innerHTML = '';
+            if (snapshot.empty) { list.innerHTML = '<p class="empty-state">No fans yet.</p>'; return; }
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <div class="list-item-row">
+                        <input type="text" id="email-${docSnap.id}" value="${data.email || ''}" placeholder="Email">
+                        <input type="text" id="secimg-${docSnap.id}" value="${data.secImg || ''}" placeholder="Sec Img">
+                    </div>
+                    <div class="list-item-row">
+                        <select id="color-${docSnap.id}">
+                            <option value="#ffb3ba" ${data.bgColor === '#ffb3ba' ? 'selected' : ''}>Pink</option>
+                            <option value="#bae1ff" ${data.bgColor === '#bae1ff' ? 'selected' : ''}>Blue</option>
+                            <option value="#baffc9" ${data.bgColor === '#baffc9' ? 'selected' : ''}>Green</option>
+                            <option value="#ffffba" ${data.bgColor === '#ffffba' ? 'selected' : ''}>Yellow</option>
+                            <option value="#d4b3ff" ${data.bgColor === '#d4b3ff' ? 'selected' : ''}>Purple</option>
+                        </select>
+                        <button class="btn-update" onclick="updateFan('${docSnap.id}', this)">Save</button>
+                        <button class="btn-delete" onclick="deleteFan('${docSnap.id}')">Delete</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        } catch (e) { list.innerHTML = '<p class="empty-state">Error loading fans.</p>'; showToast("Error: " + e.message, true); }
     }
 
     async function updateFan(id, btnElement) {
         btnElement.textContent = "Saving...";
-        await window.updateDoc(window.doc(window.db, "fans", id), {
-            email: document.getElementById(`email-${id}`).value,
-            secImg: document.getElementById(`secimg-${id}`).value
-        });
-        btnElement.textContent = "Save"; showToast();
+        try {
+            await window.updateDoc(window.doc(window.db, "fans", id), {
+                email: document.getElementById(`email-${id}`).value,
+                secImg: document.getElementById(`secimg-${id}`).value,
+                bgColor: document.getElementById(`color-${id}`).value
+            });
+            showToast("Fan updated!");
+        } catch (e) { showToast("Error: " + e.message, true); }
+        btnElement.textContent = "Save";
     }
 
     async function deleteFan(id) {
-        if (confirm("Delete this fan permanently?")) {
+        if (!confirm("Delete this fan permanently?")) return;
+        try {
             await window.deleteDoc(window.doc(window.db, "fans", id));
-            loadFans(); showToast();
-        }
+            loadFans(); showToast("Fan deleted.");
+        } catch (e) { showToast("Error: " + e.message, true); }
     }
 
     async function addNewFan() {
@@ -361,66 +443,74 @@ layout: false
         const secImg = document.getElementById('newFanSecImg').value;
         const color = document.getElementById('newFanColor').value;
         if (!email) return alert("Email is required.");
-        await window.addDoc(window.collection(window.db, "fans"), { email, secImg, bgColor: color, ringColor: "#d4c4a8", createdAt: new Date().toISOString() });
-        document.getElementById('newFanEmail').value = ""; document.getElementById('newFanSecImg').value = "";
-        toggleAddForm('fan'); loadFans(); showToast();
+        try {
+            await window.addDoc(window.collection(window.db, "fans"), { 
+                email, secImg, bgColor: color, ringColor: "#d4c4a8", createdAt: new Date().toISOString() 
+            });
+            document.getElementById('newFanEmail').value = "";
+            document.getElementById('newFanSecImg').value = "";
+            document.getElementById('newFanColor').value = "#ffb3ba";
+            toggleAddForm('fan'); loadFans(); showToast("Fan added!");
+        } catch (e) { showToast("Error: " + e.message, true); }
     }
 
-    // --- COMMENTS ---
     async function loadComments() {
         const list = document.getElementById('commentList');
         list.innerHTML = 'Loading...';
-        const q = window.query(window.collection(window.db, "comments"), window.orderBy("createdAt"));
-        const snapshot = await window.getDocs(q);
-        list.innerHTML = '';
-        if (snapshot.empty) { list.innerHTML = '<p style="color: #6b7280;">No comments yet.</p>'; return; }
-        snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            const div = document.createElement('div');
-            div.className = 'list-item';
-            div.innerHTML = `
-                <div class="list-item-row">
-                    <input type="text" id="user-${docSnap.id}" value="${data.user || ''}" placeholder="User" style="max-width: 120px;">
-                    <input type="text" id="text-${docSnap.id}" value="${data.text || ''}" placeholder="Comment">
-                </div>
-                <div class="list-item-row">
-                    <button class="btn-update" onclick="updateComment('${docSnap.id}', this)">Save</button>
-                    <button class="btn-delete" onclick="deleteComment('${docSnap.id}')">Delete</button>
-                </div>
-            `;
-            list.appendChild(div);
-        });
+        try {
+            const q = window.query(window.collection(window.db, "comments"), window.orderBy("createdAt"));
+            const snapshot = await window.getDocs(q);
+            list.innerHTML = '';
+            if (snapshot.empty) { list.innerHTML = '<p class="empty-state">No comments yet.</p>'; return; }
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <div class="list-item-row">
+                        <input type="text" id="user-${docSnap.id}" value="${data.user || ''}" placeholder="User" style="max-width:120px;">
+                        <input type="text" id="text-${docSnap.id}" value="${data.text || ''}" placeholder="Comment">
+                    </div>
+                    <div class="list-item-row">
+                        <button class="btn-update" onclick="updateComment('${docSnap.id}', this)">Save</button>
+                        <button class="btn-delete" onclick="deleteComment('${docSnap.id}')">Delete</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        } catch (e) { list.innerHTML = '<p class="empty-state">Error loading comments.</p>'; showToast("Error: " + e.message, true); }
     }
 
     async function updateComment(id, btnElement) {
         btnElement.textContent = "Saving...";
-        await window.updateDoc(window.doc(window.db, "comments", id), {
-            user: document.getElementById(`user-${id}`).value,
-            text: document.getElementById(`text-${id}`).value
-        });
-        btnElement.textContent = "Save"; showToast();
+        try {
+            await window.updateDoc(window.doc(window.db, "comments", id), {
+                user: document.getElementById(`user-${id}`).value,
+                text: document.getElementById(`text-${id}`).value
+            });
+            showToast("Comment updated!");
+        } catch (e) { showToast("Error: " + e.message, true); }
+        btnElement.textContent = "Save";
     }
 
     async function deleteComment(id) {
-        if (confirm("Delete this comment?")) {
+        if (!confirm("Delete this comment?")) return;
+        try {
             await window.deleteDoc(window.doc(window.db, "comments", id));
-            loadComments(); showToast();
-        }
+            loadComments(); showToast("Comment deleted.");
+        } catch (e) { showToast("Error: " + e.message, true); }
     }
 
     async function addNewComment() {
         const user = document.getElementById('newCommentUser').value;
         const text = document.getElementById('newCommentText').value;
         if (!user || !text) return alert("Both fields are required.");
-        await window.addDoc(window.collection(window.db, "comments"), { user, text, createdAt: new Date().toISOString() });
-        document.getElementById('newCommentUser').value = ""; document.getElementById('newCommentText').value = "";
-        toggleAddForm('comment'); loadComments(); showToast();
-    }
-
-    function showToast() {
-        const toast = document.getElementById('toast');
-        toast.style.display = 'block';
-        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        try {
+            await window.addDoc(window.collection(window.db, "comments"), { user, text, createdAt: new Date().toISOString() });
+            document.getElementById('newCommentUser').value = "";
+            document.getElementById('newCommentText').value = "";
+            toggleAddForm('comment'); loadComments(); showToast("Comment added!");
+        } catch (e) { showToast("Error: " + e.message, true); }
     }
 </script>
 </body>
