@@ -50,30 +50,36 @@ layout: false
         .login-box h2 { color: #3b82f6; margin-bottom: 20px; }
         .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #374151; border-radius: 8px; font-size: 16px; background: #111827; color: white; text-align: center; }
         .login-box button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
         .editor-content { display: none; }
         .editor-content.active { display: block; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #374151; padding-bottom: 15px; }
         .header h1 { color: #f3f4f6; }
-        .btn-back { background: #4b5563; color: white; text-decoration: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; font-size: 14px; }
-        h2 { color: #60a5fa; margin-bottom: 15px; font-size: 20px; }
+        
+        h2 { color: #60a5fa; margin-bottom: 15px; font-size: 20px; display: flex; justify-content: space-between;}
         .card { background: #1f2937; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #374151; }
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
         .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 12px; background: #111827; border: 1px solid #4b5563; border-radius: 8px; color: white; font-size: 14px; outline: none; }
         .input-group textarea { resize: vertical; min-height: 80px; }
+        
         .btn-save { background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .btn-save:hover { background: #059669; }
+        .btn-save:disabled { background: #4b5563; cursor: not-allowed; }
+        
         .btn-add { background: #3b82f6; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
         .item-list { display: flex; flex-direction: column; gap: 10px; }
         .list-item { background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #374151; display: flex; flex-direction: column; gap: 10px; }
         .list-item-row { display: flex; gap: 10px; align-items: center; }
-        .list-item input, .list-item textarea { flex-grow: 1; padding: 8px; background: #1f2937; border: 1px solid #4b5563; border-radius: 6px; color: white; font-size: 13px;}
-        .btn-update { background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px;}
+        .list-item input, .list-item textarea, .list-item select { flex-grow: 1; padding: 8px; background: #1f2937; border: 1px solid #4b5563; border-radius: 6px; color: white; font-size: 13px;}
+        .btn-update { background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; width: 100px;}
         .btn-delete { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px;}
+        
         .add-form { background: #374151; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none; flex-direction: column; gap: 10px;}
         .add-form.active { display: flex; }
         .add-form input, .add-form textarea, .add-form select { padding: 10px; border-radius: 6px; border: none; }
-        .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 15px 25px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none; animation: slideIn 0.3s ease-out; }
+        
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 15px 25px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none; animation: slideIn 0.3s ease-out; z-index: 1000;}
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     </style>
 </head>
@@ -88,7 +94,7 @@ layout: false
     <div class="container editor-content" id="editorContent">
         <div class="header">
             <h1>⚙️ Master Editor</h1>
-            <a href="/my-website/artists/" target="_blank" class="btn-back">View Directory ↗</a>
+            <a href="/my-website/artists/" target="_blank" class="btn-back" style="color:white; text-decoration:none;">View Directory ↗</a>
         </div>
 
         <!-- 1. APP SETTINGS -->
@@ -108,9 +114,9 @@ layout: false
             </div>
             <div class="input-group">
                 <label>Activation Key (8 Words separated by spaces)</label>
-                <input type="text" id="activationKeyInput" placeholder="e.g., word1 word2 word3 word4 word5 word6 word7 word8">
+                <input type="text" id="activationKeyInput" placeholder="e.g., word1 word2...">
             </div>
-            <button class="btn-save" onclick="saveSettings()">Save All Settings</button>
+            <button class="btn-save" id="saveSettingsBtn" onclick="saveSettings()">Save All Settings</button>
         </div>
 
         <!-- 2. CELEBRITY DIRECTORY -->
@@ -118,10 +124,17 @@ layout: false
             <h2>2. Celebrity Directory</h2>
             <button class="btn-add" onclick="toggleAddForm('celeb')">+ Add New Celebrity</button>
             <div class="add-form" id="celebAddForm">
-                <input type="text" id="newCelebName" placeholder="Celebrity Name (e.g., Rihanna)">
-                <input type="text" id="newCelebImage" placeholder="Image URL (e.g., https://.../image.jpg)">
-                <input type="text" id="newCelebCustomText" placeholder="Custom Text (e.g., Enter Fanbook, Official Fanbase)">
-                <input type="text" id="newCelebColor" placeholder="Fallback Color (e.g., #3a7bd5)">
+                <input type="text" id="newCelebName" placeholder="Celebrity Name">
+                <input type="text" id="newCelebImage" placeholder="Image URL">
+                <input type="text" id="newCelebCustomText" placeholder="Custom Text (e.g., Enter Fanbook)">
+                <select id="newCelebVerified">
+                    <option value="false">Standard Artist</option>
+                    <option value="true">Verified Artist (Blue Tick)</option>
+                </select>
+                <select id="newCelebAccess">
+                    <option value="open">Open Access (Fans can enter)</option>
+                    <option value="gated">Restricted (Popup Message)</option>
+                </select>
                 <textarea id="newCelebMessage" placeholder="Thank you message..."></textarea>
                 <button class="btn-save" onclick="addNewCeleb()">Save Celebrity</button>
             </div>
@@ -134,13 +147,11 @@ layout: false
             <button class="btn-add" onclick="toggleAddForm('fan')">+ Add New Fan</button>
             <div class="add-form" id="fanAddForm">
                 <input type="email" id="newFanEmail" placeholder="Email Address">
-                <input type="text" id="newFanSecImg" placeholder="Sec Img Text (e.g. VIP)">
+                <input type="text" id="newFanSecImg" placeholder="Sec Img Text">
                 <select id="newFanColor">
                     <option value="#ffb3ba">Pink</option>
                     <option value="#bae1ff">Blue</option>
                     <option value="#baffc9">Green</option>
-                    <option value="#e6b3ff">Purple</option>
-                    <option value="#ffccb3">Orange</option>
                 </select>
                 <button class="btn-save" onclick="addNewFan()">Save Fan</button>
             </div>
@@ -152,7 +163,7 @@ layout: false
             <h2>4. Live Comment Ticker</h2>
             <button class="btn-add" onclick="toggleAddForm('comment')">+ Add New Comment</button>
             <div class="add-form" id="commentAddForm">
-                <input type="text" id="newCommentUser" placeholder="Username (e.g. Sarah_M)">
+                <input type="text" id="newCommentUser" placeholder="Username">
                 <input type="text" id="newCommentText" placeholder="Comment text...">
                 <button class="btn-save" onclick="addNewComment()">Save Comment</button>
             </div>
@@ -169,18 +180,11 @@ layout: false
         if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('editorContent').classList.add('active');
-            loadSettings();
-            loadCelebrities();
-            loadFans();
-            loadComments();
-        } else {
-            alert("Wrong password");
-        }
+            loadSettings(); loadCelebrities(); loadFans(); loadComments();
+        } else { alert("Wrong password"); }
     }
 
-    function toggleAddForm(type) {
-        document.getElementById(type + 'AddForm').classList.toggle('active');
-    }
+    function toggleAddForm(type) { document.getElementById(type + 'AddForm').classList.toggle('active'); }
 
     // --- SETTINGS ---
     async function loadSettings() {
@@ -192,27 +196,24 @@ layout: false
         }
         const supportRef = window.doc(window.db, "app_settings", "support");
         const supportSnap = await window.getDoc(supportRef);
-        if (supportSnap.exists()) {
-            document.getElementById('supportWelcomeInput').value = supportSnap.data().welcomeText || "";
-        }
+        if (supportSnap.exists()) { document.getElementById('supportWelcomeInput').value = supportSnap.data().welcomeText || ""; }
+        
         const keyRef = window.doc(window.db, "app_settings", "security");
         const keySnap = await window.getDoc(keyRef);
-        if (keySnap.exists()) {
-            document.getElementById('activationKeyInput').value = keySnap.data().activationKey || "";
-        }
+        if (keySnap.exists()) { document.getElementById('activationKeyInput').value = keySnap.data().activationKey || ""; }
     }
 
     async function saveSettings() {
-        await window.setDoc(window.doc(window.db, "app_settings", "artist"), { 
-            name: document.getElementById('artistNameInput').value, 
-            message: document.getElementById('artistMessageInput').value 
-        });
-        await window.setDoc(window.doc(window.db, "app_settings", "support"), { 
-            welcomeText: document.getElementById('supportWelcomeInput').value 
-        });
-        await window.setDoc(window.doc(window.db, "app_settings", "security"), { 
-            activationKey: document.getElementById('activationKeyInput').value 
-        });
+        const btn = document.getElementById('saveSettingsBtn');
+        btn.textContent = "Saving...";
+        btn.disabled = true;
+        
+        await window.setDoc(window.doc(window.db, "app_settings", "artist"), { name: document.getElementById('artistNameInput').value, message: document.getElementById('artistMessageInput').value });
+        await window.setDoc(window.doc(window.db, "app_settings", "support"), { welcomeText: document.getElementById('supportWelcomeInput').value });
+        await window.setDoc(window.doc(window.db, "app_settings", "security"), { activationKey: document.getElementById('activationKeyInput').value });
+        
+        btn.textContent = "Save All Settings";
+        btn.disabled = false;
         showToast();
     }
 
@@ -229,21 +230,22 @@ layout: false
             const div = document.createElement('div');
             div.className = 'list-item';
             div.innerHTML = `
+                <div class="list-item-row"><input type="text" id="cname-${docSnap.id}" value="${data.name || ''}" placeholder="Name"></div>
+                <div class="list-item-row"><input type="text" id="cimage-${docSnap.id}" value="${data.imageUrl || ''}" placeholder="Image URL"></div>
+                <div class="list-item-row"><input type="text" id="ccustom-${docSnap.id}" value="${data.customText || ''}" placeholder="Custom Text"></div>
                 <div class="list-item-row">
-                    <input type="text" id="cname-${docSnap.id}" value="${data.name || ''}" placeholder="Name">
-                </div>
-                <div class="list-item-row">
-                    <input type="text" id="cimage-${docSnap.id}" value="${data.imageUrl || ''}" placeholder="Image URL">
-                </div>
-                <div class="list-item-row">
-                    <input type="text" id="ccustom-${docSnap.id}" value="${data.customText || ''}" placeholder="Custom Text (e.g. Enter Fanbook)">
-                </div>
-                <div class="list-item-row">
-                    <input type="text" id="ccolor-${docSnap.id}" value="${data.bgColor || ''}" placeholder="Fallback Color">
+                    <select id="cverified-${docSnap.id}">
+                        <option value="false" ${!data.isVerified ? 'selected' : ''}>Standard Artist</option>
+                        <option value="true" ${data.isVerified ? 'selected' : ''}>Verified (Blue Tick)</option>
+                    </select>
+                    <select id="caccess-${docSnap.id}">
+                        <option value="open" ${data.access !== 'gated' ? 'selected' : ''}>Open Access</option>
+                        <option value="gated" ${data.access === 'gated' ? 'selected' : ''}>Restricted (Popup)</option>
+                    </select>
                 </div>
                 <div class="list-item-row"><textarea id="cmessage-${docSnap.id}" placeholder="Message">${data.message || ''}</textarea></div>
                 <div class="list-item-row">
-                    <button class="btn-update" onclick="updateCeleb('${docSnap.id}')">Save Changes</button>
+                    <button class="btn-update" onclick="updateCeleb('${docSnap.id}', this)">Save</button>
                     <button class="btn-delete" onclick="deleteCeleb('${docSnap.id}')">Delete</button>
                 </div>
             `;
@@ -251,14 +253,24 @@ layout: false
         });
     }
 
-    async function updateCeleb(id) {
+    async function updateCeleb(id, btnElement) {
+        btnElement.textContent = "Saving...";
+        btnElement.disabled = true;
+        
+        const isVerified = document.getElementById(`cverified-${id}`).value === 'true';
+        const access = document.getElementById(`caccess-${id}`).value;
+        
         await window.updateDoc(window.doc(window.db, "celebrities", id), {
             name: document.getElementById(`cname-${id}`).value,
             imageUrl: document.getElementById(`cimage-${id}`).value,
             customText: document.getElementById(`ccustom-${id}`).value,
-            bgColor: document.getElementById(`ccolor-${id}`).value,
+            isVerified: isVerified,
+            access: access,
             message: document.getElementById(`cmessage-${id}`).value
         });
+        
+        btnElement.textContent = "Save";
+        btnElement.disabled = false;
         showToast();
     }
 
@@ -273,17 +285,20 @@ layout: false
         const name = document.getElementById('newCelebName').value;
         const imageUrl = document.getElementById('newCelebImage').value;
         const customText = document.getElementById('newCelebCustomText').value;
-        const bgColor = document.getElementById('newCelebColor').value;
+        const isVerified = document.getElementById('newCelebVerified').value === 'true';
+        const access = document.getElementById('newCelebAccess').value;
         const message = document.getElementById('newCelebMessage').value;
+        
         if (!name) return alert("Name is required.");
+        
         await window.addDoc(window.collection(window.db, "celebrities"), { 
-            name, imageUrl, customText, bgColor, message, 
+            name, imageUrl, customText, isVerified, access, message, 
             createdAt: new Date().toISOString() 
         });
+        
         document.getElementById('newCelebName').value = ""; 
         document.getElementById('newCelebImage').value = ""; 
         document.getElementById('newCelebCustomText').value = ""; 
-        document.getElementById('newCelebColor').value = ""; 
         document.getElementById('newCelebMessage').value = "";
         toggleAddForm('celeb'); loadCelebrities(); showToast();
     }
@@ -296,7 +311,6 @@ layout: false
         const snapshot = await window.getDocs(q);
         list.innerHTML = '';
         if (snapshot.empty) { list.innerHTML = '<p style="color: #6b7280;">No fans yet.</p>'; return; }
-
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
             const div = document.createElement('div');
@@ -307,7 +321,7 @@ layout: false
                     <input type="text" id="secimg-${docSnap.id}" value="${data.secImg || ''}" placeholder="Sec Img">
                 </div>
                 <div class="list-item-row">
-                    <button class="btn-update" onclick="updateFan('${docSnap.id}')">Save Changes</button>
+                    <button class="btn-update" onclick="updateFan('${docSnap.id}', this)">Save</button>
                     <button class="btn-delete" onclick="deleteFan('${docSnap.id}')">Delete</button>
                 </div>
             `;
@@ -315,12 +329,13 @@ layout: false
         });
     }
 
-    async function updateFan(id) {
+    async function updateFan(id, btnElement) {
+        btnElement.textContent = "Saving...";
         await window.updateDoc(window.doc(window.db, "fans", id), {
             email: document.getElementById(`email-${id}`).value,
             secImg: document.getElementById(`secimg-${id}`).value
         });
-        showToast();
+        btnElement.textContent = "Save"; showToast();
     }
 
     async function deleteFan(id) {
@@ -348,7 +363,6 @@ layout: false
         const snapshot = await window.getDocs(q);
         list.innerHTML = '';
         if (snapshot.empty) { list.innerHTML = '<p style="color: #6b7280;">No comments yet.</p>'; return; }
-
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
             const div = document.createElement('div');
@@ -359,7 +373,7 @@ layout: false
                     <input type="text" id="text-${docSnap.id}" value="${data.text || ''}" placeholder="Comment">
                 </div>
                 <div class="list-item-row">
-                    <button class="btn-update" onclick="updateComment('${docSnap.id}')">Save Changes</button>
+                    <button class="btn-update" onclick="updateComment('${docSnap.id}', this)">Save</button>
                     <button class="btn-delete" onclick="deleteComment('${docSnap.id}')">Delete</button>
                 </div>
             `;
@@ -367,12 +381,13 @@ layout: false
         });
     }
 
-    async function updateComment(id) {
+    async function updateComment(id, btnElement) {
+        btnElement.textContent = "Saving...";
         await window.updateDoc(window.doc(window.db, "comments", id), {
             user: document.getElementById(`user-${id}`).value,
             text: document.getElementById(`text-${id}`).value
         });
-        showToast();
+        btnElement.textContent = "Save"; showToast();
     }
 
     async function deleteComment(id) {
