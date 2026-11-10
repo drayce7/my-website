@@ -73,17 +73,48 @@ layout: false
         .fan-grid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 5px; padding-top: 15px; }
         .fan-card { display: flex; flex-direction: column; align-items: center; width: 85px; margin-bottom: 5px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
         .fan-card:hover { transform: scale(1.1) !important; z-index: 100 !important; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .fan-card.new-batch { animation: cardFadeIn 0.5s ease-out forwards; }
+        @keyframes cardFadeIn { from { opacity: 0; transform: translateY(20px) scale(0.9); } to { opacity: 1; } }
         .fan-avatar { width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 24px; color: white; border: 4px solid; box-shadow: 0 4px 8px rgba(0,0,0,0.15); margin-bottom: 3px; background-size: cover; background-position: center; }
         .fan-email { background: #f0e4d0; border: 1px solid #c4b4a8; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 8px; color: #5a4b42; width: 100%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .sec-img { display: inline-block; background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; font-size: 7px; color: #8a7b72; margin-top: 2px; text-transform: uppercase; font-family: sans-serif; letter-spacing: 0.5px; width: auto; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* Inline batch loader at bottom of fan grid */
+        .batch-loader {
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            width: 100%; padding: 20px 0; margin-top: 10px;
+            font-family: 'Caveat', cursive; font-size: 20px; color: #8a7b72;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .batch-loader.active { opacity: 1; }
+        .batch-loader .mini-loader {
+            width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1);
+            border-left-color: #00d2ff; border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Fallback Load More button */
+        .load-more-btn {
+            display: none; margin: 20px auto 10px auto; padding: 12px 30px;
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white;
+            border: none; border-radius: 30px; font-weight: bold; font-size: 15px;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
+            transition: 0.2s; font-family: sans-serif;
+        }
+        .load-more-btn.active { display: block; }
+        .load-more-btn:hover { transform: scale(1.05); }
+
+        /* Sentinel element that IntersectionObserver watches */
+        .load-sentinel { width: 100%; height: 20px; margin-top: 10px; }
+
         .btn-support { position: fixed; bottom: 20px; left: 20px; width: 55px; height: 55px; background: #ef4444; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); cursor: pointer; z-index: 100; transition: 0.2s; }
         .btn-support:hover { transform: scale(1.1); background: #dc2626; }
+        
         .focus-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 500; }
         .focus-overlay.active { display: flex; }
         .focus-card { background: #fdf6e3; border: 3px solid #d4c4a8; border-radius: 20px; padding: 30px; width: 80%; max-width: 300px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; position: relative; overflow: visible; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .loader { border: 4px solid rgba(0,0,0,0.1); border-left-color: #00d2ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-text { font-family: 'Caveat', cursive; font-size: 24px; color: #4a3b32; }
         .spark { position: absolute; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; animation: explode 1.5s ease-out forwards; }
         @keyframes explode { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; } }
@@ -94,6 +125,7 @@ layout: false
         .brain-text { font-family: sans-serif; font-size: 14px; font-weight: bold; color: #00d2ff; cursor: pointer; text-shadow: 0 0 8px rgba(0, 210, 255, 0.6); transition: 0.2s; }
         .brain-text:hover { transform: scale(1.1); color: #fff; }
         .btn-close { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
         .key-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .key-modal.active { display: flex; }
         .key-box { background: #fdf6e3; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; border: 2px solid #d4c4a8; box-shadow: 0 20px 40px rgba(0,0,0,0.5); animation: popIn 0.3s ease-out; }
@@ -109,6 +141,7 @@ layout: false
         .btn-dismiss:hover { background: #d0c0b0; }
         .btn-proceed { background: #00d2ff; color: #000; }
         .btn-proceed:hover { background: #00b8e6; transform: scale(1.02); }
+        
         .brain-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .brain-modal.active { display: flex; }
         .brain-box { background: #fdf6e3; padding: 30px; border-radius: 15px; width: 85%; max-width: 320px; text-align: center; border: 2px solid #d4c4a8; box-shadow: 0 20px 40px rgba(0,0,0,0.5); animation: popIn 0.3s ease-out; }
@@ -118,7 +151,6 @@ layout: false
         .btn-okay:hover { background: #00b8e6; transform: scale(1.05); }
         .verified-badge { width: 20px; height: 20px; fill: #1d9bf0; flex-shrink: 0; }
 
-        /* NEW: SUPPORT CONNECTING OVERLAY */
         .support-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 15, 30, 0.95); backdrop-filter: blur(12px); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 2000; padding: 20px; }
         .support-overlay.active { display: flex; }
         .support-box { background: #fdf6e3; border: 3px solid #d4c4a8; border-radius: 20px; padding: 40px 30px; max-width: 360px; width: 90%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -151,6 +183,12 @@ layout: false
                 </div>
             </div>
             <div class="fan-grid" id="fanGrid"></div>
+            <div class="batch-loader" id="batchLoader">
+                <div class="mini-loader"></div>
+                <span data-i18n="loading_more">Loading more fans…</span>
+            </div>
+            <button class="load-more-btn" id="loadMoreBtn" onclick="forceLoadBatch()" data-i18n="load_more_btn">Load more fans</button>
+            <div class="load-sentinel" id="loadSentinel"></div>
         </div>
 
         <div class="btn-support" onclick="showSupportConnecting()">🎧</div>
@@ -180,7 +218,6 @@ layout: false
         </div>
     </div>
 
-    <!-- NEW: SUPPORT CONNECTING OVERLAY -->
     <div class="support-overlay" id="supportOverlay">
         <div class="support-box">
             <div class="loader"></div>
@@ -191,7 +228,6 @@ layout: false
     </div>
 
 <script>
-    /* ============ TRANSLATIONS ============ */
     const translations = {
         en: {
             search_placeholder: "Search by email...",
@@ -208,7 +244,9 @@ layout: false
             fan_not_found: "Fan not found! Try exact email.",
             invalid_key: "Invalid Activation Key!",
             support_headline: "Connecting you to support…",
-            support_sub: "Please wait while we connect you to our team."
+            support_sub: "Please wait while we connect you to our team.",
+            loading_more: "Loading more fans…",
+            load_more_btn: "Load more fans"
         },
         pl: {
             search_placeholder: "Szukaj po e-mailu...",
@@ -225,7 +263,9 @@ layout: false
             fan_not_found: "Nie znaleziono fana! Spróbuj dokładnego e-maila.",
             invalid_key: "Nieprawidłowy klucz aktywacyjny!",
             support_headline: "Łączymy Cię z pomocą…",
-            support_sub: "Proszę czekać, łączymy Cię z naszym zespołem."
+            support_sub: "Proszę czekać, łączymy Cię z naszym zespołem.",
+            loading_more: "Ładowanie kolejnych fanów…",
+            load_more_btn: "Załaduj więcej fanów"
         },
         hu: {
             search_placeholder: "Keresés e-mailben...",
@@ -242,7 +282,9 @@ layout: false
             fan_not_found: "A rajongó nem található! Próbálja a pontos e-mailt.",
             invalid_key: "Érvénytelen aktiválási kulcs!",
             support_headline: "Kapcsolódás az ügyfélszolgálathoz…",
-            support_sub: "Kérjük, várjon, amíg csapatunkhoz kapcsoljuk."
+            support_sub: "Kérjük, várjon, amíg csapatunkhoz kapcsoljuk.",
+            loading_more: "További rajongók betöltése…",
+            load_more_btn: "További rajongók betöltése"
         }
     };
 
@@ -253,6 +295,17 @@ layout: false
     let realActivationKey = "";
     let allFans = [];
     let allComments = [];
+
+    /* ===== INFINITE LOOP STATE ===== */
+    const BATCH_SEQUENCE = [6, 3, 4, 5, 6, 6];  // then stays at 6 forever
+    let currentCycle = [];          // current shuffled cycle order
+    let cyclePosition = 0;          // index in current cycle
+    let batchIndex = 0;             // which batch we're on (0 = first, 1 = second...)
+    let isLoading = false;
+    let lastRenderedCyclePos = -1;
+    let lastFanRendered = null;     // for repeat-adjacent guard
+    let allLoaded = false;          // not used anymore since infinite — kept for safety
+    let searchTarget = null;        // email we're fast-loading to
 
     function t(key) {
         if (translations[currentLang] && translations[currentLang][key]) return translations[currentLang][key];
@@ -272,26 +325,44 @@ layout: false
         currentLang = detectLang();
 
         document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            el.textContent = t(key);
+            el.textContent = t(el.getAttribute('data-i18n'));
         });
-
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-            const key = el.getAttribute('data-i18n-placeholder');
-            el.placeholder = t(key);
+            el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
         });
 
-        // Key hint: prefer admin-set custom text, fallback to translation
         const hintEl = document.getElementById('keyHint');
         hintEl.textContent = customKeyHint ? customKeyHint : t('default_key_hint');
 
-        // Brain label: prefer admin-set custom label, fallback to translation
         document.querySelectorAll('.brain-text').forEach(el => {
             el.textContent = customBrainLabel ? customBrainLabel : t('brain_default');
         });
     }
 
-    /* ============ LOAD SELECTED ARTIST ============ */
+    /* ===== FISHER-YATES SHUFFLE ===== */
+    function shuffleArray(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    /* ===== BUILD NEW CYCLE WITH ADJACENT-REPEAT GUARD ===== */
+    function buildNewCycle() {
+        if (allFans.length === 0) return [];
+        let shuffled = shuffleArray(allFans);
+        // Guard: first fan of new cycle != last fan of previous cycle
+        if (lastFanRendered && shuffled.length > 1 && shuffled[0].email === lastFanRendered.email) {
+            // swap first with a random other
+            const swapIdx = 1 + Math.floor(Math.random() * (shuffled.length - 1));
+            [shuffled[0], shuffled[swapIdx]] = [shuffled[swapIdx], shuffled[0]];
+        }
+        return shuffled;
+    }
+
+    /* ===== LOAD SELECTED ARTIST ===== */
     function loadSelectedArtist() {
         const stored = sessionStorage.getItem('selectedArtist');
         if (!stored) { window.location.href = '/my-website/artists/'; return; }
@@ -317,7 +388,7 @@ layout: false
         } catch (e) { window.location.href = '/my-website/artists/'; }
     }
 
-    /* ============ FIRESTORE LOAD ============ */
+    /* ===== FIRESTORE LOAD ===== */
     window.addEventListener('firebaseLoaded', async () => {
         loadSelectedArtist();
 
@@ -346,7 +417,6 @@ layout: false
             const fansSnap = await window.getDocs(window.query(window.collection(window.db, "fans"), window.orderBy("createdAt")));
             allFans = [];
             fansSnap.forEach(d => allFans.push(d.data()));
-            renderFans();
 
             const commentsSnap = await window.getDocs(window.query(window.collection(window.db, "comments"), window.orderBy("createdAt")));
             allComments = [];
@@ -354,23 +424,137 @@ layout: false
             startTicker();
         } catch (e) { console.error("Firestore load error:", e); }
 
-        // Apply translations AFTER data load so custom fields override defaults
         applyTranslations();
+
+        // Kick off first cycle + first batch
+        if (allFans.length > 0) {
+            currentCycle = buildNewCycle();
+            cyclePosition = 0;
+            batchIndex = 0;
+            loadNextBatch();
+            setupInfiniteScroll();
+        }
     });
 
-    /* ============ FAN RENDER ============ */
-    function renderFans() {
+    /* ===== INFINITE SCROLL SETUP ===== */
+    let observer = null;
+    function setupInfiniteScroll() {
+        const sentinel = document.getElementById('loadSentinel');
+        const fanArea = document.getElementById('fanArea');
+
+        observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !isLoading) {
+                    // Only auto-trigger when user is scrolling DOWN
+                    // (we can't detect direction from IntersectionObserver alone,
+                    // but since the sentinel is at the bottom, if it's intersecting
+                    // the user is near the bottom = they scrolled down)
+                    triggerBatchLoad();
+                }
+            });
+        }, {
+            root: fanArea,
+            rootMargin: '200px',  // start loading 200px before sentinel
+            threshold: 0.01
+        });
+        observer.observe(sentinel);
+    }
+
+    /* ===== SCROLL DIRECTION TRACKING (for pause on scroll up) ===== */
+    let lastScrollTop = 0;
+    let scrollUpRecently = false;
+    document.addEventListener('DOMContentLoaded', () => {
+        const fanArea = document.getElementById('fanArea');
+        if (!fanArea) return;
+        fanArea.addEventListener('scroll', () => {
+            const st = fanArea.scrollTop;
+            if (st < lastScrollTop - 5) {
+                // user scrolled up
+                scrollUpRecently = true;
+            } else if (st > lastScrollTop + 5) {
+                scrollUpRecently = false;
+            }
+            lastScrollTop = st;
+        }, { passive: true });
+    });
+
+    /* ===== TRIGGER BATCH (auto) ===== */
+    function triggerBatchLoad() {
+        if (isLoading || allFans.length === 0) return;
+        if (scrollUpRecently) return;  // pause if user is scrolling up
+        loadNextBatch();
+    }
+
+    /* ===== FALLBACK BUTTON ===== */
+    function forceLoadBatch() {
+        if (isLoading) return;
+        scrollUpRecently = false;
+        loadNextBatch();
+    }
+
+    /* ===== CORE: LOAD NEXT BATCH ===== */
+    function loadNextBatch() {
+        if (isLoading || allFans.length === 0) return;
+        isLoading = true;
+
+        const batchLoader = document.getElementById('batchLoader');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        batchLoader.classList.add('active');
+        loadMoreBtn.classList.remove('active');
+
+        // Simulate network loading time (0.8-1.5s) for the "old Facebook" vibe
+        const fakeDelay = Math.floor(Math.random() * 700) + 800;
+
+        setTimeout(() => {
+            const size = batchIndex < BATCH_SEQUENCE.length
+                ? BATCH_SEQUENCE[batchIndex]
+                : 6;
+
+            const batch = [];
+            for (let i = 0; i < size; i++) {
+                if (cyclePosition >= currentCycle.length) {
+                    // End of cycle — reshuffle and continue
+                    currentCycle = buildNewCycle();
+                    cyclePosition = 0;
+                }
+                batch.push(currentCycle[cyclePosition]);
+                cyclePosition++;
+            }
+
+            renderBatch(batch);
+            batchIndex++;
+
+            batchLoader.classList.remove('active');
+            isLoading = false;
+
+            // If user stopped scrolling and sentinel is still visible, show button
+            setTimeout(() => {
+                const sentinel = document.getElementById('loadSentinel');
+                const rect = sentinel.getBoundingClientRect();
+                const areaRect = document.getElementById('fanArea').getBoundingClientRect();
+                if (rect.top < areaRect.bottom && !isLoading) {
+                    loadMoreBtn.classList.add('active');
+                }
+            }, 300);
+        }, fakeDelay);
+    }
+
+    /* ===== RENDER A BATCH OF FANS ===== */
+    function renderBatch(fans) {
         const fanGrid = document.getElementById('fanGrid');
-        fanGrid.innerHTML = '';
-        allFans.forEach((fan) => {
+        fans.forEach(fan => {
+            lastFanRendered = fan;
+
             const yOffset = (Math.random() * 30) - 15;
             const rotation = (Math.random() * 14) - 7;
             const xOffset = (Math.random() * 10) - 5;
             const zIndex = Math.floor(Math.random() * 10);
 
             const card = document.createElement('div');
-            card.className = 'fan-card';
-            card.id = `fan-${fan.email}`;
+            card.className = 'fan-card new-batch';
+            // Use a counter id since emails can repeat across cycles
+            card.id = `fan-${fan.email}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+            card.dataset.email = fan.email;
             card.style.transform = `translate(${xOffset}px, ${yOffset}px) rotate(${rotation}deg)`;
             card.style.zIndex = zIndex;
             card.onclick = (e) => openFocusModal(fan, e);
@@ -389,7 +573,7 @@ layout: false
         });
     }
 
-    /* ============ CONTINUING TICKER ============ */
+    /* ===== CONTINUING TICKER ===== */
     let tickerIndex = 0;
     function startTicker() {
         const tickerContainer = document.getElementById('tickerContainer');
@@ -421,7 +605,7 @@ layout: false
         if (tickerContainer.children.length > 3) tickerContainer.removeChild(tickerContainer.firstChild);
     }
 
-    /* ============ FOCUS MODAL ============ */
+    /* ===== FOCUS MODAL ===== */
     function openFocusModal(fan) {
         const overlay = document.getElementById('focusOverlay');
         const card = document.getElementById('focusCard');
@@ -486,29 +670,72 @@ layout: false
     function openBrainModal() { document.getElementById('brainModal').classList.add('active'); }
     function closeBrainModal() { document.getElementById('brainModal').classList.remove('active'); }
 
+    /* ===== SEARCH — auto-loads forward until found ===== */
     function searchFan() {
         const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
         if (!searchInput) return;
-        const targetCard = document.getElementById(`fan-${searchInput}`);
-        if (targetCard) {
-            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            targetCard.style.boxShadow = "0 0 20px 5px #00d2ff";
-            setTimeout(() => { targetCard.style.boxShadow = "none"; }, 3000);
-        } else { alert(t('fan_not_found')); }
+
+        // Check currently loaded cards
+        const existing = document.querySelector(`.fan-card[data-email="${CSS.escape(searchInput)}"]`);
+        if (existing) {
+            existing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            existing.style.boxShadow = "0 0 20px 5px #00d2ff";
+            setTimeout(() => { existing.style.boxShadow = "none"; }, 3000);
+            return;
+        }
+
+        // Not loaded yet — check if the fan exists at all
+        const fanExists = allFans.some(f => f.email.toLowerCase() === searchInput);
+        if (!fanExists) {
+            alert(t('fan_not_found'));
+            return;
+        }
+
+        // Fast-load batches until found
+        searchTarget = searchInput;
+        fastLoadToSearch();
     }
 
-    /* ============ NEW: SUPPORT CONNECTING (10–15s) ============ */
+    function fastLoadToSearch() {
+        if (!searchTarget) return;
+        const existing = document.querySelector(`.fan-card[data-email="${CSS.escape(searchTarget)}"]`);
+        if (existing) {
+            existing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            existing.style.boxShadow = "0 0 20px 5px #00d2ff";
+            setTimeout(() => { existing.style.boxShadow = "none"; }, 3000);
+            searchTarget = null;
+            return;
+        }
+        // Force-load one batch immediately, then re-check
+        if (isLoading) {
+            setTimeout(fastLoadToSearch, 300);
+            return;
+        }
+        // Temporarily disable fake delay for search speed
+        const size = 10;
+        const batch = [];
+        for (let i = 0; i < size; i++) {
+            if (cyclePosition >= currentCycle.length) {
+                currentCycle = buildNewCycle();
+                cyclePosition = 0;
+            }
+            batch.push(currentCycle[cyclePosition]);
+            cyclePosition++;
+        }
+        renderBatch(batch);
+        setTimeout(fastLoadToSearch, 200);
+    }
+
+    /* ===== SUPPORT CONNECTING ===== */
     function showSupportConnecting() {
         const overlay = document.getElementById('supportOverlay');
         const bar = document.getElementById('supportProgressBar');
         overlay.classList.add('active');
         bar.style.width = '0%';
 
-        // Pick a random duration between 10 and 15 seconds
         const totalMs = (Math.floor(Math.random() * 5000) + 10000);
         const start = Date.now();
 
-        // Smooth progress bar
         const progressTimer = setInterval(() => {
             const elapsed = Date.now() - start;
             const pct = Math.min(100, (elapsed / totalMs) * 100);
@@ -516,7 +743,6 @@ layout: false
             if (elapsed >= totalMs) clearInterval(progressTimer);
         }, 100);
 
-        // Redirect when done
         setTimeout(() => {
             clearInterval(progressTimer);
             bar.style.width = '100%';
