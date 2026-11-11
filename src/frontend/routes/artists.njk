@@ -82,7 +82,7 @@ layout: false
         .btn-okay { background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white; padding: 15px 40px; border: none; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4); transition: 0.2s; font-family: sans-serif; }
         .btn-okay:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 210, 255, 0.7); }
 
-        /* ===== NEW: PREMIUM PAGE LOAD OVERLAY ===== */
+        /* ===== PREMIUM PAGE LOAD OVERLAY ===== */
         .page-load-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #1a1226 0%, #2a1b18 60%, #1a1226 100%);
@@ -91,10 +91,7 @@ layout: false
             transition: opacity 0.8s ease, visibility 0.8s ease;
         }
         .page-load-overlay.hide { opacity: 0; visibility: hidden; pointer-events: none; }
-        .page-load-box {
-            text-align: center; max-width: 380px; width: 90%;
-            animation: fadeUp 0.8s ease-out;
-        }
+        .page-load-box { text-align: center; max-width: 380px; width: 90%; animation: fadeUp 0.8s ease-out; }
         @keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .page-load-emblem {
             width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 30px auto;
@@ -115,18 +112,9 @@ layout: false
             from { box-shadow: 0 0 25px rgba(255, 0, 204, 0.4); }
             to { box-shadow: 0 0 55px rgba(0, 210, 255, 0.8); }
         }
-        .page-load-title {
-            font-family: 'Caveat', cursive; font-size: 36px; color: #fff;
-            margin-bottom: 10px; text-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
-        }
-        .page-load-sub {
-            font-family: 'Playfair Display', serif; font-style: italic;
-            font-size: 15px; color: #d4c4a8; line-height: 1.6; margin-bottom: 30px;
-        }
-        .page-load-progress {
-            width: 100%; height: 6px; background: rgba(255,255,255,0.1);
-            border-radius: 3px; overflow: hidden;
-        }
+        .page-load-title { font-family: 'Caveat', cursive; font-size: 36px; color: #fff; margin-bottom: 10px; text-shadow: 0 0 20px rgba(0, 210, 255, 0.4); }
+        .page-load-sub { font-family: 'Playfair Display', serif; font-style: italic; font-size: 15px; color: #d4c4a8; line-height: 1.6; margin-bottom: 30px; }
+        .page-load-progress { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
         .page-load-bar {
             height: 100%; width: 0%;
             background: linear-gradient(90deg, #00d2ff, #ff00cc, #00d2ff);
@@ -135,12 +123,9 @@ layout: false
             transition: width 0.3s linear; border-radius: 3px;
         }
         @keyframes shimmer { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
-        .page-load-pct {
-            font-family: sans-serif; font-size: 12px; color: #d4c4a8;
-            margin-top: 12px; letter-spacing: 2px;
-        }
+        .page-load-pct { font-family: sans-serif; font-size: 12px; color: #d4c4a8; margin-top: 12px; letter-spacing: 2px; }
 
-        /* ===== NEW: GATE CHECK LOADING (shorter) ===== */
+        /* ===== GATE CHECK LOADING ===== */
         .gate-loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(20, 15, 30, 0.97); backdrop-filter: blur(12px);
@@ -150,19 +135,148 @@ layout: false
         .gate-loading-overlay.active { display: flex; }
         .gate-loading-box { text-align: center; max-width: 340px; width: 90%; }
         .gate-loading-box .loader { border-left-color: #ef4444; }
-        .gate-loading-title {
-            font-family: 'Caveat', cursive; font-size: 32px; color: #fff;
-            margin-bottom: 10px;
+        .gate-loading-title { font-family: 'Caveat', cursive; font-size: 32px; color: #fff; margin-bottom: 10px; }
+        .gate-loading-sub { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: #d4c4a8; line-height: 1.6; }
+
+        /* ===== ACCESS STAGE (Powered by Menai → Fan Code) ===== */
+        .access-stage {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1a1226 0%, #2a1b18 50%, #1a1226 100%);
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            z-index: 3500; padding: 30px;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
         }
-        .gate-loading-sub {
-            font-family: 'Playfair Display', serif; font-style: italic;
-            font-size: 14px; color: #d4c4a8; line-height: 1.6;
+        .access-stage::before {
+            content: ''; position: absolute; inset: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.06"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
+            pointer-events: none;
         }
+        .access-stage.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+        .access-inner {
+            position: relative; z-index: 2;
+            text-align: center; max-width: 360px; width: 90%;
+            transition: transform 0.9s cubic-bezier(0.6, 0.05, 0.28, 0.91);
+        }
+        .access-inner.shifted { transform: translateY(-80px); }
+        .powered-by {
+            font-family: sans-serif; font-size: 12px;
+            text-transform: uppercase; letter-spacing: 4px;
+            color: #d4c4a8; opacity: 0.7; margin-bottom: 12px;
+        }
+        .brand-name {
+            font-family: 'Caveat', cursive; font-size: 54px;
+            background: linear-gradient(90deg, #00d2ff, #ff00cc, #00d2ff);
+            background-size: 200% 100%;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: brandShimmer 4s linear infinite;
+            text-shadow: 0 0 40px rgba(255, 0, 204, 0.3);
+            line-height: 1.1;
+        }
+        @keyframes brandShimmer { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+        .access-code-block {
+            width: 100%; max-width: 340px; margin: 40px auto 0 auto;
+            opacity: 0; transform: translateY(20px);
+            pointer-events: none;
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .access-code-block.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .access-code-label {
+            font-family: sans-serif; font-size: 11px;
+            text-transform: uppercase; letter-spacing: 3px;
+            color: #d4c4a8; opacity: 0.7; text-align: center;
+            margin-bottom: 12px;
+        }
+        .access-code-input {
+            width: 100%; padding: 16px 20px;
+            background: rgba(255,255,255,0.06);
+            border: 2px solid rgba(212,196,168,0.3);
+            border-radius: 12px;
+            color: white; font-family: monospace;
+            font-size: 18px; text-align: center;
+            letter-spacing: 3px; outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        .access-code-input:focus { border-color: #00d2ff; box-shadow: 0 0 20px rgba(0, 210, 255, 0.3); }
+        .access-code-input.shake { animation: shake 0.4s ease-in-out; border-color: #ef4444 !important; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 75% { transform: translateX(-10px); } }
+        .access-code-error {
+            font-family: sans-serif; font-size: 13px;
+            color: #ef4444; text-align: center;
+            margin-top: 10px; min-height: 18px;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .access-code-error.active { opacity: 1; }
+        .access-code-submit {
+            margin-top: 20px; width: 100%; padding: 16px;
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            color: white; border: none; border-radius: 12px;
+            font-family: sans-serif; font-size: 16px; font-weight: bold;
+            cursor: pointer; letter-spacing: 2px;
+            transition: 0.2s;
+            box-shadow: 0 4px 20px rgba(0, 210, 255, 0.4);
+        }
+        .access-code-submit:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 6px 25px rgba(0, 210, 255, 0.6); }
+        .access-code-submit:disabled { background: #4b5563; cursor: not-allowed; box-shadow: none; }
+
+        /* Success loading overlay */
+        .success-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(20, 15, 30, 0.97); backdrop-filter: blur(12px);
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+            z-index: 4000; padding: 30px;
+        }
+        .success-overlay.active { display: flex; }
+        .success-box { text-align: center; max-width: 360px; width: 90%; }
+        .success-spinner {
+            width: 60px; height: 60px; margin: 0 auto 25px auto;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-left-color: #00d2ff; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .success-headline { font-family: 'Caveat', cursive; font-size: 32px; color: #fff; margin-bottom: 10px; text-shadow: 0 0 20px rgba(0, 210, 255, 0.5); }
+        .success-sub { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: #d4c4a8; line-height: 1.6; margin-bottom: 25px; }
+        .success-progress { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+        .success-bar {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #00d2ff, #ff00cc, #00d2ff);
+            background-size: 200% 100%;
+            animation: barShimmer 2s linear infinite;
+            border-radius: 3px; transition: width 0.3s linear;
+        }
+        @keyframes barShimmer { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+        .success-pct { font-family: sans-serif; font-size: 12px; color: #d4c4a8; margin-top: 12px; letter-spacing: 2px; }
 
         @media (min-width: 769px) { .app-wrapper { max-width: 600px; height: 90vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); } }
     </style>
 </head>
 <body>
+
+    <!-- ===== ACCESS STAGE (Powered by Menai → Fan Code) ===== -->
+    <div class="access-stage" id="accessStage">
+        <div class="access-inner" id="accessInner">
+            <div class="powered-by" id="poweredByLabel">Powered by</div>
+            <div class="brand-name" id="brandNameLabel">Menai</div>
+
+            <div class="access-code-block" id="accessCodeBlock">
+                <div class="access-code-label" id="accessCodeLabel">Input Fan Code</div>
+                <input type="text" id="accessCodeInput" class="access-code-input" inputmode="numeric" autocomplete="off" spellcheck="false">
+                <div class="access-code-error" id="accessCodeError"></div>
+                <button class="access-code-submit" id="accessCodeSubmit" onclick="submitAccessCode()">Enter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SUCCESS LOADING OVERLAY ===== -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-box">
+            <div class="success-spinner"></div>
+            <div class="success-headline" id="successHeadline">Access granted</div>
+            <div class="success-sub" id="successSub">Preparing your artist list…</div>
+            <div class="success-progress"><div class="success-bar" id="successBar"></div></div>
+            <div class="success-pct" id="successPct">0%</div>
+        </div>
+    </div>
 
     <!-- ===== PREMIUM PAGE LOAD OVERLAY (7-10s) ===== -->
     <div class="page-load-overlay" id="pageLoadOverlay">
@@ -190,7 +304,7 @@ layout: false
         </div>
     </div>
 
-    <!-- ===== GATE LOADING OVERLAY (3-5s before Access Denied) ===== -->
+    <!-- ===== GATE LOADING OVERLAY ===== -->
     <div class="gate-loading-overlay" id="gateLoadingOverlay">
         <div class="gate-loading-box">
             <div class="loader"></div>
@@ -222,6 +336,9 @@ layout: false
 
 <script>
     let customGateMessage = "We are sorry, but you do not have an active record with this artist. Please check your membership status or contact support.";
+    let customPoweredBy = "Powered by";
+    let customBrandName = "Menai";
+    let validFanCode = "123456789";
 
     const translations = {
         en: {
@@ -231,7 +348,14 @@ layout: false
             gate_loading_title: "Checking your record",
             gate_loading_sub: "Verifying membership status…",
             gate_title: "Access Denied",
-            gate_btn: "Understood"
+            gate_btn: "Understood",
+            powered_by: "Powered by",
+            input_code_label: "Input Fan Code",
+            enter_btn: "Enter",
+            error_empty: "Please enter your fan code.",
+            error_wrong: "That code is not valid. Please try again.",
+            success_headline: "Access granted",
+            success_sub: "Preparing your artist list…"
         },
         pl: {
             select_celebrity: "Wybierz swoją gwiazdę",
@@ -240,7 +364,14 @@ layout: false
             gate_loading_title: "Sprawdzanie Twojego rekordu",
             gate_loading_sub: "Weryfikacja statusu członkostwa…",
             gate_title: "Odmowa dostępu",
-            gate_btn: "Rozumiem"
+            gate_btn: "Rozumiem",
+            powered_by: "Napędzane przez",
+            input_code_label: "Wpisz kod fana",
+            enter_btn: "Wejdź",
+            error_empty: "Proszę wpisać kod fana.",
+            error_wrong: "Ten kod jest nieprawidłowy. Spróbuj ponownie.",
+            success_headline: "Dostęp przyznany",
+            success_sub: "Przygotowujemy listę artystów…"
         },
         hu: {
             select_celebrity: "Válassza ki a hírességét",
@@ -249,7 +380,14 @@ layout: false
             gate_loading_title: "Rekord ellenőrzése",
             gate_loading_sub: "Tagsági állapot ellenőrzése…",
             gate_title: "Hozzáférés megtagadva",
-            gate_btn: "Értem"
+            gate_btn: "Értem",
+            powered_by: "Működteti",
+            input_code_label: "Írja be a rajongói kódot",
+            enter_btn: "Belépés",
+            error_empty: "Kérjük, adja meg a rajongói kódot.",
+            error_wrong: "Ez a kód érvénytelen. Próbálja újra.",
+            success_headline: "Hozzáférés megadva",
+            success_sub: "Előkészítjük a művészlistát…"
         }
     };
 
@@ -270,28 +408,126 @@ layout: false
 
     function applyTranslation() {
         currentLang = detectLang();
+
         const titleElement = document.getElementById('headerTitle');
         if (titleElement) titleElement.textContent = t('select_celebrity');
         const select = document.getElementById('langSelect');
         if (select) select.value = currentLang;
+
         document.getElementById('pageLoadTitle').textContent = t('page_load_title');
         document.getElementById('pageLoadSub').textContent = t('page_load_sub');
         document.getElementById('gateLoadingTitle').textContent = t('gate_loading_title');
         document.getElementById('gateLoadingSub').textContent = t('gate_loading_sub');
         document.getElementById('gateTitle').textContent = t('gate_title');
         document.querySelector('.btn-gate-close').textContent = t('gate_btn');
+
+        // Access stage translations
+        document.getElementById('poweredByLabel').textContent = customPoweredBy || t('powered_by');
+        document.getElementById('brandNameLabel').textContent = customBrandName || 'Menai';
+        document.getElementById('accessCodeLabel').textContent = t('input_code_label');
+        document.getElementById('accessCodeSubmit').textContent = t('enter_btn');
+        document.getElementById('successHeadline').textContent = t('success_headline');
+        document.getElementById('successSub').textContent = t('success_sub');
     }
 
     document.addEventListener("DOMContentLoaded", applyTranslation);
     function changeLanguage(lang) { localStorage.setItem('selectedLanguage', lang); location.reload(); }
 
-    /* ===== PREMIUM PAGE LOAD (7-10s) ===== */
+    /* ===== ACCESS FLOW ===== */
+    let accessGranted = false;
+
+    function startAccessFlow() {
+        // If already granted this session, skip straight to page load
+        if (sessionStorage.getItem('accessGranted') === 'true') {
+            document.getElementById('accessStage').classList.add('hide');
+            setTimeout(() => {
+                const el = document.getElementById('accessStage');
+                if (el) el.remove();
+                runPageLoad();
+            }, 700);
+            return;
+        }
+
+        // Stage 1 → Stage 2 after 2 seconds
+        setTimeout(() => {
+            document.getElementById('accessInner').classList.add('shifted');
+            document.getElementById('accessCodeBlock').classList.add('active');
+            setTimeout(() => document.getElementById('accessCodeInput').focus(), 400);
+        }, 2000);
+
+        // Enter key submits
+        document.getElementById('accessCodeInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitAccessCode();
+        });
+    }
+
+    function submitAccessCode() {
+        const input = document.getElementById('accessCodeInput');
+        const errorEl = document.getElementById('accessCodeError');
+        const submitBtn = document.getElementById('accessCodeSubmit');
+        const val = input.value.trim();
+
+        errorEl.classList.remove('active');
+        errorEl.textContent = '';
+
+        if (val === '') {
+            input.classList.add('shake');
+            setTimeout(() => input.classList.remove('shake'), 500);
+            errorEl.textContent = t('error_empty');
+            errorEl.classList.add('active');
+            return;
+        }
+
+        if (val !== validFanCode) {
+            input.classList.add('shake');
+            setTimeout(() => input.classList.remove('shake'), 500);
+            errorEl.textContent = t('error_wrong');
+            errorEl.classList.add('active');
+            input.value = '';
+            return;
+        }
+
+        // Success
+        sessionStorage.setItem('accessGranted', 'true');
+        accessGranted = true;
+        submitBtn.disabled = true;
+        runSuccessLoading();
+    }
+
+    function runSuccessLoading() {
+        const overlay = document.getElementById('successOverlay');
+        const bar = document.getElementById('successBar');
+        const pctEl = document.getElementById('successPct');
+        overlay.classList.add('active');
+
+        const totalMs = 4000;
+        const start = Date.now();
+
+        const timer = setInterval(() => {
+            const elapsed = Date.now() - start;
+            const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
+            bar.style.width = pct + '%';
+            pctEl.textContent = pct + '%';
+            if (elapsed >= totalMs) {
+                clearInterval(timer);
+                // Hide access stage + success overlay, then trigger the page load overlay
+                document.getElementById('accessStage').classList.add('hide');
+                overlay.classList.remove('active');
+                setTimeout(() => {
+                    const el = document.getElementById('accessStage');
+                    if (el) el.remove();
+                    runPageLoad();
+                }, 700);
+            }
+        }, 100);
+    }
+
+    /* ===== PREMIUM PAGE LOAD (7-10s) — only runs AFTER access is granted ===== */
     function runPageLoad() {
         const overlay = document.getElementById('pageLoadOverlay');
         const bar = document.getElementById('pageLoadBar');
         const pctEl = document.getElementById('pageLoadPct');
 
-        // Random duration: 7000 - 10000 ms
         const totalMs = Math.floor(Math.random() * 3000) + 7000;
         const start = Date.now();
 
@@ -303,16 +539,28 @@ layout: false
             if (elapsed >= totalMs) {
                 clearInterval(timer);
                 overlay.classList.add('hide');
-                // Remove from DOM after fade
                 setTimeout(() => overlay.remove(), 900);
             }
         }, 100);
     }
 
-    // Fire the page load immediately — runs parallel with Firebase fetch
-    document.addEventListener("DOMContentLoaded", runPageLoad);
+    /* ===== BOOT ===== */
+    document.addEventListener('DOMContentLoaded', startAccessFlow);
 
+    /* ===== FIREBASE LOAD ===== */
     window.addEventListener('firebaseLoaded', async () => {
+        // Load landing settings (powered by + fan code)
+        try {
+            const landingSnap = await window.getDoc(window.doc(window.db, "app_settings", "landing"));
+            if (landingSnap.exists()) {
+                const data = landingSnap.data();
+                if (data.poweredBy) customPoweredBy = data.poweredBy;
+                if (data.brandName) customBrandName = data.brandName;
+                if (data.fanCode) validFanCode = data.fanCode;
+                applyTranslation();
+            }
+        } catch (e) {}
+
         try {
             const supportRef = window.doc(window.db, "app_settings", "support");
             const supportSnap = await window.getDoc(supportRef);
@@ -375,12 +623,8 @@ layout: false
     function showGateSequence() {
         const gateLoading = document.getElementById('gateLoadingOverlay');
         const gateOverlay = document.getElementById('gateOverlay');
-
         gateLoading.classList.add('active');
-
-        // Premium 3-5 second wait before showing Access Denied
         const totalMs = Math.floor(Math.random() * 2000) + 3000;
-
         setTimeout(() => {
             gateLoading.classList.remove('active');
             gateOverlay.classList.add('active');
