@@ -284,7 +284,9 @@ layout: false
     let allFans = [];
     let allComments = [];
     let pendingFanForModal = null;
-    let defaultFanCode = "";   // from app_settings/landing.defaultFanCode
+    
+    // HARDCODED DEFAULT: Every fan is locked with 7777777 by default
+    let defaultFanCode = "7777777"; 
 
     /* ===== INFINITE LOOP STATE ===== */
     const BATCH_SEQUENCE = [6, 3, 4, 5, 6, 6];
@@ -393,12 +395,15 @@ layout: false
                 if (keySnap.data().keyHint) customKeyHint = keySnap.data().keyHint;
             }
 
-            // Load default fan code from landing settings
+            // Load default fan code from landing settings. 
+            // If it exists and is not blank, use it. Otherwise fall back to 7777777.
             try {
                 const landingSnap = await window.getDoc(window.doc(window.db, "app_settings", "landing"));
                 if (landingSnap.exists()) {
                     const ld = landingSnap.data();
-                    if (ld.defaultFanCode) defaultFanCode = ld.defaultFanCode;
+                    if (ld.defaultFanCode && ld.defaultFanCode.trim() !== "") {
+                        defaultFanCode = ld.defaultFanCode.trim();
+                    }
                 }
             } catch (e) {}
 
@@ -510,14 +515,11 @@ layout: false
         });
     }
 
-    /* ===== PER-FAN CODE GATE with default fallback ===== */
+    /* ===== PER-FAN CODE GATE with MANDATORY fallback ===== */
     function handleFanClick(fan, event) {
-        const effectiveCode = (fan.fanCode && fan.fanCode.trim()) || defaultFanCode || "";
-        if (!effectiveCode) {
-            // No code set for this fan and no default → open directly
-            openFocusModal(fan);
-            return;
-        }
+        // Check personal code first, then default. There is no "open" state.
+        const effectiveCode = (fan.fanCode && fan.fanCode.trim()) || defaultFanCode;
+        
         pendingFanForModal = fan;
         openFanCodeModal();
     }
@@ -543,7 +545,9 @@ layout: false
         }
         const fan = pendingFanForModal;
         if (!fan) return;
-        const effectiveCode = ((fan.fanCode && fan.fanCode.trim()) || defaultFanCode || "");
+        
+        const effectiveCode = ((fan.fanCode && fan.fanCode.trim()) || defaultFanCode);
+        
         if (val !== effectiveCode) {
             input.classList.add('shake'); setTimeout(() => input.classList.remove('shake'), 500);
             alert(t('wrong_fan_code'));
