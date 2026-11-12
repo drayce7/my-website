@@ -73,14 +73,8 @@ layout: false
         .fan-grid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 5px; padding-top: 15px; }
         .fan-card { display: flex; flex-direction: column; align-items: center; width: 85px; margin-bottom: 5px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; opacity: 0; }
         
-        /* ===== STAGGERED ARRANGE ANIMATION: slide from left, one by one ===== */
-        .fan-card.arranging {
-            animation: arrangeFromLeft 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        @keyframes arrangeFromLeft {
-            from { opacity: 0; transform: translateX(-40px) scale(0.85); }
-            to   { opacity: 1; }
-        }
+        .fan-card.arranging { animation: arrangeFromLeft 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes arrangeFromLeft { from { opacity: 0; transform: translateX(-40px) scale(0.85); } to { opacity: 1; } }
 
         .fan-card:hover { transform: scale(1.1) !important; z-index: 100 !important; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .fan-avatar { width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 24px; color: white; border: 4px solid; box-shadow: 0 4px 8px rgba(0,0,0,0.15); margin-bottom: 3px; background-size: cover; background-position: center; }
@@ -100,6 +94,7 @@ layout: false
         .spark { position: absolute; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; animation: explode 1.5s ease-out forwards; }
         @keyframes explode { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; } }
         .focus-avatar { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 15px auto; display: flex; justify-content: center; align-items: center; font-size: 40px; font-weight: bold; color: white; border: 6px solid; box-shadow: 0 10px 20px rgba(0,0,0,0.2); background-size: cover; background-position: center; }
+        .focus-username { font-family: 'Caveat', cursive; font-size: 24px; color: #4a3b32; font-weight: bold; margin-bottom: 8px; }
         .focus-email { font-family: monospace; font-size: 14px; color: #5a4b42; background: #f0e4d0; padding: 8px; border-radius: 6px; border: 1px solid #c4b4a8; margin-bottom: 10px; word-break: break-all; }
         .focus-sec-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .focus-sec-img { display: inline-block; background: rgba(0,0,0,0.05); padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #8a7b72; text-transform: uppercase; letter-spacing: 1px; }
@@ -173,6 +168,18 @@ layout: false
         <div class="focus-card" id="focusCard" onclick="event.stopPropagation()"></div>
     </div>
 
+    <div class="key-modal" id="fanCodeModal">
+        <div class="key-box">
+            <h2 data-i18n="enter_fan_code_title">Enter Fan Code</h2>
+            <input type="text" id="fanCodeInput" class="key-input" data-i18n-placeholder="enter_fan_code_placeholder" placeholder="Enter this fan's code...">
+            <div class="key-hint" data-i18n="default_fan_code_hint">Ask this fan for their personal code.</div>
+            <div class="key-actions">
+                <button class="btn-key btn-dismiss" onclick="closeFanCodeModal()" data-i18n="dismiss">Dismiss</button>
+                <button class="btn-key btn-proceed" onclick="checkFanCode()" data-i18n="proceed">Proceed</button>
+            </div>
+        </div>
+    </div>
+
     <div class="key-modal" id="keyModal">
         <div class="key-box">
             <h2 data-i18n="enter_key_title">Enter Activation Key</h2>
@@ -209,6 +216,9 @@ layout: false
             enter_key_title: "Enter Activation Key",
             enter_key_placeholder: "Enter your key here...",
             default_key_hint: "Format: 9 letters, 4 letters, 7 letters, 10 letters, 4 letters, 7 letters, 8 letters, 8 letters",
+            enter_fan_code_title: "Enter Fan Code",
+            enter_fan_code_placeholder: "Enter this fan's code...",
+            default_fan_code_hint: "Ask this fan for their personal code.",
             dismiss: "Dismiss",
             proceed: "Proceed",
             brain_title: "Artist Message",
@@ -218,6 +228,7 @@ layout: false
             close: "Close",
             fan_not_found: "Fan not found! Try exact email.",
             invalid_key: "Invalid Activation Key!",
+            wrong_fan_code: "Wrong fan code. Please try again.",
             support_headline: "Connecting you to support…",
             support_sub: "Please wait while we connect you to our team."
         },
@@ -226,6 +237,9 @@ layout: false
             enter_key_title: "Wpisz klucz aktywacyjny",
             enter_key_placeholder: "Wpisz swój klucz tutaj...",
             default_key_hint: "Format: 9 liter, 4 litery, 7 liter, 10 liter, 4 litery, 7 liter, 8 liter, 8 liter",
+            enter_fan_code_title: "Wpisz kod fana",
+            enter_fan_code_placeholder: "Wpisz kod tego fana...",
+            default_fan_code_hint: "Poproś tego fana o jego osobisty kod.",
             dismiss: "Odrzuć",
             proceed: "Kontynuuj",
             brain_title: "Wiadomość od artysty",
@@ -235,6 +249,7 @@ layout: false
             close: "Zamknij",
             fan_not_found: "Nie znaleziono fana! Spróbuj dokładnego e-maila.",
             invalid_key: "Nieprawidłowy klucz aktywacyjny!",
+            wrong_fan_code: "Nieprawidłowy kod fana. Spróbuj ponownie.",
             support_headline: "Łączymy Cię z pomocą…",
             support_sub: "Proszę czekać, łączymy Cię z naszym zespołem."
         },
@@ -243,6 +258,9 @@ layout: false
             enter_key_title: "Írja be az aktiválási kulcsot",
             enter_key_placeholder: "Írja be a kulcsot...",
             default_key_hint: "Formátum: 9 betű, 4 betű, 7 betű, 10 betű, 4 betű, 7 betű, 8 betű, 8 betű",
+            enter_fan_code_title: "Írja be a rajongói kódot",
+            enter_fan_code_placeholder: "Írja be ennek a rajongónak a kódját...",
+            default_fan_code_hint: "Kérje meg ezt a rajongót a személyes kódjáért.",
             dismiss: "Elvetés",
             proceed: "Tovább",
             brain_title: "Üzenet a művésztől",
@@ -252,6 +270,7 @@ layout: false
             close: "Bezárás",
             fan_not_found: "A rajongó nem található! Próbálja a pontos e-mailt.",
             invalid_key: "Érvénytelen aktiválási kulcs!",
+            wrong_fan_code: "Hibás rajongói kód. Próbálja újra.",
             support_headline: "Kapcsolódás az ügyfélszolgálathoz…",
             support_sub: "Kérjük, várjon, amíg csapatunkhoz kapcsoljuk."
         }
@@ -264,6 +283,7 @@ layout: false
     let realActivationKey = "";
     let allFans = [];
     let allComments = [];
+    let pendingFanForModal = null;
 
     /* ===== INFINITE LOOP STATE ===== */
     const BATCH_SEQUENCE = [6, 3, 4, 5, 6, 6];
@@ -297,7 +317,7 @@ layout: false
             el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
         });
         const hintEl = document.getElementById('keyHint');
-        hintEl.textContent = customKeyHint ? customKeyHint : t('default_key_hint');
+        if (hintEl) hintEl.textContent = customKeyHint ? customKeyHint : t('default_key_hint');
         document.querySelectorAll('.brain-text').forEach(el => {
             el.textContent = customBrainLabel ? customBrainLabel : t('brain_default');
         });
@@ -389,13 +409,11 @@ layout: false
             cyclePosition = 0;
             batchIndex = 0;
             await loadNextBatch();
-            // Auto-fill: keep loading until the fan area is scrollable
             await fillInitialView();
             setupInfiniteScroll();
         }
     });
 
-    /* ===== AUTO-FILL: keep loading until page has scrollable height ===== */
     async function fillInitialView() {
         const fanArea = document.getElementById('fanArea');
         let safety = 0;
@@ -405,7 +423,6 @@ layout: false
         }
     }
 
-    /* ===== SCROLL-DOWN INFINITE LOADING ===== */
     let scrollHandlerAttached = false;
     function setupInfiniteScroll() {
         if (scrollHandlerAttached) return;
@@ -415,14 +432,12 @@ layout: false
         fanArea.addEventListener('scroll', () => {
             if (isLoading) return;
             const distanceToBottom = fanArea.scrollHeight - fanArea.scrollTop - fanArea.clientHeight;
-            // When user is within 300px of the bottom → load next batch
             if (distanceToBottom < 300) {
                 loadNextBatch();
             }
         }, { passive: true });
     }
 
-    /* ===== CORE: LOAD NEXT BATCH ===== */
     function loadNextBatch() {
         return new Promise((resolve) => {
             if (isLoading || allFans.length === 0) { resolve(); return; }
@@ -445,12 +460,10 @@ layout: false
             renderBatchStaggered(batch);
             batchIndex++;
 
-            // Small lock so rapid scroll doesn't double-fire
             setTimeout(() => { isLoading = false; resolve(); }, 100);
         });
     }
 
-    /* ===== RENDER BATCH STAGGERED (slide from left, one by one) ===== */
     function renderBatchStaggered(fans) {
         const fanGrid = document.getElementById('fanGrid');
         fans.forEach((fan, idx) => {
@@ -466,7 +479,7 @@ layout: false
             card.dataset.email = fan.email;
             card.style.transform = `translate(${xOffset}px, ${yOffset}px) rotate(${rotation}deg)`;
             card.style.zIndex = zIndex;
-            card.onclick = (e) => openFocusModal(fan, e);
+            card.onclick = (e) => handleFanClick(fan, e);
 
             const initial = fan.email.charAt(0).toUpperCase();
             const avatarStyle = fan.photoUrl
@@ -480,7 +493,6 @@ layout: false
             `;
             fanGrid.appendChild(card);
 
-            // Staggered arrange animation: one card every 80ms, left to right
             setTimeout(() => {
                 card.style.opacity = '1';
                 card.classList.add('arranging');
@@ -488,7 +500,49 @@ layout: false
         });
     }
 
-    /* ===== CONTINUING TICKER ===== */
+    /* ===== PER-FAN CODE GATE ===== */
+    function handleFanClick(fan, event) {
+        if (!fan.fanCode) {
+            // No code set on this fan — open directly (admin chose not to protect this one)
+            openFocusModal(fan);
+            return;
+        }
+        pendingFanForModal = fan;
+        openFanCodeModal();
+    }
+
+    function openFanCodeModal() {
+        const modal = document.getElementById('fanCodeModal');
+        modal.classList.add('active');
+        const inp = document.getElementById('fanCodeInput');
+        inp.value = "";
+        inp.classList.remove('shake');
+        setTimeout(() => inp.focus(), 200);
+    }
+    function closeFanCodeModal() {
+        document.getElementById('fanCodeModal').classList.remove('active');
+        pendingFanForModal = null;
+    }
+    function checkFanCode() {
+        const input = document.getElementById('fanCodeInput');
+        const val = input.value.trim();
+        if (val === "") {
+            input.classList.add('shake'); setTimeout(() => input.classList.remove('shake'), 500);
+            return;
+        }
+        if (!pendingFanForModal || val !== (pendingFanForModal.fanCode || '')) {
+            input.classList.add('shake'); setTimeout(() => input.classList.remove('shake'), 500);
+            alert(t('wrong_fan_code'));
+            input.value = "";
+            return;
+        }
+        const fan = pendingFanForModal;
+        document.getElementById('fanCodeModal').classList.remove('active');
+        pendingFanForModal = null;
+        openFocusModal(fan);
+    }
+
+    /* ===== TICKER ===== */
     let tickerIndex = 0;
     function startTicker() {
         const tickerContainer = document.getElementById('tickerContainer');
@@ -535,9 +589,13 @@ layout: false
                 : `background:${fan.bgColor}; border-color:${fan.ringColor};`;
 
             const brainLabel = customBrainLabel ? customBrainLabel : t('brain_default');
+            const usernameHTML = fan.username
+                ? `<div class="focus-username">${fan.username}</div>`
+                : '';
 
             card.innerHTML = `
                 <div class="focus-avatar" style="${avatarStyle}">${!fan.photoUrl ? initial : ''}</div>
+                ${usernameHTML}
                 <div class="focus-email">${fan.email}</div>
                 <div class="focus-sec-row">
                     <div class="focus-sec-img">${fan.secImg}</div>
@@ -585,7 +643,6 @@ layout: false
     function openBrainModal() { document.getElementById('brainModal').classList.add('active'); }
     function closeBrainModal() { document.getElementById('brainModal').classList.remove('active'); }
 
-    /* ===== SEARCH — auto-loads forward until found ===== */
     function searchFan() {
         const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
         if (!searchInput) return;
@@ -629,7 +686,6 @@ layout: false
         setTimeout(fastLoadToSearch, 200);
     }
 
-    /* ===== SUPPORT CONNECTING ===== */
     function showSupportConnecting() {
         const overlay = document.getElementById('supportOverlay');
         const bar = document.getElementById('supportProgressBar');
