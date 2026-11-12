@@ -284,6 +284,7 @@ layout: false
     let allFans = [];
     let allComments = [];
     let pendingFanForModal = null;
+    let defaultFanCode = "";   // from app_settings/landing.defaultFanCode
 
     /* ===== INFINITE LOOP STATE ===== */
     const BATCH_SEQUENCE = [6, 3, 4, 5, 6, 6];
@@ -391,6 +392,15 @@ layout: false
                 realActivationKey = keySnap.data().activationKey || "";
                 if (keySnap.data().keyHint) customKeyHint = keySnap.data().keyHint;
             }
+
+            // Load default fan code from landing settings
+            try {
+                const landingSnap = await window.getDoc(window.doc(window.db, "app_settings", "landing"));
+                if (landingSnap.exists()) {
+                    const ld = landingSnap.data();
+                    if (ld.defaultFanCode) defaultFanCode = ld.defaultFanCode;
+                }
+            } catch (e) {}
 
             const fansSnap = await window.getDocs(window.query(window.collection(window.db, "fans"), window.orderBy("createdAt")));
             allFans = [];
@@ -500,10 +510,11 @@ layout: false
         });
     }
 
-    /* ===== PER-FAN CODE GATE ===== */
+    /* ===== PER-FAN CODE GATE with default fallback ===== */
     function handleFanClick(fan, event) {
-        if (!fan.fanCode) {
-            // No code set on this fan — open directly (admin chose not to protect this one)
+        const effectiveCode = (fan.fanCode && fan.fanCode.trim()) || defaultFanCode || "";
+        if (!effectiveCode) {
+            // No code set for this fan and no default → open directly
             openFocusModal(fan);
             return;
         }
@@ -530,13 +541,15 @@ layout: false
             input.classList.add('shake'); setTimeout(() => input.classList.remove('shake'), 500);
             return;
         }
-        if (!pendingFanForModal || val !== (pendingFanForModal.fanCode || '')) {
+        const fan = pendingFanForModal;
+        if (!fan) return;
+        const effectiveCode = ((fan.fanCode && fan.fanCode.trim()) || defaultFanCode || "");
+        if (val !== effectiveCode) {
             input.classList.add('shake'); setTimeout(() => input.classList.remove('shake'), 500);
             alert(t('wrong_fan_code'));
             input.value = "";
             return;
         }
-        const fan = pendingFanForModal;
         document.getElementById('fanCodeModal').classList.remove('active');
         pendingFanForModal = null;
         openFocusModal(fan);
