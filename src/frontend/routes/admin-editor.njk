@@ -174,7 +174,7 @@ layout: false
             <div class="add-form" id="fanAddForm">
                 <input type="email" id="newFanEmail" placeholder="Email Address">
                 <input type="text" id="newFanUsername" placeholder="Username (shown only after fan code is entered)">
-                <input type="text" id="newFanFanCode" placeholder="Fan Code (required to reveal this fan's details)">
+                <input type="text" id="newFanFanCode" placeholder="Fan Code (leave blank to use the default from Section 5)">
                 <input type="text" id="newFanSecImg" placeholder="Sec Img Text (e.g., VIP, GOLD)">
                 <input type="text" id="newFanPhoto" placeholder="Photo URL (optional — direct link)" oninput="previewNewFanPhoto(this.value)">
                 <div style="display:flex; align-items:center; gap:10px;">
@@ -208,7 +208,7 @@ layout: false
 
         <div class="card">
             <h2>5. Landing Page <span class="badge-new">NEW</span></h2>
-            <p class="section-help">Controls the access screen that appears before the celebrity list on /artists/. Fans must enter the Fan Code to reach the artists.</p>
+            <p class="section-help">Controls the access screen that appears before the celebrity list on /artists/. Fans must enter the Artist List Access Code to reach the artists.</p>
             
             <div class="input-group">
                 <label>"Powered by" Label</label>
@@ -223,7 +223,12 @@ layout: false
             <div class="input-group">
                 <label>Artist List Access Code</label>
                 <input type="text" id="fanCodeInput" placeholder="123456789">
-                <div class="help-text">Fans must enter this exact code to unlock the artist list on /artists/. This is separate from each fan's personal code in Section 3. Current default: 123456789</div>
+                <div class="help-text">Fans must enter this exact code to unlock the artist list on /artists/. This is separate from the per-fan code in Section 3.</div>
+            </div>
+            <div class="input-group">
+                <label>Default Fan Code <span class="badge-new">NEW</span></label>
+                <input type="text" id="defaultFanCodeInput" placeholder="7777777">
+                <div class="help-text">Used for any fan whose individual Fan Code (Section 3) is blank. Leave blank and that fan becomes freely visible (no prompt).</div>
             </div>
             <button class="btn-save" id="saveLandingBtn" onclick="saveLandingSettings()">Save Landing Settings</button>
         </div>
@@ -332,6 +337,7 @@ layout: false
                 document.getElementById('poweredByInput').value = data.poweredBy || "";
                 document.getElementById('brandNameInput').value = data.brandName || "";
                 document.getElementById('fanCodeInput').value = data.fanCode || "";
+                document.getElementById('defaultFanCodeInput').value = data.defaultFanCode || "";
             }
         } catch (e) { showToast("Error loading landing settings: " + e.message, true); }
     }
@@ -343,7 +349,8 @@ layout: false
             await window.setDoc(window.doc(window.db, "app_settings", "landing"), {
                 poweredBy: document.getElementById('poweredByInput').value || "Powered by",
                 brandName: document.getElementById('brandNameInput').value || "Menai",
-                fanCode: document.getElementById('fanCodeInput').value || "123456789"
+                fanCode: document.getElementById('fanCodeInput').value || "123456789",
+                defaultFanCode: document.getElementById('defaultFanCodeInput').value || ""
             });
             showToast("Landing settings saved!");
         } catch (e) { showToast("Error: " + e.message, true); }
@@ -458,7 +465,7 @@ layout: false
                         <input type="text" id="username-${docSnap.id}" value="${data.username || ''}" placeholder="Username (shown only after fan code is entered)">
                     </div>
                     <div class="list-item-row">
-                        <input type="text" id="fancode-${docSnap.id}" value="${data.fanCode || ''}" placeholder="Fan Code (required to reveal this fan's details)">
+                        <input type="text" id="fancode-${docSnap.id}" value="${data.fanCode || ''}" placeholder="Fan Code (leave blank to use default from Section 5)">
                     </div>
                     <div class="list-item-row">
                         <input type="text" id="photo-${docSnap.id}" value="${data.photoUrl || ''}" placeholder="Photo URL (optional)" oninput="previewFanAvatar('${docSnap.id}', this.value, '${initial}')">
