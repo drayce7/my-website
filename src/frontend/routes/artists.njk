@@ -82,7 +82,6 @@ layout: false
         .btn-okay { background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white; padding: 15px 40px; border: none; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4); transition: 0.2s; font-family: sans-serif; }
         .btn-okay:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 210, 255, 0.7); }
 
-        /* ===== PREMIUM PAGE LOAD OVERLAY ===== */
         .page-load-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #1a1226 0%, #2a1b18 60%, #1a1226 100%);
@@ -125,7 +124,6 @@ layout: false
         @keyframes shimmer { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
         .page-load-pct { font-family: sans-serif; font-size: 12px; color: #d4c4a8; margin-top: 12px; letter-spacing: 2px; }
 
-        /* ===== GATE CHECK LOADING ===== */
         .gate-loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(20, 15, 30, 0.97); backdrop-filter: blur(12px);
@@ -138,7 +136,6 @@ layout: false
         .gate-loading-title { font-family: 'Caveat', cursive; font-size: 32px; color: #fff; margin-bottom: 10px; }
         .gate-loading-sub { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: #d4c4a8; line-height: 1.6; }
 
-        /* ===== ACCESS STAGE (Powered by Menai → Fan Code) ===== */
         .access-stage {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #1a1226 0%, #2a1b18 50%, #1a1226 100%);
@@ -219,7 +216,6 @@ layout: false
         .access-code-submit:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 6px 25px rgba(0, 210, 255, 0.6); }
         .access-code-submit:disabled { background: #4b5563; cursor: not-allowed; box-shadow: none; }
 
-        /* Success loading overlay */
         .success-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(20, 15, 30, 0.97); backdrop-filter: blur(12px);
@@ -252,7 +248,6 @@ layout: false
 </head>
 <body>
 
-    <!-- ===== ACCESS STAGE (Powered by Menai → Fan Code) ===== -->
     <div class="access-stage" id="accessStage">
         <div class="access-inner" id="accessInner">
             <div class="powered-by" id="poweredByLabel">Powered by</div>
@@ -267,7 +262,6 @@ layout: false
         </div>
     </div>
 
-    <!-- ===== SUCCESS LOADING OVERLAY ===== -->
     <div class="success-overlay" id="successOverlay">
         <div class="success-box">
             <div class="success-spinner"></div>
@@ -278,7 +272,6 @@ layout: false
         </div>
     </div>
 
-    <!-- ===== PREMIUM PAGE LOAD OVERLAY (7-10s) ===== -->
     <div class="page-load-overlay" id="pageLoadOverlay">
         <div class="page-load-box">
             <div class="page-load-emblem">★</div>
@@ -304,7 +297,6 @@ layout: false
         </div>
     </div>
 
-    <!-- ===== GATE LOADING OVERLAY ===== -->
     <div class="gate-loading-overlay" id="gateLoadingOverlay">
         <div class="gate-loading-box">
             <div class="loader"></div>
@@ -339,6 +331,9 @@ layout: false
     let customPoweredBy = "Powered by";
     let customBrandName = "Menai";
     let validFanCode = "123456789";
+
+    /* ===== INACTIVITY TIMEOUT: 30 minutes ===== */
+    const ACCESS_TIMEOUT_MS = 30 * 60 * 1000;  // 30 min
 
     const translations = {
         en: {
@@ -421,7 +416,6 @@ layout: false
         document.getElementById('gateTitle').textContent = t('gate_title');
         document.querySelector('.btn-gate-close').textContent = t('gate_btn');
 
-        // Access stage translations
         document.getElementById('poweredByLabel').textContent = customPoweredBy || t('powered_by');
         document.getElementById('brandNameLabel').textContent = customBrandName || 'Menai';
         document.getElementById('accessCodeLabel').textContent = t('input_code_label');
@@ -433,29 +427,50 @@ layout: false
     document.addEventListener("DOMContentLoaded", applyTranslation);
     function changeLanguage(lang) { localStorage.setItem('selectedLanguage', lang); location.reload(); }
 
-    /* ===== ACCESS FLOW ===== */
-    let accessGranted = false;
+    /* ===== ACCESS HELPERS ===== */
+    function isAccessValid() {
+        const granted = sessionStorage.getItem('accessGranted');
+        const at = parseInt(sessionStorage.getItem('accessGrantedAt') || '0', 10);
+        if (granted !== 'true' || !at) return false;
+        return (Date.now() - at) < ACCESS_TIMEOUT_MS;
+    }
 
-    function startAccessFlow() {
-        // If already granted this session, skip straight to page load
+    function grantAccess() {
+        sessionStorage.setItem('accessGranted', 'true');
+        sessionStorage.setItem('accessGrantedAt', String(Date.now()));
+    }
+
+    function touchAccess() {
+        // Extends the idle timer on activity
         if (sessionStorage.getItem('accessGranted') === 'true') {
-            document.getElementById('accessStage').classList.add('hide');
-            setTimeout(() => {
-                const el = document.getElementById('accessStage');
-                if (el) el.remove();
-                runPageLoad();
-            }, 700);
+            sessionStorage.setItem('accessGrantedAt', String(Date.now()));
+        }
+    }
+
+    /* ===== ACCESS FLOW ===== */
+    function startAccessFlow() {
+        if (isAccessValid()) {
+            // Skip access stage, go straight to page load
+            const stage = document.getElementById('accessStage');
+            if (stage) {
+                stage.classList.add('hide');
+                setTimeout(() => { if (stage.parentNode) stage.remove(); }, 700);
+            }
+            runPageLoad();
             return;
         }
 
-        // Stage 1 → Stage 2 after 2 seconds
+        // Clear stale access so we don't confuse later checks
+        sessionStorage.removeItem('accessGranted');
+        sessionStorage.removeItem('accessGrantedAt');
+
+        // Stage 1 → Stage 2 after 2s
         setTimeout(() => {
             document.getElementById('accessInner').classList.add('shifted');
             document.getElementById('accessCodeBlock').classList.add('active');
             setTimeout(() => document.getElementById('accessCodeInput').focus(), 400);
         }, 2000);
 
-        // Enter key submits
         document.getElementById('accessCodeInput').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') submitAccessCode();
         });
@@ -487,9 +502,7 @@ layout: false
             return;
         }
 
-        // Success
-        sessionStorage.setItem('accessGranted', 'true');
-        accessGranted = true;
+        grantAccess();
         submitBtn.disabled = true;
         runSuccessLoading();
     }
@@ -510,19 +523,18 @@ layout: false
             pctEl.textContent = pct + '%';
             if (elapsed >= totalMs) {
                 clearInterval(timer);
-                // Hide access stage + success overlay, then trigger the page load overlay
-                document.getElementById('accessStage').classList.add('hide');
+                const stage = document.getElementById('accessStage');
+                if (stage) stage.classList.add('hide');
                 overlay.classList.remove('active');
                 setTimeout(() => {
-                    const el = document.getElementById('accessStage');
-                    if (el) el.remove();
+                    if (stage && stage.parentNode) stage.remove();
                     runPageLoad();
                 }, 700);
             }
         }, 100);
     }
 
-    /* ===== PREMIUM PAGE LOAD (7-10s) — only runs AFTER access is granted ===== */
+    /* ===== PREMIUM PAGE LOAD (7-10s) ===== */
     function runPageLoad() {
         const overlay = document.getElementById('pageLoadOverlay');
         const bar = document.getElementById('pageLoadBar');
@@ -544,12 +556,17 @@ layout: false
         }, 100);
     }
 
+    /* ===== IDLE-RESET: extend timer on user activity ===== */
+    // Only attach these once; they fire on scroll, click, keypress, touch
+    ['scroll', 'click', 'keydown', 'touchstart'].forEach(evt => {
+        document.addEventListener(evt, touchAccess, { passive: true });
+    });
+
     /* ===== BOOT ===== */
     document.addEventListener('DOMContentLoaded', startAccessFlow);
 
     /* ===== FIREBASE LOAD ===== */
     window.addEventListener('firebaseLoaded', async () => {
-        // Load landing settings (powered by + fan code)
         try {
             const landingSnap = await window.getDoc(window.doc(window.db, "app_settings", "landing"));
             if (landingSnap.exists()) {
@@ -611,7 +628,7 @@ layout: false
         applyTranslation(); 
     });
 
-    /* ===== GATED ARTIST — LOADING THEN ACCESS DENIED ===== */
+    /* ===== GATED ARTIST ===== */
     function handleArtistClick(artist) {
         if (artist.access === 'gated') {
             showGateSequence();
