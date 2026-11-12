@@ -173,7 +173,8 @@ layout: false
             <button class="btn-add" onclick="toggleAddForm('fan')">+ Add New Fan</button>
             <div class="add-form" id="fanAddForm">
                 <input type="email" id="newFanEmail" placeholder="Email Address">
-                <input type="text" id="newFanUsername" placeholder="Username (shown after code entry)">
+                <input type="text" id="newFanUsername" placeholder="Username (shown only after fan code is entered)">
+                <input type="text" id="newFanFanCode" placeholder="Fan Code (required to reveal this fan's details)">
                 <input type="text" id="newFanSecImg" placeholder="Sec Img Text (e.g., VIP, GOLD)">
                 <input type="text" id="newFanPhoto" placeholder="Photo URL (optional — direct link)" oninput="previewNewFanPhoto(this.value)">
                 <div style="display:flex; align-items:center; gap:10px;">
@@ -207,7 +208,7 @@ layout: false
 
         <div class="card">
             <h2>5. Landing Page <span class="badge-new">NEW</span></h2>
-            <p class="section-help">Controls the /access/ screen on the artists page that appears before the celebrity list. Fans must enter the Fan Code to reach the artists.</p>
+            <p class="section-help">Controls the access screen that appears before the celebrity list on /artists/. Fans must enter the Fan Code to reach the artists.</p>
             
             <div class="input-group">
                 <label>"Powered by" Label</label>
@@ -220,9 +221,9 @@ layout: false
                 <div class="help-text">The large gradient text (e.g., "Menai").</div>
             </div>
             <div class="input-group">
-                <label>Fan Access Code</label>
+                <label>Artist List Access Code</label>
                 <input type="text" id="fanCodeInput" placeholder="123456789">
-                <div class="help-text">Fans must enter this exact code to unlock the artist list and to see fan details in the fanbook. Current default: 123456789</div>
+                <div class="help-text">Fans must enter this exact code to unlock the artist list on /artists/. This is separate from each fan's personal code in Section 3. Current default: 123456789</div>
             </div>
             <button class="btn-save" id="saveLandingBtn" onclick="saveLandingSettings()">Save Landing Settings</button>
         </div>
@@ -454,7 +455,10 @@ layout: false
                         <input type="text" id="email-${docSnap.id}" value="${data.email || ''}" placeholder="Email">
                     </div>
                     <div class="list-item-row">
-                        <input type="text" id="username-${docSnap.id}" value="${data.username || ''}" placeholder="Username (shown after code entry)">
+                        <input type="text" id="username-${docSnap.id}" value="${data.username || ''}" placeholder="Username (shown only after fan code is entered)">
+                    </div>
+                    <div class="list-item-row">
+                        <input type="text" id="fancode-${docSnap.id}" value="${data.fanCode || ''}" placeholder="Fan Code (required to reveal this fan's details)">
                     </div>
                     <div class="list-item-row">
                         <input type="text" id="photo-${docSnap.id}" value="${data.photoUrl || ''}" placeholder="Photo URL (optional)" oninput="previewFanAvatar('${docSnap.id}', this.value, '${initial}')">
@@ -483,6 +487,7 @@ layout: false
             await window.updateDoc(window.doc(window.db, "fans", id), {
                 email: document.getElementById(`email-${id}`).value,
                 username: document.getElementById(`username-${id}`).value,
+                fanCode: document.getElementById(`fancode-${id}`).value,
                 secImg: document.getElementById(`secimg-${id}`).value,
                 bgColor: document.getElementById(`color-${id}`).value,
                 photoUrl: document.getElementById(`photo-${id}`).value
@@ -505,6 +510,7 @@ layout: false
             await window.addDoc(window.collection(window.db, "fans"), { 
                 email,
                 username: document.getElementById('newFanUsername').value,
+                fanCode: document.getElementById('newFanFanCode').value,
                 secImg: document.getElementById('newFanSecImg').value,
                 photoUrl: document.getElementById('newFanPhoto').value,
                 bgColor: document.getElementById('newFanColor').value,
@@ -513,6 +519,7 @@ layout: false
             });
             document.getElementById('newFanEmail').value = "";
             document.getElementById('newFanUsername').value = "";
+            document.getElementById('newFanFanCode').value = "";
             document.getElementById('newFanSecImg').value = "";
             document.getElementById('newFanPhoto').value = "";
             document.getElementById('newFanColor').value = "#ffb3ba";
