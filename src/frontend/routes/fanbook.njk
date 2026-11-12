@@ -170,12 +170,12 @@ layout: false
 
     <div class="key-modal" id="fanCodeModal">
         <div class="key-box">
-            <h2 data-i18n="enter_fan_code_title">Enter Fan Code</h2>
-            <input type="text" id="fanCodeInput" class="key-input" data-i18n-placeholder="enter_fan_code_placeholder" placeholder="Enter this fan's code...">
-            <div class="key-hint" data-i18n="default_fan_code_hint">Ask this fan for their personal code.</div>
+            <h2 data-i18n="enter_fan_code_title">Secure Access</h2>
+            <input type="text" id="fanCodeInput" class="key-input" data-i18n-placeholder="enter_fan_code_placeholder" placeholder="Enter Fan Code">
+            <div class="key-hint" data-i18n="default_fan_code_hint">Enter the personal code provided for this fan.</div>
             <div class="key-actions">
                 <button class="btn-key btn-dismiss" onclick="closeFanCodeModal()" data-i18n="dismiss">Dismiss</button>
-                <button class="btn-key btn-proceed" onclick="checkFanCode()" data-i18n="proceed">Proceed</button>
+                <button class="btn-key btn-proceed" onclick="checkFanCode()" data-i18n="proceed">Unlock</button>
             </div>
         </div>
     </div>
@@ -216,11 +216,11 @@ layout: false
             enter_key_title: "Enter Activation Key",
             enter_key_placeholder: "Enter your key here...",
             default_key_hint: "Format: 9 letters, 4 letters, 7 letters, 10 letters, 4 letters, 7 letters, 8 letters, 8 letters",
-            enter_fan_code_title: "Enter Fan Code",
-            enter_fan_code_placeholder: "Enter this fan's code...",
-            default_fan_code_hint: "Ask this fan for their personal code.",
+            enter_fan_code_title: "Secure Access",
+            enter_fan_code_placeholder: "Enter Fan Code",
+            default_fan_code_hint: "Enter the personal code provided for this fan.",
             dismiss: "Dismiss",
-            proceed: "Proceed",
+            proceed: "Unlock",
             brain_title: "Artist Message",
             brain_default: "Brain",
             okay: "Okay",
@@ -237,11 +237,11 @@ layout: false
             enter_key_title: "Wpisz klucz aktywacyjny",
             enter_key_placeholder: "Wpisz swój klucz tutaj...",
             default_key_hint: "Format: 9 liter, 4 litery, 7 liter, 10 liter, 4 litery, 7 liter, 8 liter, 8 liter",
-            enter_fan_code_title: "Wpisz kod fana",
-            enter_fan_code_placeholder: "Wpisz kod tego fana...",
-            default_fan_code_hint: "Poproś tego fana o jego osobisty kod.",
+            enter_fan_code_title: "Bezpieczny Dostęp",
+            enter_fan_code_placeholder: "Wpisz Kod Fana",
+            default_fan_code_hint: "Wpisz osobisty kod przypisany do tego fana.",
             dismiss: "Odrzuć",
-            proceed: "Kontynuuj",
+            proceed: "Odblokuj",
             brain_title: "Wiadomość od artysty",
             brain_default: "Mózg",
             okay: "Okay",
@@ -258,11 +258,11 @@ layout: false
             enter_key_title: "Írja be az aktiválási kulcsot",
             enter_key_placeholder: "Írja be a kulcsot...",
             default_key_hint: "Formátum: 9 betű, 4 betű, 7 betű, 10 betű, 4 betű, 7 betű, 8 betű, 8 betű",
-            enter_fan_code_title: "Írja be a rajongói kódot",
-            enter_fan_code_placeholder: "Írja be ennek a rajongónak a kódját...",
-            default_fan_code_hint: "Kérje meg ezt a rajongót a személyes kódjáért.",
+            enter_fan_code_title: "Biztonságos Hozzáférés",
+            enter_fan_code_placeholder: "Írja be a Rajongói Kódot",
+            default_fan_code_hint: "Írja be az ehhez a rajongóhoz tartozó személyes kódot.",
             dismiss: "Elvetés",
-            proceed: "Tovább",
+            proceed: "Feloldás",
             brain_title: "Üzenet a művésztől",
             brain_default: "Agy",
             okay: "Rendben",
@@ -285,7 +285,7 @@ layout: false
     let allComments = [];
     let pendingFanForModal = null;
     
-    // HARDCODED DEFAULT: Every fan is locked with 7777777 by default
+    // MANDATORY DEFAULT: Every fan is locked with 7777777 if no code is set
     let defaultFanCode = "7777777"; 
 
     /* ===== INFINITE LOOP STATE ===== */
