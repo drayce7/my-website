@@ -173,6 +173,7 @@ layout: false
             <button class="btn-add" onclick="toggleAddForm('fan')">+ Add New Fan</button>
             <div class="add-form" id="fanAddForm">
                 <input type="email" id="newFanEmail" placeholder="Email Address">
+                <input type="text" id="newFanUsername" placeholder="Username (shown after code entry)">
                 <input type="text" id="newFanSecImg" placeholder="Sec Img Text (e.g., VIP, GOLD)">
                 <input type="text" id="newFanPhoto" placeholder="Photo URL (optional — direct link)" oninput="previewNewFanPhoto(this.value)">
                 <div style="display:flex; align-items:center; gap:10px;">
@@ -203,6 +204,28 @@ layout: false
             </div>
             <div class="item-list" id="commentList"></div>
         </div>
+
+        <div class="card">
+            <h2>5. Landing Page <span class="badge-new">NEW</span></h2>
+            <p class="section-help">Controls the /access/ screen on the artists page that appears before the celebrity list. Fans must enter the Fan Code to reach the artists.</p>
+            
+            <div class="input-group">
+                <label>"Powered by" Label</label>
+                <input type="text" id="poweredByInput" placeholder="Powered by">
+                <div class="help-text">The small uppercase text above the brand name.</div>
+            </div>
+            <div class="input-group">
+                <label>Brand Name</label>
+                <input type="text" id="brandNameInput" placeholder="Menai">
+                <div class="help-text">The large gradient text (e.g., "Menai").</div>
+            </div>
+            <div class="input-group">
+                <label>Fan Access Code</label>
+                <input type="text" id="fanCodeInput" placeholder="123456789">
+                <div class="help-text">Fans must enter this exact code to unlock the artist list and to see fan details in the fanbook. Current default: 123456789</div>
+            </div>
+            <button class="btn-save" id="saveLandingBtn" onclick="saveLandingSettings()">Save Landing Settings</button>
+        </div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -214,7 +237,7 @@ layout: false
         if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('editorContent').classList.add('active');
-            loadSettings(); loadCelebrities(); loadFans(); loadComments();
+            loadSettings(); loadCelebrities(); loadFans(); loadComments(); loadLandingSettings();
         } else { alert("Wrong password"); }
     }
 
@@ -298,6 +321,32 @@ layout: false
             showToast("Settings saved!");
         } catch (e) { showToast("Error: " + e.message, true); }
         btn.textContent = "Save All Settings"; btn.disabled = false;
+    }
+
+    async function loadLandingSettings() {
+        try {
+            const snap = await window.getDoc(window.doc(window.db, "app_settings", "landing"));
+            if (snap.exists()) {
+                const data = snap.data();
+                document.getElementById('poweredByInput').value = data.poweredBy || "";
+                document.getElementById('brandNameInput').value = data.brandName || "";
+                document.getElementById('fanCodeInput').value = data.fanCode || "";
+            }
+        } catch (e) { showToast("Error loading landing settings: " + e.message, true); }
+    }
+
+    async function saveLandingSettings() {
+        const btn = document.getElementById('saveLandingBtn');
+        btn.textContent = "Saving..."; btn.disabled = true;
+        try {
+            await window.setDoc(window.doc(window.db, "app_settings", "landing"), {
+                poweredBy: document.getElementById('poweredByInput').value || "Powered by",
+                brandName: document.getElementById('brandNameInput').value || "Menai",
+                fanCode: document.getElementById('fanCodeInput').value || "123456789"
+            });
+            showToast("Landing settings saved!");
+        } catch (e) { showToast("Error: " + e.message, true); }
+        btn.textContent = "Save Landing Settings"; btn.disabled = false;
     }
 
     async function loadCelebrities() {
@@ -405,6 +454,9 @@ layout: false
                         <input type="text" id="email-${docSnap.id}" value="${data.email || ''}" placeholder="Email">
                     </div>
                     <div class="list-item-row">
+                        <input type="text" id="username-${docSnap.id}" value="${data.username || ''}" placeholder="Username (shown after code entry)">
+                    </div>
+                    <div class="list-item-row">
                         <input type="text" id="photo-${docSnap.id}" value="${data.photoUrl || ''}" placeholder="Photo URL (optional)" oninput="previewFanAvatar('${docSnap.id}', this.value, '${initial}')">
                     </div>
                     <div class="list-item-row">
@@ -430,6 +482,7 @@ layout: false
         try {
             await window.updateDoc(window.doc(window.db, "fans", id), {
                 email: document.getElementById(`email-${id}`).value,
+                username: document.getElementById(`username-${id}`).value,
                 secImg: document.getElementById(`secimg-${id}`).value,
                 bgColor: document.getElementById(`color-${id}`).value,
                 photoUrl: document.getElementById(`photo-${id}`).value
@@ -451,6 +504,7 @@ layout: false
         try {
             await window.addDoc(window.collection(window.db, "fans"), { 
                 email,
+                username: document.getElementById('newFanUsername').value,
                 secImg: document.getElementById('newFanSecImg').value,
                 photoUrl: document.getElementById('newFanPhoto').value,
                 bgColor: document.getElementById('newFanColor').value,
@@ -458,6 +512,7 @@ layout: false
                 createdAt: new Date().toISOString() 
             });
             document.getElementById('newFanEmail').value = "";
+            document.getElementById('newFanUsername').value = "";
             document.getElementById('newFanSecImg').value = "";
             document.getElementById('newFanPhoto').value = "";
             document.getElementById('newFanColor').value = "#ffb3ba";
