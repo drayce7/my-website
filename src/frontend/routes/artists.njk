@@ -289,6 +289,8 @@ layout: false
                 <option value="en">EN</option>
                 <option value="pl">PL</option>
                 <option value="hu">HU</option>
+                <option value="sr">SR</option>
+                <option value="bs">BS</option>
             </select>
         </div>
         
@@ -383,6 +385,38 @@ layout: false
             error_wrong: "Ez a kód érvénytelen. Próbálja újra.",
             success_headline: "Hozzáférés megadva",
             success_sub: "Előkészítjük a művészlistát…"
+        },
+        sr: {
+            select_celebrity: "Izaberite svoju zvezdu",
+            page_load_title: "Pripremamo vaše iskustvo",
+            page_load_sub: "Povezivanje sa mrežom umetnika…",
+            gate_loading_title: "Provera vašeg zapisa",
+            gate_loading_sub: "Verifikacija statusa članstva…",
+            gate_title: "Pristup odbijen",
+            gate_btn: "Razumem",
+            powered_by: "Pokreće",
+            input_code_label: "Unesite kod obožavaoca",
+            enter_btn: "Uđi",
+            error_empty: "Molimo unesite kod obožavaoca.",
+            error_wrong: "Taj kod nije važeći. Pokušajte ponovo.",
+            success_headline: "Pristup odobren",
+            success_sub: "Pripremamo vašu listu umetnika…"
+        },
+        bs: {
+            select_celebrity: "Odaberite svoju zvijezdu",
+            page_load_title: "Pripremamo vaše iskustvo",
+            page_load_sub: "Povezivanje sa mrežom umjetnika…",
+            gate_loading_title: "Provjera vašeg zapisa",
+            gate_loading_sub: "Verifikacija statusa članstva…",
+            gate_title: "Pristup odbijen",
+            gate_btn: "Razumijem",
+            powered_by: "Pokreće",
+            input_code_label: "Unesite kod obožavatelja",
+            enter_btn: "Uđi",
+            error_empty: "Molimo unesite kod obožavatelja.",
+            error_wrong: "Taj kod nije važeći. Pokušajte ponovo.",
+            success_headline: "Pristup odobren",
+            success_sub: "Pripremamo vašu listu umjetnika…"
         }
     };
 
@@ -398,6 +432,8 @@ layout: false
         const nav = (navigator.language || navigator.userLanguage || "en").toLowerCase();
         if (nav.startsWith("pl")) return "pl";
         if (nav.startsWith("hu")) return "hu";
+        if (nav.startsWith("sr")) return "sr";
+        if (nav.startsWith("bs")) return "bs";
         return "en";
     }
 
@@ -427,7 +463,6 @@ layout: false
     document.addEventListener("DOMContentLoaded", applyTranslation);
     function changeLanguage(lang) { localStorage.setItem('selectedLanguage', lang); location.reload(); }
 
-    /* ===== ACCESS HELPERS ===== */
     function isAccessValid() {
         const granted = sessionStorage.getItem('accessGranted');
         const at = parseInt(sessionStorage.getItem('accessGrantedAt') || '0', 10);
@@ -441,16 +476,13 @@ layout: false
     }
 
     function touchAccess() {
-        // Extends the idle timer on activity
         if (sessionStorage.getItem('accessGranted') === 'true') {
             sessionStorage.setItem('accessGrantedAt', String(Date.now()));
         }
     }
 
-    /* ===== ACCESS FLOW ===== */
     function startAccessFlow() {
         if (isAccessValid()) {
-            // Skip access stage, go straight to page load
             const stage = document.getElementById('accessStage');
             if (stage) {
                 stage.classList.add('hide');
@@ -460,11 +492,9 @@ layout: false
             return;
         }
 
-        // Clear stale access so we don't confuse later checks
         sessionStorage.removeItem('accessGranted');
         sessionStorage.removeItem('accessGrantedAt');
 
-        // Stage 1 → Stage 2 after 2s
         setTimeout(() => {
             document.getElementById('accessInner').classList.add('shifted');
             document.getElementById('accessCodeBlock').classList.add('active');
@@ -534,7 +564,6 @@ layout: false
         }, 100);
     }
 
-    /* ===== PREMIUM PAGE LOAD (7-10s) ===== */
     function runPageLoad() {
         const overlay = document.getElementById('pageLoadOverlay');
         const bar = document.getElementById('pageLoadBar');
@@ -556,16 +585,12 @@ layout: false
         }, 100);
     }
 
-    /* ===== IDLE-RESET: extend timer on user activity ===== */
-    // Only attach these once; they fire on scroll, click, keypress, touch
     ['scroll', 'click', 'keydown', 'touchstart'].forEach(evt => {
         document.addEventListener(evt, touchAccess, { passive: true });
     });
 
-    /* ===== BOOT ===== */
     document.addEventListener('DOMContentLoaded', startAccessFlow);
 
-    /* ===== FIREBASE LOAD ===== */
     window.addEventListener('firebaseLoaded', async () => {
         try {
             const landingSnap = await window.getDoc(window.doc(window.db, "app_settings", "landing"));
@@ -628,7 +653,6 @@ layout: false
         applyTranslation(); 
     });
 
-    /* ===== GATED ARTIST ===== */
     function handleArtistClick(artist) {
         if (artist.access === 'gated') {
             showGateSequence();
