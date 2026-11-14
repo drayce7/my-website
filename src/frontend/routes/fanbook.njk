@@ -1,3 +1,10 @@
+Here is the full updated code for **`src/fanbook.njk`**. 
+
+The logic, premium wording, mandatory `7777777` lock, and layout are exactly the same. The only changes are the addition of **SR (Serbian)** and **BS (Bosnian)** to the translation dictionary and the language detector.
+
+### `src/fanbook.njk`
+
+```html
 ---
 title: "Artist Fanbook"
 permalink: "/fanbook/"
@@ -273,6 +280,48 @@ layout: false
             wrong_fan_code: "Hibás rajongói kód. Próbálja újra.",
             support_headline: "Kapcsolódás az ügyfélszolgálathoz…",
             support_sub: "Kérjük, várjon, amíg csapatunkhoz kapcsoljuk."
+        },
+        sr: {
+            search_placeholder: "Pretraži po e-mailu...",
+            enter_key_title: "Unesite aktivacioni ključ",
+            enter_key_placeholder: "Unesite vaš ključ ovde...",
+            default_key_hint: "Format: 9 slova, 4 slova, 7 slova, 10 slova, 4 slova, 7 slova, 8 slova, 8 slova",
+            enter_fan_code_title: "Bezbedan pristup",
+            enter_fan_code_placeholder: "Unesite kod obožavaoca",
+            default_fan_code_hint: "Unesite lični kod dodeljen ovom obožavaocu.",
+            dismiss: "Odbaci",
+            proceed: "Otključaj",
+            brain_title: "Poruka umetnika",
+            brain_default: "Mozak",
+            okay: "Okay",
+            summoning: "Prikupljanje detalja obožavaoca...",
+            close: "Zatvori",
+            fan_not_found: "Obožavalac nije pronađen! Pokušajte sa tačnim e-mailom.",
+            invalid_key: "Nevažeći aktivacioni ključ!",
+            wrong_fan_code: "Pogrešan kod obožavaoca. Pokušajte ponovo.",
+            support_headline: "Povezivanje sa podrškom…",
+            support_sub: "Molimo sačekajte dok vas povezujemo sa našim timom."
+        },
+        bs: {
+            search_placeholder: "Pretraži po e-mailu...",
+            enter_key_title: "Unesite aktivacijski ključ",
+            enter_key_placeholder: "Unesite vaš ključ ovdje...",
+            default_key_hint: "Format: 9 slova, 4 slova, 7 slova, 10 slova, 4 slova, 7 slova, 8 slova, 8 slova",
+            enter_fan_code_title: "Siguran pristup",
+            enter_fan_code_placeholder: "Unesite kod obožavatelja",
+            default_fan_code_hint: "Unesite lični kod dodijeljen ovom obožavatelju.",
+            dismiss: "Odbaci",
+            proceed: "Otključaj",
+            brain_title: "Poruka umjetnika",
+            brain_default: "Mozak",
+            okay: "Okay",
+            summoning: "Prikupljanje detalja obožavatelja...",
+            close: "Zatvori",
+            fan_not_found: "Obožavatelj nije pronađen! Pokušajte sa tačnim e-mailom.",
+            invalid_key: "Nevažeći aktivacijski ključ!",
+            wrong_fan_code: "Pogrešan kod obožavatelja. Pokušajte ponovo.",
+            support_headline: "Povezivanje sa podrškom…",
+            support_sub: "Molimo sačekajte dok vas povezujemo sa našim timom."
         }
     };
 
@@ -308,6 +357,8 @@ layout: false
         const nav = (navigator.language || navigator.userLanguage || "en").toLowerCase();
         if (nav.startsWith("pl")) return "pl";
         if (nav.startsWith("hu")) return "hu";
+        if (nav.startsWith("sr")) return "sr";
+        if (nav.startsWith("bs")) return "bs";
         return "en";
     }
 
@@ -728,3 +779,4 @@ layout: false
 </script>
 </body>
 </html>
+```
