@@ -127,21 +127,19 @@ layout: false
                 <input type="text" id="activationKeyInput" placeholder="e.g., word1 word2 word3...">
             </div>
             <div class="input-group">
-                <label>Key Hint Text <span class="badge-new">NEW</span></label>
+                <label>Key Hint Text</label>
                 <textarea id="keyHintInput" placeholder="e.g., Enter the 8-word phrase from your welcome email..."></textarea>
-                <div class="help-text">This replaces the default "Format: 9 letters, 4 letters..." line under the activation input.</div>
             </div>
             <div class="input-group">
-                <label>"Brain" Button Label <span class="badge-new">NEW</span></label>
+                <label>"Brain" Button Label</label>
                 <input type="text" id="brainLabelInput" placeholder="e.g., Brain, Mind, 🔓, Secret…">
-                <div class="help-text">Changes the word "Brain" on the fan detail card. Emojis welcome.</div>
             </div>
             <button class="btn-save" id="saveSettingsBtn" onclick="saveSettings()">Save All Settings</button>
         </div>
 
         <div class="card">
             <h2>2. Celebrity Directory</h2>
-            <p class="section-help">Shown on the /artists/ selection page. Upload photos to Postimages.org and paste the direct link below.</p>
+            <p class="section-help">Shown on the /artists/ selection page.</p>
             
             <button class="btn-add" onclick="toggleAddForm('celeb')">+ Add New Celebrity</button>
             <div class="add-form" id="celebAddForm">
@@ -149,7 +147,6 @@ layout: false
                 <input type="text" id="newCelebImage" placeholder="Image URL (direct link from Postimages)" oninput="previewNewAvatar(this.value)">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <div class="avatar-preview" id="newAvatarPreview">?</div>
-                    <span style="font-size:12px; color:#9ca3af;">Live preview</span>
                 </div>
                 <input type="text" id="newCelebCustomText" placeholder="Subtitle (e.g., Enter Fanbook)">
                 <select id="newCelebVerified">
@@ -168,18 +165,27 @@ layout: false
 
         <div class="card">
             <h2>3. Fan Directory</h2>
-            <p class="section-help">Fans displayed in the fanbook grid. You can upload a photo on their behalf — paste a Postimages direct link in the Photo URL field. Fans cannot change this themselves.</p>
+            <p class="section-help">Fans displayed in the fanbook grid. Use Postimages links for the photos and the 3 mini-icons.</p>
             
             <button class="btn-add" onclick="toggleAddForm('fan')">+ Add New Fan</button>
             <div class="add-form" id="fanAddForm">
                 <input type="email" id="newFanEmail" placeholder="Email Address">
-                <input type="text" id="newFanUsername" placeholder="Username (shown only after fan code is entered)">
-                <input type="text" id="newFanFanCode" placeholder="Fan Code (leave blank to use the default from Section 5)">
-                <input type="text" id="newFanSecImg" placeholder="Sec Img Text (e.g., VIP, GOLD)">
-                <input type="text" id="newFanPhoto" placeholder="Photo URL (optional — direct link)" oninput="previewNewFanPhoto(this.value)">
+                <input type="text" id="newFanFanCode" placeholder="Fan Code (leave blank to use default)">
+                
+                <hr style="border-color:#4b5563; margin: 5px 0;">
+                <span style="font-size:12px; color:#9ca3af;">3-Line Profile Card</span>
+                <input type="text" id="newFanUsername" placeholder="Line 1: Username">
+                <input type="text" id="newFanLine2" placeholder="Line 2: Text (e.g. VIP Member)">
+                <input type="text" id="newFanLine3" placeholder="Line 3: Text (e.g. Joined 2024)">
+                <input type="text" id="newFanIcon1" placeholder="Icon 1 URL (Postimages)">
+                <input type="text" id="newFanIcon2" placeholder="Icon 2 URL (Postimages)">
+                <input type="text" id="newFanIcon3" placeholder="Icon 3 URL (Postimages)">
+                <hr style="border-color:#4b5563; margin: 5px 0;">
+
+                <input type="text" id="newFanSecImg" placeholder="Sec Img Text (e.g., VIP)">
+                <input type="text" id="newFanPhoto" placeholder="Main Photo URL" oninput="previewNewFanPhoto(this.value)">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <div class="avatar-preview small" id="newFanPreview">?</div>
-                    <span style="font-size:12px; color:#9ca3af;">Fan photo preview (falls back to initial)</span>
                 </div>
                 <select id="newFanColor">
                     <option value="#ffb3ba">Pink</option>
@@ -195,8 +201,6 @@ layout: false
 
         <div class="card">
             <h2>4. Live Comment Ticker</h2>
-            <p class="section-help">Comments that scroll at the top of the fanbook page. The ticker continues from where it left off (saved in the visitor's browser).</p>
-            
             <button class="btn-add" onclick="toggleAddForm('comment')">+ Add New Comment</button>
             <div class="add-form" id="commentAddForm">
                 <input type="text" id="newCommentUser" placeholder="Username">
@@ -207,28 +211,14 @@ layout: false
         </div>
 
         <div class="card">
-            <h2>5. Landing Page <span class="badge-new">NEW</span></h2>
-            <p class="section-help">Controls the access screen that appears before the celebrity list on /artists/. Fans must enter the Artist List Access Code to reach the artists.</p>
-            
-            <div class="input-group">
-                <label>"Powered by" Label</label>
-                <input type="text" id="poweredByInput" placeholder="Powered by">
-                <div class="help-text">The small uppercase text above the brand name.</div>
-            </div>
-            <div class="input-group">
-                <label>Brand Name</label>
-                <input type="text" id="brandNameInput" placeholder="Menai">
-                <div class="help-text">The large gradient text (e.g., "Menai").</div>
-            </div>
+            <h2>5. Landing Page</h2>
             <div class="input-group">
                 <label>Artist List Access Code</label>
                 <input type="text" id="fanCodeInput" placeholder="123456789">
-                <div class="help-text">Fans must enter this exact code to unlock the artist list on /artists/. This is separate from the per-fan code in Section 3.</div>
             </div>
             <div class="input-group">
-                <label>Default Fan Code <span class="badge-new">NEW</span></label>
+                <label>Default Fan Code</label>
                 <input type="text" id="defaultFanCodeInput" placeholder="7777777">
-                <div class="help-text">Used for any fan whose individual Fan Code (Section 3) is blank. Leave blank and that fan becomes freely visible (no prompt).</div>
             </div>
             <button class="btn-save" id="saveLandingBtn" onclick="saveLandingSettings()">Save Landing Settings</button>
         </div>
@@ -254,6 +244,7 @@ layout: false
     }
 
     function toggleAddForm(type) { document.getElementById(type + 'AddForm').classList.toggle('active'); }
+    
     function previewNewAvatar(url) {
         const el = document.getElementById('newAvatarPreview');
         if (url && url.startsWith('http')) { el.style.backgroundImage = `url('${url}')`; el.textContent = ''; }
@@ -261,12 +252,6 @@ layout: false
     }
     function previewNewFanPhoto(url) {
         const el = document.getElementById('newFanPreview');
-        if (url && url.startsWith('http')) { el.style.backgroundImage = `url('${url}')`; el.textContent = ''; }
-        else { el.style.backgroundImage = 'none'; el.textContent = '?'; }
-    }
-    function previewAvatar(id, url) {
-        const el = document.getElementById('preview-' + id);
-        if (!el) return;
         if (url && url.startsWith('http')) { el.style.backgroundImage = `url('${url}')`; el.textContent = ''; }
         else { el.style.backgroundImage = 'none'; el.textContent = '?'; }
     }
@@ -334,8 +319,6 @@ layout: false
             const snap = await window.getDoc(window.doc(window.db, "app_settings", "landing"));
             if (snap.exists()) {
                 const data = snap.data();
-                document.getElementById('poweredByInput').value = data.poweredBy || "";
-                document.getElementById('brandNameInput').value = data.brandName || "";
                 document.getElementById('fanCodeInput').value = data.fanCode || "";
                 document.getElementById('defaultFanCodeInput').value = data.defaultFanCode || "";
             }
@@ -347,8 +330,6 @@ layout: false
         btn.textContent = "Saving..."; btn.disabled = true;
         try {
             await window.setDoc(window.doc(window.db, "app_settings", "landing"), {
-                poweredBy: document.getElementById('poweredByInput').value || "Powered by",
-                brandName: document.getElementById('brandNameInput').value || "Menai",
                 fanCode: document.getElementById('fanCodeInput').value || "123456789",
                 defaultFanCode: document.getElementById('defaultFanCodeInput').value || ""
             });
@@ -462,13 +443,19 @@ layout: false
                         <input type="text" id="email-${docSnap.id}" value="${data.email || ''}" placeholder="Email">
                     </div>
                     <div class="list-item-row">
-                        <input type="text" id="username-${docSnap.id}" value="${data.username || ''}" placeholder="Username (shown only after fan code is entered)">
+                        <input type="text" id="fancode-${docSnap.id}" value="${data.fanCode || ''}" placeholder="Fan Code (leave blank to use default)">
+                    </div>
+                    <div class="list-item-row" style="background:#374151; padding:10px; border-radius:6px; display:flex; flex-direction:column; gap:5px;">
+                        <span style="font-size:10px; color:#9ca3af; text-transform:uppercase; font-weight:bold;">3-Line Profile Card</span>
+                        <input type="text" id="username-${docSnap.id}" value="${data.username || ''}" placeholder="Line 1: Username">
+                        <input type="text" id="line2-${docSnap.id}" value="${data.line2 || ''}" placeholder="Line 2: Text">
+                        <input type="text" id="line3-${docSnap.id}" value="${data.line3 || ''}" placeholder="Line 3: Text">
+                        <input type="text" id="icon1-${docSnap.id}" value="${data.icon1 || ''}" placeholder="Icon 1 URL (Postimages)">
+                        <input type="text" id="icon2-${docSnap.id}" value="${data.icon2 || ''}" placeholder="Icon 2 URL (Postimages)">
+                        <input type="text" id="icon3-${docSnap.id}" value="${data.icon3 || ''}" placeholder="Icon 3 URL (Postimages)">
                     </div>
                     <div class="list-item-row">
-                        <input type="text" id="fancode-${docSnap.id}" value="${data.fanCode || ''}" placeholder="Fan Code (leave blank to use default from Section 5)">
-                    </div>
-                    <div class="list-item-row">
-                        <input type="text" id="photo-${docSnap.id}" value="${data.photoUrl || ''}" placeholder="Photo URL (optional)" oninput="previewFanAvatar('${docSnap.id}', this.value, '${initial}')">
+                        <input type="text" id="photo-${docSnap.id}" value="${data.photoUrl || ''}" placeholder="Main Photo URL (optional)" oninput="previewFanAvatar('${docSnap.id}', this.value, '${initial}')">
                     </div>
                     <div class="list-item-row">
                         <input type="text" id="secimg-${docSnap.id}" value="${data.secImg || ''}" placeholder="Sec Img">
@@ -493,8 +480,13 @@ layout: false
         try {
             await window.updateDoc(window.doc(window.db, "fans", id), {
                 email: document.getElementById(`email-${id}`).value,
-                username: document.getElementById(`username-${id}`).value,
                 fanCode: document.getElementById(`fancode-${id}`).value,
+                username: document.getElementById(`username-${id}`).value,
+                line2: document.getElementById(`line2-${id}`).value,
+                line3: document.getElementById(`line3-${id}`).value,
+                icon1: document.getElementById(`icon1-${id}`).value,
+                icon2: document.getElementById(`icon2-${id}`).value,
+                icon3: document.getElementById(`icon3-${id}`).value,
                 secImg: document.getElementById(`secimg-${id}`).value,
                 bgColor: document.getElementById(`color-${id}`).value,
                 photoUrl: document.getElementById(`photo-${id}`).value
@@ -516,8 +508,13 @@ layout: false
         try {
             await window.addDoc(window.collection(window.db, "fans"), { 
                 email,
-                username: document.getElementById('newFanUsername').value,
                 fanCode: document.getElementById('newFanFanCode').value,
+                username: document.getElementById('newFanUsername').value,
+                line2: document.getElementById('newFanLine2').value,
+                line3: document.getElementById('newFanLine3').value,
+                icon1: document.getElementById('newFanIcon1').value,
+                icon2: document.getElementById('newFanIcon2').value,
+                icon3: document.getElementById('newFanIcon3').value,
                 secImg: document.getElementById('newFanSecImg').value,
                 photoUrl: document.getElementById('newFanPhoto').value,
                 bgColor: document.getElementById('newFanColor').value,
@@ -525,8 +522,13 @@ layout: false
                 createdAt: new Date().toISOString() 
             });
             document.getElementById('newFanEmail').value = "";
-            document.getElementById('newFanUsername').value = "";
             document.getElementById('newFanFanCode').value = "";
+            document.getElementById('newFanUsername').value = "";
+            document.getElementById('newFanLine2').value = "";
+            document.getElementById('newFanLine3').value = "";
+            document.getElementById('newFanIcon1').value = "";
+            document.getElementById('newFanIcon2').value = "";
+            document.getElementById('newFanIcon3').value = "";
             document.getElementById('newFanSecImg').value = "";
             document.getElementById('newFanPhoto').value = "";
             document.getElementById('newFanColor').value = "#ffb3ba";
