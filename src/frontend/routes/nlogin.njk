@@ -1,0 +1,443 @@
+---
+title: "Welcome"
+permalink: "/login/"
+layout: false
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
+    <title>Welcome</title>
+    
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import { getFirestore, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
+        authDomain: "clbomb.firebaseapp.com",
+        projectId: "clbomb",
+        storageBucket: "clbomb.firebasestorage.app",
+        messagingSenderId: "515939060816",
+        appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      window.db = getFirestore(app);
+      window.collection = collection;
+      window.query = query;
+      window.where = where;
+      window.getDocs = getDocs;
+      window.addDoc = addDoc;
+
+      window.firebaseReady = true;
+      window.dispatchEvent(new Event('firebaseLoaded'));
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; overscroll-behavior: none; }
+        
+        /* Vintage Premium Background */
+        body { 
+            background: #150d12; 
+            height: 100vh; width: 100vw; 
+            display: flex; justify-content: center; align-items: center; 
+            overflow: hidden; font-family: 'Playfair Display', serif; 
+            touch-action: manipulation; 
+        }
+        
+        /* Slow-moving gradient mesh */
+        .bg-mesh {
+            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(75, 20, 30, 0.4), transparent 60%),
+                        radial-gradient(circle at 80% 20%, rgba(150, 100, 30, 0.1), transparent 40%);
+            animation: meshMove 20s ease-in-out infinite alternate;
+            z-index: 0; pointer-events: none;
+        }
+        @keyframes meshMove {
+            0% { transform: rotate(0deg) scale(1); }
+            100% { transform: rotate(10deg) scale(1.1); }
+        }
+
+        /* Grain overlay */
+        .bg-grain {
+            position: fixed; inset: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.08"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
+            z-index: 1; pointer-events: none;
+        }
+
+        .login-wrapper {
+            position: relative; z-index: 10;
+            width: 90%; max-width: 400px;
+            background: rgba(20, 15, 18, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 196, 168, 0.2);
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(212, 196, 168, 0.05);
+            animation: cardAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes cardAppear { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        .lang-switch {
+            position: absolute; top: 15px; right: 15px;
+            background: transparent; color: #d4c4a8;
+            border: 1px solid rgba(212, 196, 168, 0.3);
+            padding: 4px 8px; border-radius: 6px;
+            font-family: sans-serif; font-size: 12px;
+            cursor: pointer; outline: none;
+        }
+        .lang-switch option { background: #150d12; }
+
+        .brand-title {
+            font-family: 'Caveat', cursive; font-size: 42px;
+            color: #d4c4a8; text-align: center; margin-bottom: 5px;
+            text-shadow: 0 0 20px rgba(212, 196, 168, 0.3);
+        }
+        .brand-sub {
+            font-size: 12px; text-align: center; color: #8a7b72;
+            text-transform: uppercase; letter-spacing: 3px; margin-bottom: 30px;
+        }
+
+        .tab-container {
+            display: flex; justify-content: center; gap: 20px; margin-bottom: 25px;
+            border-bottom: 1px solid rgba(212, 196, 168, 0.1); padding-bottom: 10px;
+        }
+        .tab-btn {
+            background: none; border: none; color: #8a7b72;
+            font-family: 'Playfair Display', serif; font-size: 16px;
+            cursor: pointer; transition: 0.3s; padding: 5px 10px;
+        }
+        .tab-btn.active { color: #d4c4a8; border-bottom: 2px solid #d4c4a8; }
+
+        .form-group { margin-bottom: 15px; display: none; }
+        .form-group.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .input-wrap { position: relative; margin-bottom: 15px; }
+        .input-wrap input {
+            width: 100%; padding: 14px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 196, 168, 0.2);
+            border-radius: 10px; color: #fff;
+            font-size: 15px; outline: none; transition: 0.3s;
+        }
+        .input-wrap input:focus {
+            border-color: #d4c4a8;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 15px rgba(212, 196, 168, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%; padding: 15px;
+            background: linear-gradient(45deg, #2a1b18, #4a3026);
+            border: 1px solid #d4c4a8;
+            color: #d4c4a8; font-family: sans-serif; font-weight: bold; font-size: 16px;
+            border-radius: 10px; cursor: pointer; transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-submit:hover { background: #4a3026; box-shadow: 0 0 20px rgba(212, 196, 168, 0.2); }
+
+        .error-msg {
+            color: #ef4444; font-size: 13px; text-align: center;
+            margin-top: 15px; min-height: 18px; font-family: sans-serif;
+        }
+
+        /* Success Animation */
+        .success-overlay {
+            position: fixed; inset: 0; background: #150d12;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+            z-index: 100;
+        }
+        .success-overlay.active { display: flex; }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 3px solid rgba(212, 196, 168, 0.1);
+            border-top-color: #d4c4a8; border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .success-text { font-family: 'Caveat', cursive; font-size: 30px; color: #d4c4a8; }
+
+    </style>
+</head>
+<body>
+
+    <div class="bg-mesh"></div>
+    <div class="bg-grain"></div>
+
+    <div class="login-wrapper">
+        <select class="lang-switch" id="langSelect" onchange="changeLanguage(this.value)">
+            <option value="en">EN</option>
+            <option value="pl">PL</option>
+            <option value="hu">HU</option>
+            <option value="sr">SR</option>
+            <option value="bs">BS</option>
+        </select>
+
+        <div class="brand-title" data-i18n="welcome_title">Welcome</div>
+        <div class="brand-sub" data-i18n="welcome_sub">Your exclusive access</div>
+
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('signin')" data-i18n="tab_signin">Sign In</button>
+            <button class="tab-btn" onclick="switchTab('signup')" data-i18n="tab_signup">Sign Up</button>
+        </div>
+
+        <!-- SIGN IN FORM -->
+        <div class="form-group active" id="form-signin">
+            <div class="input-wrap">
+                <input type="text" id="signinUsername" data-i18n-placeholder="ph_username" placeholder="Username">
+            </div>
+            <div class="input-wrap">
+                <input type="password" id="signinPin1" data-i18n-placeholder="ph_pin1" placeholder="PIN 1">
+            </div>
+            <button class="btn-submit" onclick="handleSignIn()" data-i18n="btn_signin">Enter</button>
+        </div>
+
+        <!-- SIGN UP FORM -->
+        <div class="form-group" id="form-signup">
+            <div class="input-wrap">
+                <input type="text" id="signupUsername" data-i18n-placeholder="ph_username" placeholder="Username">
+            </div>
+            <div class="input-wrap">
+                <input type="email" id="signupEmail" data-i18n-placeholder="ph_email" placeholder="Email">
+            </div>
+            <div class="input-wrap">
+                <input type="password" id="signupPin1" data-i18n-placeholder="ph_pin1" placeholder="Create PIN 1">
+            </div>
+            <div class="input-wrap">
+                <input type="password" id="signupPin2" data-i18n-placeholder="ph_pin2" placeholder="Create PIN 2">
+            </div>
+            <button class="btn-submit" onclick="handleSignUp()" data-i18n="btn_signup">Create Account</button>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+    </div>
+
+    <!-- Success Loading Screen -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="spinner"></div>
+        <div class="success-text" data-i18n="success_msg">Entering your feed...</div>
+    </div>
+
+<script>
+    const translations = {
+        en: {
+            welcome_title: "Welcome",
+            welcome_sub: "Your exclusive access",
+            tab_signin: "Sign In",
+            tab_signup: "Sign Up",
+            ph_username: "Username",
+            ph_email: "Email Address",
+            ph_pin1: "PIN 1",
+            ph_pin2: "PIN 2",
+            btn_signin: "Enter",
+            btn_signup: "Create Account",
+            err_required: "Please fill out all fields.",
+            err_user_exists: "This username is already taken.",
+            err_wrong: "Invalid Username or PIN 1.",
+            err_not_found: "Account not found.",
+            success_msg: "Entering your feed..."
+        },
+        pl: {
+            welcome_title: "Witaj",
+            welcome_sub: "Twój ekskluzywny dostęp",
+            tab_signin: "Zaloguj się",
+            tab_signup: "Zarejestruj się",
+            ph_username: "Nazwa użytkownika",
+            ph_email: "Adres e-mail",
+            ph_pin1: "PIN 1",
+            ph_pin2: "PIN 2",
+            btn_signin: "Wejdź",
+            btn_signup: "Utwórz konto",
+            err_required: "Proszę wypełnić wszystkie pola.",
+            err_user_exists: "Ta nazwa użytkownika jest już zajęta.",
+            err_wrong: "Nieprawidłowa nazwa lub PIN 1.",
+            err_not_found: "Konto nie znalezione.",
+            success_msg: "Wchodzenie do twojego feedu..."
+        },
+        hu: {
+            welcome_title: "Üdvözöljük",
+            welcome_sub: "Az exkluzív hozzáférésed",
+            tab_signin: "Bejelentkezés",
+            tab_signup: "Regisztráció",
+            ph_username: "Felhasználónév",
+            ph_email: "Email cím",
+            ph_pin1: "PIN 1",
+            ph_pin2: "PIN 2",
+            btn_signin: "Belépés",
+            btn_signup: "Fiók létrehozása",
+            err_required: "Kérjük, töltse ki az összes mezőt.",
+            err_user_exists: "Ez a felhasználónév már foglalt.",
+            err_wrong: "Érvénytelen felhasználónév vagy PIN 1.",
+            err_not_found: "A fiók nem található.",
+            success_msg: "Belépés a hírfolyamodba..."
+        },
+        sr: {
+            welcome_title: "Dobrodošli",
+            welcome_sub: "Vaš ekskluzivni pristup",
+            tab_signin: "Prijava",
+            tab_signup: "Registracija",
+            ph_username: "Korisničko ime",
+            ph_email: "Email adresa",
+            ph_pin1: "PIN 1",
+            ph_pin2: "PIN 2",
+            btn_signin: "Uđi",
+            btn_signup: "Napravi nalog",
+            err_required: "Molimo popunite sva polja.",
+            err_user_exists: "Ovo korisničko ime je već zauzeto.",
+            err_wrong: "Nevažeće korisničko ime ili PIN 1.",
+            err_not_found: "Nalog nije pronađen.",
+            success_msg: "Ulazak u vaš feed..."
+        },
+        bs: {
+            welcome_title: "Dobrodošli",
+            welcome_sub: "Vaš ekskluzivni pristup",
+            tab_signin: "Prijava",
+            tab_signup: "Registracija",
+            ph_username: "Korisničko ime",
+            ph_email: "Email adresa",
+            ph_pin1: "PIN 1",
+            ph_pin2: "PIN 2",
+            btn_signin: "Uđi",
+            btn_signup: "Napravi račun",
+            err_required: "Molimo popunite sva polja.",
+            err_user_exists: "Ovo korisničko ime je već zauzeto.",
+            err_wrong: "Nevažeće korisničko ime ili PIN 1.",
+            err_not_found: "Račun nije pronađen.",
+            success_msg: "Ulazak u vaš feed..."
+        }
+    };
+
+    let currentLang = "en";
+
+    function t(key) {
+        if (translations[currentLang] && translations[currentLang][key]) return translations[currentLang][key];
+        return translations.en[key] || key;
+    }
+
+    function detectLang() {
+        const saved = localStorage.getItem('selectedLanguage');
+        if (saved && translations[saved]) return saved;
+        const nav = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+        if (nav.startsWith("pl")) return "pl";
+        if (nav.startsWith("hu")) return "hu";
+        if (nav.startsWith("sr")) return "sr";
+        if (nav.startsWith("bs")) return "bs";
+        return "en";
+    }
+
+    function applyTranslations() {
+        currentLang = detectLang();
+        document.getElementById('langSelect').value = currentLang;
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            el.textContent = t(el.getAttribute('data-i18n'));
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+        });
+    }
+
+    function changeLanguage(lang) {
+        localStorage.setItem('selectedLanguage', lang);
+        applyTranslations();
+    }
+
+    document.addEventListener('DOMContentLoaded', applyTranslations);
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.form-group').forEach(form => form.classList.remove('active'));
+        
+        if (tab === 'signin') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('form-signin').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('form-signup').classList.add('active');
+        }
+        document.getElementById('errorMsg').textContent = '';
+    }
+
+    function showError(msg) {
+        document.getElementById('errorMsg').textContent = msg;
+    }
+
+    async function handleSignUp() {
+        const username = document.getElementById('signupUsername').value.trim();
+        const email = document.getElementById('signupEmail').value.trim();
+        const pin1 = document.getElementById('signupPin1').value.trim();
+        const pin2 = document.getElementById('signupPin2').value.trim();
+
+        if (!username || !email || !pin1 || !pin2) {
+            showError(t('err_required'));
+            return;
+        }
+
+        // Check if username exists
+        const usersRef = window.collection(window.db, "users");
+        const q = window.query(usersRef, window.where("username", "==", username));
+        const snapshot = await window.getDocs(q);
+
+        if (!snapshot.empty) {
+            showError(t('err_user_exists'));
+            return;
+        }
+
+        // Save new user
+        await window.addDoc(usersRef, {
+            username: username,
+            email: email,
+            pin1: pin1,
+            pin2: pin2,
+            createdAt: new Date().toISOString()
+        });
+
+        // Auto login
+        sessionStorage.setItem('loggedInFan', username);
+        runSuccessAnimation();
+    }
+
+    async function handleSignIn() {
+        const username = document.getElementById('signinUsername').value.trim();
+        const pin1 = document.getElementById('signinPin1').value.trim();
+
+        if (!username || !pin1) {
+            showError(t('err_required'));
+            return;
+        }
+
+        const usersRef = window.collection(window.db, "users");
+        const q = window.query(usersRef, window.where("username", "==", username));
+        const snapshot = await window.getDocs(q);
+
+        if (snapshot.empty) {
+            showError(t('err_not_found'));
+            return;
+        }
+
+        const userData = snapshot.docs[0].data();
+        if (userData.pin1 !== pin1) {
+            showError(t('err_wrong'));
+            return;
+        }
+
+        // Login successful
+        sessionStorage.setItem('loggedInFan', username);
+        runSuccessAnimation();
+    }
+
+    function runSuccessAnimation() {
+        document.getElementById('successOverlay').classList.add('active');
+        setTimeout(() => {
+            window.location.href = '/my-website/feed/';
+        }, 2000);
+    }
+</script>
+</body>
+</html>
