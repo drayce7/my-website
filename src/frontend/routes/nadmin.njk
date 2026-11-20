@@ -1,0 +1,230 @@
+---
+title: "Feed Admin"
+permalink: "/nadmin/"
+layout: false
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed Admin</title>
+    
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
+        authDomain: "clbomb.firebaseapp.com",
+        projectId: "clbomb",
+        storageBucket: "clbomb.firebasestorage.app",
+        messagingSenderId: "515939060816",
+        appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      window.db = db;
+      window.doc = doc; window.getDoc = getDoc; window.setDoc = setDoc;
+      window.collection = collection; window.getDocs = getDocs;
+      window.query = query; window.orderBy = orderBy;
+      window.addDoc = addDoc; window.deleteDoc = deleteDoc;
+      window.firebaseReady = true;
+      window.dispatchEvent(new Event('firebaseLoaded'));
+    </script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #0a1128; color: white; min-height: 100vh; display: flex; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 900px; }
+        .login-box { background: #111827; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; max-width: 400px; margin: 100px auto; border: 1px solid #374151; }
+        .login-box h2 { color: #e2e8f0; margin-bottom: 20px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #374151; border-radius: 8px; font-size: 16px; background: #1f2937; color: white; text-align: center; }
+        .login-box button { width: 100%; padding: 12px; background: #e2e8f0; color: #0a1128; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
+        .editor-content { display: none; }
+        .editor-content.active { display: block; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #1f2937; padding-bottom: 15px; }
+        .header h1 { color: #e2e8f0; font-size: 24px; }
+        .btn-logout { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        
+        h2 { color: #3b82f6; margin-bottom: 15px; font-size: 20px; }
+        .section-help { color: #9ca3af; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+        .card { background: #111827; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #374151; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
+        .input-group input, .input-group textarea { width: 100%; padding: 12px; background: #1f2937; border: 1px solid #374151; border-radius: 8px; color: white; font-size: 14px; outline: none; }
+        
+        .btn-save { background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-save:hover { background: #059669; }
+        .btn-add { background: #3b82f6; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+        
+        .item-list { display: flex; flex-direction: column; gap: 10px; }
+        .list-item { background: #1f2937; padding: 15px; border-radius: 8px; border: 1px solid #374151; display: flex; gap: 10px; align-items: center; }
+        .list-item input { flex-grow: 1; padding: 8px; background: #111827; border: 1px solid #374151; border-radius: 6px; color: white; font-size: 13px; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        
+        .toast { position: fixed; bottom: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none; z-index: 1000; color: white; background: #10b981; }
+    </style>
+</head>
+<body>
+
+    <div class="login-box" id="loginBox">
+        <h2>Feed Admin Access</h2>
+        <input type="password" id="adminPass" placeholder="Enter admin password">
+        <button onclick="login()">Unlock</button>
+    </div>
+
+    <div class="container editor-content" id="editorContent">
+        <div class="header">
+            <h1>⚙️ Feed Settings</h1>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- SECTION 1: Images & Starting Numbers -->
+        <div class="card">
+            <h2>1. Image Settings & Base Likes</h2>
+            <p class="section-help">Upload Postimages links and set the starting like numbers for the two images.</p>
+            
+            <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:250px;">
+                    <h3 style="color:#9ca3af; margin-bottom:10px; font-size:14px;">Image 1 (Left)</h3>
+                    <div class="input-group">
+                        <label>Image URL</label>
+                        <input type="text" id="img1Url" placeholder="https://i.postimg.cc/...">
+                    </div>
+                    <div class="input-group">
+                        <label>Base Likes (Starting Number)</label>
+                        <input type="number" id="img1Likes" placeholder="e.g. 5000">
+                    </div>
+                </div>
+                
+                <div style="flex:1; min-width:250px;">
+                    <h3 style="color:#9ca3af; margin-bottom:10px; font-size:14px;">Image 2 (Right)</h3>
+                    <div class="input-group">
+                        <label>Image URL</label>
+                        <input type="text" id="img2Url" placeholder="https://i.postimg.cc/...">
+                    </div>
+                    <div class="input-group">
+                        <label>Base Likes (Starting Number)</label>
+                        <input type="number" id="img2Likes" placeholder="e.g. 5000">
+                    </div>
+                </div>
+            </div>
+            <button class="btn-save" onclick="saveImages()">Save Images & Numbers</button>
+        </div>
+
+        <!-- SECTION 2: Ticker Messages -->
+        <div class="card">
+            <h2>2. Looping Top Messages</h2>
+            <p class="section-help">These texts will slide up in the top bar of the feed page.</p>
+            
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input type="text" id="newCommentUser" placeholder="Username" style="flex:1; padding:12px; background:#1f2937; border:1px solid #374151; border-radius:8px; color:white;">
+                <input type="text" id="newCommentText" placeholder="Message text..." style="flex:2; padding:12px; background:#1f2937; border:1px solid #374151; border-radius:8px; color:white;">
+                <button class="btn-add" style="margin-bottom:0;" onclick="addComment()">Add</button>
+            </div>
+            
+            <div class="item-list" id="commentList"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Saved!</div>
+
+<script>
+    const ADMIN_PASSWORD = "admin123";
+
+    function login() {
+        if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('editorContent').classList.add('active');
+            loadSettings();
+            loadComments();
+        } else { alert("Wrong password"); }
+    }
+
+    function logout() {
+        document.getElementById('loginBox').style.display = 'block';
+        document.getElementById('editorContent').classList.remove('active');
+        document.getElementById('adminPass').value = '';
+    }
+
+    function showToast() {
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    async function loadSettings() {
+        try {
+            const snap = await window.getDoc(window.doc(window.db, "app_settings", "feed"));
+            if (snap.exists()) {
+                const data = snap.data();
+                document.getElementById('img1Url').value = data.img1Url || "";
+                document.getElementById('img1Likes').value = data.img1Likes || "";
+                document.getElementById('img2Url').value = data.img2Url || "";
+                document.getElementById('img2Likes').value = data.img2Likes || "";
+            }
+        } catch(e) { console.log(e); }
+    }
+
+    async function saveImages() {
+        try {
+            await window.setDoc(window.doc(window.db, "app_settings", "feed"), {
+                img1Url: document.getElementById('img1Url').value,
+                img1Likes: document.getElementById('img1Likes').value,
+                img2Url: document.getElementById('img2Url').value,
+                img2Likes: document.getElementById('img2Likes').value
+            });
+            showToast();
+        } catch(e) { alert("Error saving"); }
+    }
+
+    async function loadComments() {
+        const list = document.getElementById('commentList');
+        list.innerHTML = 'Loading...';
+        try {
+            const q = window.query(window.collection(window.db, "feed_comments"), window.orderBy("createdAt"));
+            const snapshot = await window.getDocs(q);
+            list.innerHTML = '';
+            if (snapshot.empty) { list.innerHTML = '<p style="color:#6b7280;">No comments yet.</p>'; return; }
+            
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <strong style="color:#3b82f6; min-width:80px;">${data.user}</strong>
+                    <input type="text" value="${data.text}" readonly>
+                    <button class="btn-delete" onclick="deleteComment('${docSnap.id}')">Delete</button>
+                `;
+                list.appendChild(div);
+            });
+        } catch(e) { console.log(e); }
+    }
+
+    async function addComment() {
+        const user = document.getElementById('newCommentUser').value;
+        const text = document.getElementById('newCommentText').value;
+        if (!user || !text) return alert("Fill both fields");
+        
+        await window.addDoc(window.collection(window.db, "feed_comments"), {
+            user: user, text: text, createdAt: new Date().toISOString()
+        });
+        
+        document.getElementById('newCommentUser').value = "";
+        document.getElementById('newCommentText').value = "";
+        loadComments();
+        showToast();
+    }
+
+    async function deleteComment(id) {
+        if (!confirm("Delete this message?")) return;
+        await window.deleteDoc(window.doc(window.db, "feed_comments", id));
+        loadComments();
+    }
+</script>
+</body>
+</html>
