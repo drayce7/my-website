@@ -3,6 +3,7 @@ title: "Feed Admin"
 permalink: "/nadmin/"
 layout: false
 ---
+{% raw %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,7 +84,6 @@ layout: false
             <button class="btn-logout" onclick="logout()">Logout</button>
         </div>
 
-        <!-- SECTION 1: Images & Starting Numbers -->
         <div class="card">
             <h2>1. Image Settings & Base Likes</h2>
             <p class="section-help">Upload Postimages links and set the starting like numbers for the two images.</p>
@@ -116,7 +116,6 @@ layout: false
             <button class="btn-save" onclick="saveImages()">Save Images & Numbers</button>
         </div>
 
-        <!-- SECTION 2: Ticker Messages -->
         <div class="card">
             <h2>2. Looping Top Messages</h2>
             <p class="section-help">These texts will slide up in the top bar of the feed page.</p>
@@ -228,3 +227,4 @@ layout: false
 </script>
 </body>
 </html>
+{% endraw %}
