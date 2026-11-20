@@ -1,0 +1,178 @@
+---
+title: "Select"
+permalink: "/nselect/"
+layout: false
+---
+{% raw %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Select</title>
+    
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import { getFirestore, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
+        authDomain: "clbomb.firebaseapp.com",
+        projectId: "clbomb",
+        storageBucket: "clbomb.firebasestorage.app",
+        messagingSenderId: "515939060816",
+        appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      window.db = getFirestore(app);
+      window.collection = collection;
+      window.getDocs = getDocs;
+      window.query = query;
+
+      window.firebaseReady = true;
+      window.dispatchEvent(new Event('firebaseLoaded'));
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        
+        body { 
+            background: #0a1128; 
+            height: 100vh; width: 100vw; 
+            display: flex; justify-content: center; align-items: center; 
+            overflow: hidden; font-family: 'Playfair Display', serif; 
+            cursor: pointer;
+        }
+
+        .bg-mesh {
+            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(20, 40, 90, 0.8), transparent 60%),
+                        radial-gradient(circle at 80% 20%, rgba(180, 190, 210, 0.1), transparent 40%);
+            animation: meshMove 10s ease-in-out infinite alternate;
+            z-index: 0; pointer-events: none;
+        }
+        @keyframes meshMove {
+            0% { transform: rotate(0deg) scale(1); }
+            100% { transform: rotate(10deg) scale(1.1); }
+        }
+
+        .vs-container {
+            position: relative; z-index: 10;
+            width: 100%; max-width: 800px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px;
+        }
+
+        .artist-side {
+            display: flex; flex-direction: column; align-items: center;
+            width: 35%;
+            animation: slideIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .artist-side.right {
+            animation: slideInRight 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .artist-img {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            background-size: cover; background-position: center;
+            border: 3px solid #e2e8f0;
+            box-shadow: 0 0 30px rgba(226, 232, 240, 0.4);
+            margin-bottom: 20px;
+            background-color: #111827;
+        }
+
+        .artist-name {
+            font-family: 'Caveat', cursive;
+            font-size: 32px; color: #e2e8f0;
+            text-align: center; line-height: 1.1;
+            text-shadow: 0 0 20px rgba(226, 232, 240, 0.5);
+        }
+
+        .vs-text {
+            font-size: 64px; color: #3b82f6; font-style: italic;
+            text-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+            animation: pulseVS 1.5s infinite alternate;
+        }
+        @keyframes pulseVS {
+            from { transform: scale(1); opacity: 0.8; }
+            to { transform: scale(1.1); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .artist-img { width: 80px; height: 80px; }
+            .artist-name { font-size: 24px; }
+            .vs-text { font-size: 48px; }
+        }
+    </style>
+</head>
+<body onclick="goToFeed()">
+
+    <div class="bg-mesh"></div>
+
+    <div class="vs-container">
+        <!-- Left Artist -->
+        <div class="artist-side left">
+            <div class="artist-img" id="img1" style="background-image: url('https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg');"></div>
+            <div class="artist-name" id="name1">Artist One</div>
+        </div>
+
+        <!-- VS -->
+        <div class="vs-text">VS</div>
+
+        <!-- Right Artist -->
+        <div class="artist-side right">
+            <div class="artist-img" id="img2" style="background-image: url('https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg');"></div>
+            <div class="artist-name" id="name2">Artist Two</div>
+        </div>
+    </div>
+
+<script>
+    if (!sessionStorage.getItem('loggedInFan')) {
+        window.location.href = '/my-website/nlogin/';
+    }
+
+    // Fetch two random artists to display on the VS screen
+    window.addEventListener('firebaseLoaded', async () => {
+        try {
+            const snapshot = await window.getDocs(window.collection(window.db, "celebrities"));
+            const artists = [];
+            snapshot.forEach(doc => artists.push(doc.data()));
+
+            if (artists.length >= 2) {
+                // Pick 2 random artists
+                const shuffled = artists.sort(() => 0.5 - Math.random());
+                const a1 = shuffled[0];
+                const a2 = shuffled[1];
+
+                document.getElementById('name1').innerText = a1.name;
+                if (a1.imageUrl) document.getElementById('img1').style.backgroundImage = "url('" + a1.imageUrl + "')";
+
+                document.getElementById('name2').innerText = a2.name;
+                if (a2.imageUrl) document.getElementById('img2').style.backgroundImage = "url('" + a2.imageUrl + "')";
+            }
+        } catch(e) { console.log("Error loading artists:", e); }
+    });
+
+    // Auto proceed after 5 seconds, or click anywhere to proceed
+    let timer = setTimeout(goToFeed, 5000);
+
+    function goToFeed() {
+        clearTimeout(timer);
+        window.location.href = '/my-website/nfeed/';
+    }
+</script>
+</body>
+</html>
+{% endraw %}

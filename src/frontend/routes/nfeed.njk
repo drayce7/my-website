@@ -62,6 +62,19 @@ layout: false
             100% { transform: rotate(10deg) scale(1.1); }
         }
 
+        /* TARGET BACKGROUND */
+        .target-bg {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80vw; height: 80vw; max-width: 600px; max-height: 600px;
+            border-radius: 50%; border: 2px dashed rgba(180, 190, 210, 0.1);
+            box-shadow: 0 0 50px rgba(20, 40, 90, 0.5) inset;
+            z-index: 1; pointer-events: none;
+        }
+        .target-bg::after {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 50%; height: 50%; border-radius: 50%; border: 2px solid rgba(180, 190, 210, 0.15);
+        }
+
         .app-wrapper {
             position: relative; z-index: 10;
             width: 100%; max-width: 500px; height: 100vh;
@@ -73,15 +86,17 @@ layout: false
             overflow: hidden;
         }
 
+        /* LARGER UPPER TICKER REGION */
         .top-bar {
             display: flex; align-items: center; justify-content: space-between; gap: 15px;
             background: rgba(5, 10, 25, 0.9);
-            padding: 12px 15px; border-bottom: 1px solid rgba(180, 190, 210, 0.15);
+            padding: 20px 15px; border-bottom: 1px solid rgba(180, 190, 210, 0.15);
             z-index: 20; flex-shrink: 0;
+            height: 100px; /* Taller region */
         }
         
         .ticker-container { 
-            flex-grow: 1; height: 45px;
+            flex-grow: 1; height: 60px;
             overflow: hidden; position: relative; 
             display: flex; flex-direction: column; justify-content: flex-end; 
             mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent); 
@@ -98,52 +113,66 @@ layout: false
         .btn-join {
             background: transparent;
             color: #e2e8f0; border: 1px solid #e2e8f0; 
-            padding: 6px 14px; border-radius: 15px; 
-            font-size: 11px; font-weight: bold; letter-spacing: 1px;
+            padding: 8px 16px; border-radius: 20px; 
+            font-size: 12px; font-weight: bold; letter-spacing: 1px;
             cursor: pointer; transition: 0.3s; text-transform: uppercase;
             flex-shrink: 0;
         }
         .btn-join:hover { background: rgba(226, 232, 240, 0.1); }
 
         .feed-content {
-            flex-grow: 1; padding: 20px 15px;
+            flex-grow: 1; padding: 15px;
             display: flex; flex-direction: row; gap: 15px;
             justify-content: center; align-items: center;
         }
 
+        /* BOUNCING IMAGES & FULLER SCREEN */
         .image-card {
             position: relative;
             flex: 1; 
-            height: 75vh; 
-            border-radius: 16px;
+            height: 82vh; /* Taller */
+            border-radius: 20px;
             border: 1px solid rgba(180, 190, 210, 0.3);
             background-color: #111827;
             background-size: cover; background-position: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.9);
             overflow: hidden;
             cursor: grab;
+            animation: bounceImage 4s ease-in-out infinite;
         }
-        .image-card:active { cursor: grabbing; }
+        
+        /* Stagger the bounce so they alternate */
+        .image-card:nth-child(2) { animation-delay: 2s; }
+
+        @keyframes bounceImage {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .image-card:active { cursor: grabbing; transform: scale(0.98) !important; animation: none; }
 
         .image-overlay {
             position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 40%);
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 40%);
             pointer-events: none;
         }
 
+        /* TARGET COUNTER BADGE */
         .counter-badge {
-            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(226, 232, 240, 0.3);
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(226, 232, 240, 0.4);
+            border-radius: 50%; /* Circle target */
+            width: 70px; height: 70px;
             color: #e2e8f0;
-            padding: 6px 12px; border-radius: 20px;
-            font-family: sans-serif; font-weight: bold; font-size: 14px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            display: flex; align-items: center; gap: 5px;
+            font-family: sans-serif; font-weight: bold; font-size: 13px;
+            box-shadow: 0 0 20px rgba(226,232,240,0.2), inset 0 0 15px rgba(0,0,0,0.8);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;
             transition: transform 0.1s;
             pointer-events: none;
         }
+        .counter-badge span:first-child { font-size: 16px; }
 
         .floating-icon {
             position: absolute;
@@ -180,6 +209,7 @@ layout: false
 <body>
 
     <div class="bg-mesh"></div>
+    <div class="target-bg"></div>
 
     <div class="app-wrapper">
         <div class="top-bar">
