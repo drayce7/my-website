@@ -187,7 +187,6 @@ layout: false
         </div>
 
         <div class="feed-content">
-            <!-- We added a click event just in case the swipe feels unresponsive on some phones -->
             <div class="image-card" id="card-1" data-counter="count-1" onclick="handleTap(event, 'count-1')" style="background-image: url('https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg');">
                 <div class="image-overlay"></div>
                 <div class="counter-badge" id="badge-1">
@@ -237,7 +236,7 @@ layout: false
     }
     function applyTranslations() {
         currentLang = detectLang();
-        document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+        document.querySelectorAll('[data-i18n]').forEach(function(el) { el.textContent = t(el.getAttribute('data-i18n')); });
     }
     document.addEventListener('DOMContentLoaded', applyTranslations);
 
@@ -251,39 +250,33 @@ layout: false
     ];
     const colors = ['#ff4d4d', '#ffd700', '#00d2ff', '#ff00cc', '#33ff33'];
 
-    // ===== SMOOTH SWIPE LOGIC =====
     let swipeCooldown = false;
 
     function handleSwipe(x, y, counterId) {
         if (swipeCooldown) return;
         swipeCooldown = true;
         triggerReaction(x, y, counterId);
-        
-        // Reset cooldown after 500ms so you have to intentionally swipe again
-        setTimeout(() => { swipeCooldown = false; }, 500);
+        setTimeout(function() { swipeCooldown = false; }, 500);
     }
 
     function handleTap(event, counterId) {
-        // Fallback for devices where swipe might not register perfectly
         if (swipeCooldown) return;
         swipeCooldown = true;
         triggerReaction(event.clientX, event.clientY, counterId);
-        setTimeout(() => { swipeCooldown = false; }, 500);
+        setTimeout(function() { swipeCooldown = false; }, 500);
     }
 
     function setupInteractions() {
         const cards = document.querySelectorAll('.image-card');
-        cards.forEach(card => {
+        cards.forEach(function(card) {
             const counterId = card.getAttribute('data-counter');
             
-            // Mobile Swipe
-            card.addEventListener('touchmove', (e) => {
+            card.addEventListener('touchmove', function(e) {
                 const touch = e.touches[0];
                 handleSwipe(touch.clientX, touch.clientY, counterId);
             }, { passive: true });
 
-            // Desktop Drag
-            card.addEventListener('mousemove', (e) => {
+            card.addEventListener('mousemove', function(e) {
                 if (e.buttons === 1) { handleSwipe(e.clientX, e.clientY, counterId); }
             });
         });
@@ -292,7 +285,6 @@ layout: false
     function triggerReaction(x, y, counterId) {
         const counterEl = document.getElementById(counterId);
         
-        // We use the actual internal number variables now to prevent overwriting
         if (counterId === 'count-1') {
             count1 += 1;
             counterEl.innerText = count1.toLocaleString();
@@ -303,11 +295,11 @@ layout: false
         
         const badge = document.getElementById(counterId).parentElement;
         badge.style.transform = "translateX(-50%) scale(1.2)";
-        setTimeout(() => badge.style.transform = "translateX(-50%) scale(1)", 150);
+        setTimeout(function() { badge.style.transform = "translateX(-50%) scale(1)"; }, 150);
 
         const randomIcon = icons[Math.floor(Math.random() * icons.length)];
         for (let i = 0; i < 4; i++) {
-            setTimeout(() => { createFloatingIcon(x, y, randomIcon.path); }, i * 150); 
+            setTimeout(function() { createFloatingIcon(x, y, randomIcon.path); }, i * 150); 
         }
     }
 
@@ -322,60 +314,53 @@ layout: false
 
         const randomX = x + (Math.random() * 80) - 40;
         const randomY = y + (Math.random() * 20) - 10;
-        svg.style.left = `${randomX}px`;
-        svg.style.top = `${randomY}px`;
+        svg.style.left = randomX + "px";
+        svg.style.top = randomY + "px";
         
         const randomColor = colors[Math.floor(Math.random() * colors.length)];
         svg.style.fill = randomColor;
-        svg.style.filter = `drop-shadow(0 4px 10px rgba(0,0,0,0.8)) drop-shadow(0 0 15px ${randomColor})`;
+        svg.style.filter = "drop-shadow(0 4px 10px rgba(0,0,0,0.8)) drop-shadow(0 0 15px " + randomColor + ")";
 
         const size = 35 + Math.random() * 25; 
-        svg.style.width = `${size}px`;
-        svg.style.height = `${size}px`;
+        svg.style.width = size + "px";
+        svg.style.height = size + "px";
         svg.style.stroke = "rgba(0,0,0,0.4)"; 
         svg.style.strokeWidth = "1.5px";
 
         document.body.appendChild(svg);
-        setTimeout(() => { if (svg.parentNode) svg.parentNode.removeChild(svg); }, 3000);
+        setTimeout(function() { if (svg.parentNode) svg.parentNode.removeChild(svg); }, 3000);
     }
 
     document.addEventListener('DOMContentLoaded', setupInteractions);
 
-    // ===== LIVE AUTO-COUNTING LOGIC (Fixed) =====
     let count1 = 5000;
     let count2 = 5000;
 
-    setInterval(() => {
-        // Add 10 every second
+    setInterval(function() {
         count1 += 10;
         count2 += 10;
-        
-        // Update the screen
         document.getElementById('count-1').innerText = count1.toLocaleString();
         document.getElementById('count-2').innerText = count2.toLocaleString();
     }, 1000); 
 
-    // ===== TICKER LOGIC =====
     let allFeedComments = [];
     let tickerIndex = 0;
 
-    window.addEventListener('firebaseLoaded', async () => {
+    window.addEventListener('firebaseLoaded', async function() {
         try {
-            // Load Images from Admin settings (if they exist)
             const feedSnap = await window.getDoc(window.doc(window.db, "app_settings", "feed"));
             if (feedSnap.exists()) {
                 const data = feedSnap.data();
-                if (data.img1Url) document.getElementById('card-1').style.backgroundImage = `url('${data.img1Url}')`;
-                if (data.img2Url) document.getElementById('card-2').style.backgroundImage = `url('${data.img2Url}')`;
+                if (data.img1Url) document.getElementById('card-1').style.backgroundImage = "url('" + data.img1Url + "')";
+                if (data.img2Url) document.getElementById('card-2').style.backgroundImage = "url('" + data.img2Url + "')";
                 if (data.img1Likes) { count1 = parseInt(data.img1Likes); document.getElementById('count-1').innerText = count1.toLocaleString(); }
                 if (data.img2Likes) { count2 = parseInt(data.img2Likes); document.getElementById('count-2').innerText = count2.toLocaleString(); }
             }
 
-            // Load Ticker messages
             const q = window.query(window.collection(window.db, "feed_comments"), window.orderBy("createdAt"));
             const snapshot = await window.getDocs(q);
             allFeedComments = [];
-            snapshot.forEach(d => allFeedComments.push(d.data()));
+            snapshot.forEach(function(d) { allFeedComments.push(d.data()); });
             startTicker();
         } catch(e) { console.log("Load error:", e); }
     });
@@ -389,7 +374,7 @@ layout: false
             addCommentToTicker(allFeedComments[i]);
         }
 
-        setInterval(() => {
+        setInterval(function() {
             tickerIndex = (tickerIndex + 1) % allFeedComments.length;
             addCommentToTicker(allFeedComments[tickerIndex]);
         }, 3000);
@@ -399,7 +384,9 @@ layout: false
         const tickerContainer = document.getElementById('tickerContainer');
         const line = document.createElement('div');
         line.className = 'comment-line';
-        line.innerHTML = `<span class="rainbow-username">${comment.user}:</span> <span>${comment.text}</span>`;
+        
+        line.innerHTML = '<span class="rainbow-username">' + comment.user + ':</span> <span>' + comment.text + '</span>';
+        
         tickerContainer.appendChild(line);
         if (tickerContainer.children.length > 3) {
             tickerContainer.removeChild(tickerContainer.firstChild);

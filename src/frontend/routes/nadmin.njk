@@ -154,7 +154,7 @@ layout: false
     function showToast() {
         const toast = document.getElementById('toast');
         toast.style.display = 'block';
-        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        setTimeout(function() { toast.style.display = 'none'; }, 3000);
     }
 
     async function loadSettings() {
@@ -191,15 +191,15 @@ layout: false
             list.innerHTML = '';
             if (snapshot.empty) { list.innerHTML = '<p style="color:#6b7280;">No comments yet.</p>'; return; }
             
-            snapshot.forEach(docSnap => {
+            snapshot.forEach(function(docSnap) {
                 const data = docSnap.data();
                 const div = document.createElement('div');
                 div.className = 'list-item';
-                div.innerHTML = `
-                    <strong style="color:#3b82f6; min-width:80px;">${data.user}</strong>
-                    <input type="text" value="${data.text}" readonly>
-                    <button class="btn-delete" onclick="deleteComment('${docSnap.id}')">Delete</button>
-                `;
+                
+                div.innerHTML = '<strong style="color:#3b82f6; min-width:80px;">' + data.user + '</strong>' +
+                                '<input type="text" value="' + data.text + '" readonly>' +
+                                '<button class="btn-delete" onclick="deleteComment(\'' + docSnap.id + '\')">Delete</button>';
+                
                 list.appendChild(div);
             });
         } catch(e) { console.log(e); }
