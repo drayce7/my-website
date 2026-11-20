@@ -67,16 +67,16 @@ layout: false
             overflow: hidden;
         }
 
-        /* Top Ticker - Made Taller */
         .top-bar {
             display: flex; align-items: center; justify-content: space-between; gap: 15px;
             background: rgba(5, 10, 25, 0.9);
             padding: 12px 15px; border-bottom: 1px solid rgba(180, 190, 210, 0.15);
             z-index: 20; flex-shrink: 0;
+            height: 70px; /* Fixed height for math */
         }
         
         .ticker-container { 
-            flex-grow: 1; height: 45px; /* TALLER TICKER */
+            flex-grow: 1; height: 45px;
             overflow: hidden; position: relative; 
             display: flex; flex-direction: column; justify-content: flex-end; 
             mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent); 
@@ -100,61 +100,53 @@ layout: false
         }
         .btn-join:hover { background: rgba(226, 232, 240, 0.1); }
 
-        /* Main Content Area - Side by Side */
+        /* SWIPE FEED - Vertical Snap */
         .feed-content {
-            flex-grow: 1; padding: 20px 15px;
-            display: flex; flex-direction: row; gap: 15px;
-            justify-content: center;
-            align-items: center;
+            height: calc(100vh - 70px); /* Exactly fills the rest of the screen */
+            overflow-y: auto;
+            scroll-snap-type: y mandatory;
+            display: flex; flex-direction: column;
+            scrollbar-width: none; 
+            -webkit-overflow-scrolling: touch;
         }
+        .feed-content::-webkit-scrollbar { display: none; }
 
-        /* The 2 Side-by-Side Images */
         .image-card {
             position: relative;
-            flex: 1; /* Each takes exactly 50% minus the gap */
-            height: 75vh; 
-            border-radius: 16px;
-            border: 1px solid rgba(180, 190, 210, 0.3);
+            width: 100%; height: calc(100vh - 70px); /* Exact height of the feed area */
+            flex-shrink: 0;
+            scroll-snap-align: start;
             background-color: #111827;
             background-size: cover; background-position: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.1s;
+            cursor: grab;
         }
-        .image-card:active {
-            transform: scale(0.98);
-        }
+        .image-card:active { cursor: grabbing; }
 
         .image-overlay {
             position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 40%);
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 30%);
             pointer-events: none;
         }
 
-        /* The Counter at the top */
         .counter-badge {
-            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(5px);
             border: 1px solid rgba(226, 232, 240, 0.3);
             color: #e2e8f0;
-            padding: 6px 12px; border-radius: 20px;
-            font-family: sans-serif; font-weight: bold; font-size: 14px;
+            padding: 8px 18px; border-radius: 20px;
+            font-family: sans-serif; font-weight: bold; font-size: 16px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            display: flex; align-items: center; gap: 5px;
+            display: flex; align-items: center; gap: 8px;
             transition: transform 0.1s;
+            pointer-events: none;
         }
 
-        /* THICKER, HEAVIER Floating Animation */
         .floating-icon {
             position: absolute;
             pointer-events: none;
             z-index: 100;
-            fill: #e2e8f0;
-            /* Stronger drop shadow for a physical presence */
-            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8)) drop-shadow(0 0 15px rgba(226,232,240,0.6));
-            animation: floatUpThick 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation: floatUpThick 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
         @keyframes floatUpThick {
             0% { transform: translateY(0) scale(0.5); opacity: 0; }
@@ -162,7 +154,6 @@ layout: false
             100% { transform: translateY(-450px) scale(1.8); opacity: 0; }
         }
 
-        /* Join Modal */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85);
             backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center;
@@ -188,18 +179,18 @@ layout: false
     <div class="bg-mesh"></div>
 
     <div class="app-wrapper">
-        <!-- Top Ticker & Join Button -->
         <div class="top-bar">
             <div class="ticker-container" id="tickerContainer"></div>
             <button class="btn-join" onclick="openJoinModal()" data-i18n="btn_join">Join</button>
         </div>
 
-        <div class="feed-content">
+        <div class="feed-content" id="feedContent">
             
-            <!-- IMAGE 1 (Left) -->
+            <!-- IMAGE 1 -->
             <div class="image-card" 
-                 style="background-image: url('https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg');"
-                 onclick="triggerFloat(event, 'count-1')">
+                 id="card-1"
+                 data-counter="count-1"
+                 style="background-image: url('https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg');">
                 
                 <div class="image-overlay"></div>
                 <div class="counter-badge" id="badge-1">
@@ -207,10 +198,11 @@ layout: false
                 </div>
             </div>
 
-            <!-- IMAGE 2 (Right) -->
+            <!-- IMAGE 2 -->
             <div class="image-card" 
-                 style="background-image: url('https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg');"
-                 onclick="triggerFloat(event, 'count-2')">
+                 id="card-2"
+                 data-counter="count-2"
+                 style="background-image: url('https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg');">
                 
                 <div class="image-overlay"></div>
                 <div class="counter-badge" id="badge-2">
@@ -221,7 +213,6 @@ layout: false
         </div>
     </div>
 
-    <!-- Join Modal -->
     <div class="modal-overlay" id="joinModal" onclick="closeJoinModal()">
         <div class="modal-box" onclick="event.stopPropagation()">
             <h2 data-i18n="join_title">Join the Club</h2>
@@ -265,23 +256,57 @@ layout: false
 
     document.addEventListener('DOMContentLoaded', applyTranslations);
 
-    // Modal
-    function openJoinModal() {
-        document.getElementById('joinModal').classList.add('active');
-    }
-    function closeJoinModal() {
-        document.getElementById('joinModal').classList.remove('active');
-    }
+    function openJoinModal() { document.getElementById('joinModal').classList.add('active'); }
+    function closeJoinModal() { document.getElementById('joinModal').classList.remove('active'); }
 
-    // Floating Animation & Counter Logic
+    // Floating Animation Logic
     const icons = [
         { id: 'heart', path: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' },
         { id: 'star', path: 'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' },
         { id: 'gift', path: 'M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z' }
     ];
+    const colors = ['#ff4d4d', '#ffd700', '#00d2ff', '#ff00cc', '#33ff33'];
 
-    function triggerFloat(event, counterId) {
-        // 1. Increase the counter
+    // ===== SWIPE & TOUCH LISTENER LOGIC =====
+    function setupInteractions() {
+        const cards = document.querySelectorAll('.image-card');
+        
+        cards.forEach(card => {
+            const counterId = card.getAttribute('data-counter');
+            
+            // For Mobile (Touch)
+            card.addEventListener('touchmove', (e) => {
+                // Only trigger once per swipe to prevent spamming
+                if (!card.dataset.swiping) {
+                    card.dataset.swiping = "true";
+                    const touch = e.touches[0];
+                    triggerReaction(touch.clientX, touch.clientY, counterId);
+                    
+                    // Reset the lock after 500ms
+                    setTimeout(() => { delete card.dataset.swiping; }, 500);
+                }
+            }, { passive: true });
+
+            // For Desktop (Mouse Drag)
+            card.addEventListener('mousemove', (e) => {
+                if (e.buttons === 1) { // If left mouse button is held down
+                    if (!card.dataset.swiping) {
+                        card.dataset.swiping = "true";
+                        triggerReaction(e.clientX, e.clientY, counterId);
+                        setTimeout(() => { delete card.dataset.swiping; }, 500);
+                    }
+                }
+            });
+            
+            // Also trigger on simple click
+            card.addEventListener('click', (e) => {
+                triggerReaction(e.clientX, e.clientY, counterId);
+            });
+        });
+    }
+
+    function triggerReaction(x, y, counterId) {
+        // 1. Increase the counter immediately
         const counterEl = document.getElementById(counterId);
         let currentCount = parseInt(counterEl.innerText) || 0;
         counterEl.innerText = currentCount + 1;
@@ -291,18 +316,14 @@ layout: false
         badge.style.transform = "translateX(-50%) scale(1.2)";
         setTimeout(() => badge.style.transform = "translateX(-50%) scale(1)", 150);
 
-        // 2. Randomize the icon that floats
+        // 2. Randomize the icon
         const randomIcon = icons[Math.floor(Math.random() * icons.length)];
         
-        // Get exact position of the click on the screen
-        const startX = event.clientX;
-        const startY = event.clientY;
-
-        // 3. Spawn 20 floating icons
-        for (let i = 0; i < 20; i++) {
+        // 3. Spawn 4 floating icons
+        for (let i = 0; i < 4; i++) {
             setTimeout(() => {
-                createFloatingIcon(startX, startY, randomIcon.path);
-            }, i * 40);
+                createFloatingIcon(x, y, randomIcon.path);
+            }, i * 150); 
         }
     }
 
@@ -316,26 +337,50 @@ layout: false
         pathEl.setAttribute("d", path);
         svg.appendChild(pathEl);
 
-        // Randomize starting position slightly
-        const randomX = x + (Math.random() * 60) - 30;
+        const randomX = x + (Math.random() * 80) - 40;
         const randomY = y + (Math.random() * 20) - 10;
 
         svg.style.left = `${randomX}px`;
         svg.style.top = `${randomY}px`;
         
-        // THICKNESS & SIZE INCREASE
-        const size = 35 + Math.random() * 25; // Increased from 20-50 to 35-60
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        svg.style.fill = randomColor;
+        svg.style.filter = `drop-shadow(0 4px 10px rgba(0,0,0,0.8)) drop-shadow(0 0 15px ${randomColor})`;
+
+        const size = 35 + Math.random() * 25; 
         svg.style.width = `${size}px`;
         svg.style.height = `${size}px`;
-        svg.style.stroke = "rgba(0,0,0,0.5)"; // Dark outline for thickness
-        svg.style.strokeWidth = "1px";
+        svg.style.stroke = "rgba(0,0,0,0.4)"; 
+        svg.style.strokeWidth = "1.5px";
 
         document.body.appendChild(svg);
 
         setTimeout(() => {
             if (svg.parentNode) svg.parentNode.removeChild(svg);
-        }, 2500);
+        }, 3000);
     }
+
+    document.addEventListener('DOMContentLoaded', setupInteractions);
+
+    // ===== AUTO-COUNTING LOGIC =====
+    let count1 = 0;
+    let count2 = 0;
+
+    setInterval(() => {
+        count1 += Math.floor(Math.random() * 3) + 1;
+        count2 += Math.floor(Math.random() * 3) + 1;
+
+        const el1 = document.getElementById('count-1');
+        const el2 = document.getElementById('count-2');
+
+        if (parseInt(el1.innerText) < count1) el1.innerText = count1;
+        else count1 = parseInt(el1.innerText); 
+
+        if (parseInt(el2.innerText) < count2) el2.innerText = count2;
+        else count2 = parseInt(el2.innerText);
+        
+    }, 2000); 
+
 </script>
 </body>
 </html>
