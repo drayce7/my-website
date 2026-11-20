@@ -13,7 +13,7 @@ layout: false
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-      import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
@@ -30,6 +30,7 @@ layout: false
       window.getDocs = getDocs;
       window.query = query;
       window.orderBy = orderBy;
+      window.doc = doc; window.getDoc = getDoc;
 
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
@@ -186,14 +187,15 @@ layout: false
         </div>
 
         <div class="feed-content">
-            <div class="image-card" id="card-1" data-counter="count-1" style="background-image: url('https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg');">
+            <!-- We added a click event just in case the swipe feels unresponsive on some phones -->
+            <div class="image-card" id="card-1" data-counter="count-1" onclick="handleTap(event, 'count-1')" style="background-image: url('https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg');">
                 <div class="image-overlay"></div>
                 <div class="counter-badge" id="badge-1">
                     <span>❤️</span> <span id="count-1">0</span>
                 </div>
             </div>
 
-            <div class="image-card" id="card-2" data-counter="count-2" style="background-image: url('https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg');">
+            <div class="image-card" id="card-2" data-counter="count-2" onclick="handleTap(event, 'count-2')" style="background-image: url('https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg');">
                 <div class="image-overlay"></div>
                 <div class="counter-badge" id="badge-2">
                     <span>⭐</span> <span id="count-2">0</span>
@@ -242,31 +244,6 @@ layout: false
     function openJoinModal() { document.getElementById('joinModal').classList.add('active'); }
     function closeJoinModal() { document.getElementById('joinModal').classList.remove('active'); }
 
-    // ===== SWIPE TO LIKE LOGIC =====
-    function setupInteractions() {
-        const cards = document.querySelectorAll('.image-card');
-        cards.forEach(card => {
-            const counterId = card.getAttribute('data-counter');
-            let isSwiping = false; 
-
-            function handleSwipe(x, y) {
-                if (isSwiping) return;
-                isSwiping = true;
-                triggerReaction(x, y, counterId);
-                setTimeout(() => { isSwiping = false; }, 800);
-            }
-
-            card.addEventListener('touchmove', (e) => {
-                const touch = e.touches[0];
-                handleSwipe(touch.clientX, touch.clientY);
-            }, { passive: true });
-
-            card.addEventListener('mousemove', (e) => {
-                if (e.buttons === 1) { handleSwipe(e.clientX, e.clientY); }
-            });
-        });
-    }
-
     const icons = [
         { id: 'heart', path: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' },
         { id: 'star', path: 'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' },
@@ -274,10 +251,55 @@ layout: false
     ];
     const colors = ['#ff4d4d', '#ffd700', '#00d2ff', '#ff00cc', '#33ff33'];
 
+    // ===== SMOOTH SWIPE LOGIC =====
+    let swipeCooldown = false;
+
+    function handleSwipe(x, y, counterId) {
+        if (swipeCooldown) return;
+        swipeCooldown = true;
+        triggerReaction(x, y, counterId);
+        
+        // Reset cooldown after 500ms so you have to intentionally swipe again
+        setTimeout(() => { swipeCooldown = false; }, 500);
+    }
+
+    function handleTap(event, counterId) {
+        // Fallback for devices where swipe might not register perfectly
+        if (swipeCooldown) return;
+        swipeCooldown = true;
+        triggerReaction(event.clientX, event.clientY, counterId);
+        setTimeout(() => { swipeCooldown = false; }, 500);
+    }
+
+    function setupInteractions() {
+        const cards = document.querySelectorAll('.image-card');
+        cards.forEach(card => {
+            const counterId = card.getAttribute('data-counter');
+            
+            // Mobile Swipe
+            card.addEventListener('touchmove', (e) => {
+                const touch = e.touches[0];
+                handleSwipe(touch.clientX, touch.clientY, counterId);
+            }, { passive: true });
+
+            // Desktop Drag
+            card.addEventListener('mousemove', (e) => {
+                if (e.buttons === 1) { handleSwipe(e.clientX, e.clientY, counterId); }
+            });
+        });
+    }
+
     function triggerReaction(x, y, counterId) {
         const counterEl = document.getElementById(counterId);
-        let currentCount = parseInt(counterEl.innerText.replace(/,/g, '')) || 0;
-        counterEl.innerText = (currentCount + 1).toLocaleString();
+        
+        // We use the actual internal number variables now to prevent overwriting
+        if (counterId === 'count-1') {
+            count1 += 1;
+            counterEl.innerText = count1.toLocaleString();
+        } else {
+            count2 += 1;
+            counterEl.innerText = count2.toLocaleString();
+        }
         
         const badge = document.getElementById(counterId).parentElement;
         badge.style.transform = "translateX(-50%) scale(1.2)";
@@ -319,13 +341,16 @@ layout: false
 
     document.addEventListener('DOMContentLoaded', setupInteractions);
 
-    // ===== AUTO-COUNTING LOGIC =====
-    let count1 = 0;
-    let count2 = 0;
+    // ===== LIVE AUTO-COUNTING LOGIC (Fixed) =====
+    let count1 = 5000;
+    let count2 = 5000;
 
     setInterval(() => {
+        // Add 10 every second
         count1 += 10;
         count2 += 10;
+        
+        // Update the screen
         document.getElementById('count-1').innerText = count1.toLocaleString();
         document.getElementById('count-2').innerText = count2.toLocaleString();
     }, 1000); 
@@ -336,12 +361,23 @@ layout: false
 
     window.addEventListener('firebaseLoaded', async () => {
         try {
+            // Load Images from Admin settings (if they exist)
+            const feedSnap = await window.getDoc(window.doc(window.db, "app_settings", "feed"));
+            if (feedSnap.exists()) {
+                const data = feedSnap.data();
+                if (data.img1Url) document.getElementById('card-1').style.backgroundImage = `url('${data.img1Url}')`;
+                if (data.img2Url) document.getElementById('card-2').style.backgroundImage = `url('${data.img2Url}')`;
+                if (data.img1Likes) { count1 = parseInt(data.img1Likes); document.getElementById('count-1').innerText = count1.toLocaleString(); }
+                if (data.img2Likes) { count2 = parseInt(data.img2Likes); document.getElementById('count-2').innerText = count2.toLocaleString(); }
+            }
+
+            // Load Ticker messages
             const q = window.query(window.collection(window.db, "feed_comments"), window.orderBy("createdAt"));
             const snapshot = await window.getDocs(q);
             allFeedComments = [];
             snapshot.forEach(d => allFeedComments.push(d.data()));
             startTicker();
-        } catch(e) { console.log("Ticker error:", e); }
+        } catch(e) { console.log("Load error:", e); }
     });
 
     function startTicker() {
