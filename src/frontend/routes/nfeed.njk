@@ -36,7 +36,6 @@ layout: false
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
         html, body { height: 100%; overscroll-behavior: none; }
         
-        /* Midnight Blue & Silver Premium Background */
         body { 
             background: #0a1128; 
             height: 100vh; width: 100vw; 
@@ -68,7 +67,7 @@ layout: false
             overflow: hidden;
         }
 
-        /* Top Ticker & Join Button */
+        /* Top Ticker - Made Taller */
         .top-bar {
             display: flex; align-items: center; justify-content: space-between; gap: 15px;
             background: rgba(5, 10, 25, 0.9);
@@ -77,18 +76,19 @@ layout: false
         }
         
         .ticker-container { 
-            flex-grow: 1; height: 30px; overflow: hidden; position: relative; 
+            flex-grow: 1; height: 45px; /* TALLER TICKER */
+            overflow: hidden; position: relative; 
             display: flex; flex-direction: column; justify-content: flex-end; 
             mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent); 
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent); 
         }
         .comment-line { 
-            font-size: 11px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; 
+            font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px; 
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-            animation: slideUp 0.4s ease-out forwards; font-family: sans-serif; line-height: 1.2; 
+            animation: slideUp 0.4s ease-out forwards; font-family: sans-serif; line-height: 1.3; 
         }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .rainbow-username { font-family: 'Caveat', cursive; font-size: 14px; font-weight: 700; background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-right: 5px; }
+        .rainbow-username { font-family: 'Caveat', cursive; font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-right: 5px; }
         
         .btn-join {
             background: transparent;
@@ -100,10 +100,10 @@ layout: false
         }
         .btn-join:hover { background: rgba(226, 232, 240, 0.1); }
 
-        /* Main Content Area */
+        /* Main Content Area - Side by Side */
         .feed-content {
             flex-grow: 1; padding: 20px 15px;
-            display: flex; flex-direction: row; gap: 15px; /* SIDE BY SIDE */
+            display: flex; flex-direction: row; gap: 15px;
             justify-content: center;
             align-items: center;
         }
@@ -123,7 +123,7 @@ layout: false
             transition: transform 0.1s;
         }
         .image-card:active {
-            transform: scale(0.98); /* Click feedback */
+            transform: scale(0.98);
         }
 
         .image-overlay {
@@ -146,20 +146,20 @@ layout: false
             transition: transform 0.1s;
         }
 
-        /* Floating Animation */
+        /* THICKER, HEAVIER Floating Animation */
         .floating-icon {
             position: absolute;
-            width: 30px; height: 30px;
             pointer-events: none;
             z-index: 100;
             fill: #e2e8f0;
-            filter: drop-shadow(0 0 8px rgba(226, 232, 240, 0.8));
-            animation: floatUp 2.5s ease-out forwards;
+            /* Stronger drop shadow for a physical presence */
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8)) drop-shadow(0 0 15px rgba(226,232,240,0.6));
+            animation: floatUpThick 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
-        @keyframes floatUp {
+        @keyframes floatUpThick {
             0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            10% { opacity: 1; transform: translateY(-50px) scale(1.2); }
-            100% { transform: translateY(-400px) scale(1.8); opacity: 0; }
+            15% { opacity: 1; transform: translateY(-40px) scale(1.3); }
+            100% { transform: translateY(-450px) scale(1.8); opacity: 0; }
         }
 
         /* Join Modal */
@@ -237,36 +237,11 @@ layout: false
     }
 
     const translations = {
-        en: {
-            btn_join: "Join",
-            join_title: "Join the Club",
-            join_text: "You have clicked Join! We will add more details here soon.",
-            join_close: "Okay"
-        },
-        pl: {
-            btn_join: "Dołącz",
-            join_title: "Dołącz do klubu",
-            join_text: "Kliknąłeś Dołącz! Wkrótce dodamy więcej szczegółów.",
-            join_close: "Okay"
-        },
-        hu: {
-            btn_join: "Csatlakozás",
-            join_title: "Csatlakozz a klubhoz",
-            join_text: "Rákattintottál a Csatlakozásra! Hamarosan további részleteket adunk hozzá.",
-            join_close: "Rendben"
-        },
-        sr: {
-            btn_join: "Pridruži se",
-            join_title: "Pridruži se klubu",
-            join_text: "Kliknuli ste Pridruži se! Uskoro ćemo dodati više detalja.",
-            join_close: "Okay"
-        },
-        bs: {
-            btn_join: "Pridruži se",
-            join_title: "Pridruži se klubu",
-            join_text: "Kliknuli ste Pridruži se! Uskoro ćemo dodati više detalja.",
-            join_close: "Okay"
-        }
+        en: { btn_join: "Join", join_title: "Join the Club", join_text: "You have clicked Join! We will add more details here soon.", join_close: "Okay" },
+        pl: { btn_join: "Dołącz", join_title: "Dołącz do klubu", join_text: "Kliknąłeś Dołącz! Wkrótce dodamy więcej szczegółów.", join_close: "Okay" },
+        hu: { btn_join: "Csatlakozás", join_title: "Csatlakozz a klubhoz", join_text: "Rákattintottál a Csatlakozásra! Hamarosan további részleteket adunk hozzá.", join_close: "Rendben" },
+        sr: { btn_join: "Pridruži se", join_title: "Pridruži se klubu", join_text: "Kliknuli ste Pridruži se! Uskoro ćemo dodati više detalja.", join_close: "Okay" },
+        bs: { btn_join: "Pridruži se", join_title: "Pridruži se klubu", join_text: "Kliknuli ste Pridruži se! Uskoro ćemo dodati više detalja.", join_close: "Okay" }
     };
 
     let currentLang = "en";
@@ -327,7 +302,7 @@ layout: false
         for (let i = 0; i < 20; i++) {
             setTimeout(() => {
                 createFloatingIcon(startX, startY, randomIcon.path);
-            }, i * 40); // Stagger them slightly so it looks like a beautiful wave
+            }, i * 40);
         }
     }
 
@@ -341,21 +316,22 @@ layout: false
         pathEl.setAttribute("d", path);
         svg.appendChild(pathEl);
 
-        // Randomize starting position slightly so they don't overlap perfectly
-        const randomX = x + (Math.random() * 80) - 40;
+        // Randomize starting position slightly
+        const randomX = x + (Math.random() * 60) - 30;
         const randomY = y + (Math.random() * 20) - 10;
 
         svg.style.left = `${randomX}px`;
         svg.style.top = `${randomY}px`;
         
-        // Randomize rotation and size slightly for a dynamic feel
-        const size = 20 + Math.random() * 30;
+        // THICKNESS & SIZE INCREASE
+        const size = 35 + Math.random() * 25; // Increased from 20-50 to 35-60
         svg.style.width = `${size}px`;
         svg.style.height = `${size}px`;
+        svg.style.stroke = "rgba(0,0,0,0.5)"; // Dark outline for thickness
+        svg.style.strokeWidth = "1px";
 
         document.body.appendChild(svg);
 
-        // Remove from DOM after animation finishes (2.5 seconds)
         setTimeout(() => {
             if (svg.parentNode) svg.parentNode.removeChild(svg);
         }, 2500);
