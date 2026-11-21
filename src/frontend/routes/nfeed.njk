@@ -1,13 +1,3 @@
-Here is the updated `src/nfeed.njk`. 
-
-I have made the following changes:
-1. **Smaller Buttons:** Both "Join" and the new "Rewards" buttons are now much smaller and stacked vertically in the top right corner.
-2. **Rewards Button:** Added the "Rewards" button (translated into all 5 languages) which pops up a beautiful modal saying "Please log into your fan account to view your rewards."
-3. **Persistent Counting (Refresh Proof):** I used your browser's `localStorage` to save the numbers. Now, when you refresh the page, the numbers will pick up exactly where they left off instead of resetting to 5,000. *(Note: Since this is saved on your device, it will keep your numbers running no matter how many times you refresh).*
-
-### `src/nfeed.njk`
-
-```html
 ---
 title: "Exclusive Feed"
 permalink: "/nfeed/"
@@ -237,7 +227,6 @@ layout: false
         <div class="top-bar">
             <div class="ticker-container" id="tickerContainer"></div>
             
-            <!-- NEW STACKED BUTTONS -->
             <div class="button-stack">
                 <button class="btn-join" onclick="openJoinModal()" data-i18n="btn_join">Join</button>
                 <button class="btn-rewards" onclick="openRewardsModal()" data-i18n="btn_rewards">Rewards</button>
@@ -280,6 +269,7 @@ layout: false
     </div>
 
 <script>
+    // SECURITY CHECK: If they didn't log in, redirect them back to nlogin
     if (!sessionStorage.getItem('loggedInFan')) {
         window.location.href = '/my-website/nlogin/';
     }
@@ -390,11 +380,11 @@ layout: false
         if (counterId === 'count-1') {
             count1 += 1;
             counterEl.innerText = count1.toLocaleString();
-            localStorage.setItem('feed_count1', count1); // Save to local storage
+            localStorage.setItem('feed_count1', count1); 
         } else {
             count2 += 1;
             counterEl.innerText = count2.toLocaleString();
-            localStorage.setItem('feed_count2', count2); // Save to local storage
+            localStorage.setItem('feed_count2', count2); 
         }
         
         const badge = document.getElementById(counterId).parentElement;
@@ -437,17 +427,17 @@ layout: false
 
     document.addEventListener('DOMContentLoaded', setupInteractions);
 
-    // FAST AUTO-COUNTING + SAVE TO LOCALSTORAGE
+    // FAST AUTO-COUNTING (Optimized to 1 second so it doesn't crash)
     setInterval(function() {
-        count1 += Math.floor(Math.random() * 20) + 10;
-        count2 += Math.floor(Math.random() * 20) + 10;
+        count1 += Math.floor(Math.random() * 20) + 15; 
+        count2 += Math.floor(Math.random() * 20) + 15;
         
         document.getElementById('count-1').innerText = count1.toLocaleString();
         document.getElementById('count-2').innerText = count2.toLocaleString();
         
         localStorage.setItem('feed_count1', count1);
         localStorage.setItem('feed_count2', count2);
-    }, 100); 
+    }, 1000); 
 
     let allFeedComments = [];
     let tickerIndex = 0;
@@ -522,4 +512,3 @@ layout: false
 </body>
 </html>
 {% endraw %}
-```
