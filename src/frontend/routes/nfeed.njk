@@ -164,7 +164,7 @@ layout: false
             backdrop-filter: blur(8px);
             border: 2px solid rgba(226, 232, 240, 0.4);
             border-radius: 50%; /* Circle target */
-            width: 70px; height: 70px;
+            width: 65px; height: 65px;
             color: #e2e8f0;
             font-family: sans-serif; font-weight: bold; font-size: 13px;
             box-shadow: 0 0 20px rgba(226,232,240,0.2), inset 0 0 15px rgba(0,0,0,0.8);
@@ -172,7 +172,8 @@ layout: false
             transition: transform 0.1s;
             pointer-events: none;
         }
-        .counter-badge span:first-child { font-size: 16px; }
+        /* SMALLER EMOJI IN BADGE */
+        .counter-badge span:first-child { font-size: 12px; }
 
         .floating-icon {
             position: absolute;
@@ -354,7 +355,8 @@ layout: false
         svg.style.fill = randomColor;
         svg.style.filter = "drop-shadow(0 4px 10px rgba(0,0,0,0.8)) drop-shadow(0 0 15px " + randomColor + ")";
 
-        const size = 35 + Math.random() * 25; 
+        // SMALLER SIZE
+        const size = 20 + Math.random() * 15; 
         svg.style.width = size + "px";
         svg.style.height = size + "px";
         svg.style.stroke = "rgba(0,0,0,0.4)"; 
@@ -376,6 +378,16 @@ layout: false
     let allFeedComments = [];
     let tickerIndex = 0;
 
+    // FALLBACK RANDOM MESSAGES
+    const defaultMessages = [
+        { user: "Alex", text: "Just unlocked VIP access!" },
+        { user: "Sarah", text: "Sent a gift!" },
+        { user: "Michael", text: "Is on fire today!" },
+        { user: "Emma", text: "Loving the new feed." },
+        { user: "David", text: "Just joined the club." },
+        { user: "Sophia", text: "Target reached!" }
+    ];
+
     window.addEventListener('firebaseLoaded', async function() {
         try {
             const feedSnap = await window.getDoc(window.doc(window.db, "app_settings", "feed"));
@@ -391,8 +403,18 @@ layout: false
             const snapshot = await window.getDocs(q);
             allFeedComments = [];
             snapshot.forEach(function(d) { allFeedComments.push(d.data()); });
+            
+            // If database is empty, use the default messages
+            if (allFeedComments.length === 0) {
+                allFeedComments = defaultMessages;
+            }
+            
             startTicker();
-        } catch(e) { console.log("Load error:", e); }
+        } catch(e) { 
+            console.log("Load error, using defaults:", e); 
+            allFeedComments = defaultMessages;
+            startTicker();
+        }
     });
 
     function startTicker() {
