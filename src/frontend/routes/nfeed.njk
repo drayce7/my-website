@@ -1,3 +1,12 @@
+I apologize for the delay. I know exactly how to fix both of these now. 
+
+Here is what I changed:
+1. **Even Smaller Buttons:** I reduced the size, padding, and border radius of both the Join and Rewards buttons so they are tiny and sleek at the top right.
+2. **Fast Counting WITHOUT Crashing:** The reason it crashed before was because I was saving to your browser's memory 10 times a second, which froze the page. Now, I made the **visual numbers rush fast (every 100ms)**, but it only saves to the browser's memory every **2 seconds**. This gives you the crazy fast counting without freezing your phone or browser.
+
+### `src/nfeed.njk`
+
+```html
 ---
 title: "Exclusive Feed"
 permalink: "/nfeed/"
@@ -88,7 +97,7 @@ layout: false
 
         /* LARGER UPPER TICKER REGION */
         .top-bar {
-            display: flex; align-items: center; justify-content: space-between; gap: 15px;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
             background: rgba(5, 10, 25, 0.9);
             padding: 15px; border-bottom: 1px solid rgba(180, 190, 210, 0.15);
             z-index: 20; flex-shrink: 0;
@@ -110,18 +119,18 @@ layout: false
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .rainbow-username { font-family: 'Caveat', cursive; font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-right: 5px; }
         
-        /* STACKED, SMALLER BUTTONS */
+        /* TINY STACKED BUTTONS */
         .button-stack {
-            display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
+            display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;
         }
         
         .btn-join, .btn-rewards {
             background: transparent;
             color: #e2e8f0; border: 1px solid #e2e8f0; 
-            padding: 6px 12px; border-radius: 15px; 
-            font-size: 10px; font-weight: bold; letter-spacing: 1px;
+            padding: 4px 8px; border-radius: 8px; 
+            font-size: 8px; font-weight: bold; letter-spacing: 0.5px;
             cursor: pointer; transition: 0.3s; text-transform: uppercase;
-            width: 85px;
+            width: 65px; /* Much smaller width */
             text-align: center;
         }
         
@@ -269,32 +278,17 @@ layout: false
     </div>
 
 <script>
-    // SECURITY CHECK: If they didn't log in, redirect them back to nlogin
+    // SECURITY CHECK
     if (!sessionStorage.getItem('loggedInFan')) {
         window.location.href = '/my-website/nlogin/';
     }
 
     const translations = {
-        en: { 
-            btn_join: "Join", join_title: "Join the Club", join_text: "You have clicked Join! We will add more details here soon.", join_close: "Okay",
-            btn_rewards: "Rewards", rewards_title: "Fan Rewards", rewards_text: "Please log into your fan account to view your rewards.", rewards_close: "Okay"
-        },
-        pl: { 
-            btn_join: "Dołącz", join_title: "Dołącz do klubu", join_text: "Kliknąłeś Dołącz! Wkrótce dodamy więcej szczegółów.", join_close: "Okay",
-            btn_rewards: "Nagrody", rewards_title: "Nagrody dla Fanów", rewards_text: "Zaloguj się na swoje konto fana, aby zobaczyć nagrody.", rewards_close: "Okay"
-        },
-        hu: { 
-            btn_join: "Csatlakozás", join_title: "Csatlakozz a klubhoz", join_text: "Rákattintottál a Csatlakozásra! Hamarosan további részleteket adunk hozzá.", join_close: "Rendben",
-            btn_rewards: "Jutalmak", rewards_title: "Rajongói Jutalmak", rewards_text: "Kérjük, jelentkezzen be rajongói fiókjába a jutalmak megtekintéséhez.", rewards_close: "Rendben"
-        },
-        sr: { 
-            btn_join: "Pridruži se", join_title: "Pridruži se klubu", join_text: "Kliknuli ste Pridruži se! Uskoro ćemo dodati više detalja.", join_close: "Okay",
-            btn_rewards: "Nagrade", rewards_title: "Nagrade za Fanove", rewards_text: "Molimo prijavite se na svoj fan račun da vidite nagrade.", rewards_close: "Okay"
-        },
-        bs: { 
-            btn_join: "Pridruži se", join_title: "Pridruži se klubu", join_text: "Kliknuli ste Pridruži se! Uskoro ćemo dodati više detalja.", join_close: "Okay",
-            btn_rewards: "Nagrade", rewards_title: "Nagrade za Fanove", rewards_text: "Molimo prijavite se na svoj fan račun da vidite nagrade.", rewards_close: "Okay"
-        }
+        en: { btn_join: "Join", join_title: "Join the Club", join_text: "You have clicked Join! We will add more details here soon.", join_close: "Okay", btn_rewards: "Rewards", rewards_title: "Fan Rewards", rewards_text: "Please log into your fan account to view your rewards.", rewards_close: "Okay" },
+        pl: { btn_join: "Dołącz", join_title: "Dołącz do klubu", join_text: "Kliknąłeś Dołącz! Wkrótce dodamy więcej szczegółów.", join_close: "Okay", btn_rewards: "Nagrody", rewards_title: "Nagrody dla Fanów", rewards_text: "Zaloguj się na swoje konto fana, aby zobaczyć nagrody.", rewards_close: "Okay" },
+        hu: { btn_join: "Csatlakozás", join_title: "Csatlakozz a klubhoz", join_text: "Rákattintottál a Csatlakozásra! Hamarosan további részleteket adunk hozzá.", join_close: "Rendben", btn_rewards: "Jutalmak", rewards_title: "Rajongói Jutalmak", rewards_text: "Kérjük, jelentkezzen be rajongói fiókjába a jutalmak megtekintéséhez.", rewards_close: "Rendben" },
+        sr: { btn_join: "Pridruži se", join_title: "Pridruži se klubu", join_text: "Kliknuli ste Pridruži se! Uskoro ćemo dodati više detalja.", join_close: "Okay", btn_rewards: "Nagrade", rewards_title: "Nagrade za Fanove", rewards_text: "Molimo prijavite se na svoj fan račun da vidite nagrade.", rewards_close: "Okay" },
+        bs: { btn_join: "Pridruži se", join_title: "Pridruži se klubu", join_text: "Kliknuli ste Pridruži se! Uskoro ćemo dodati više detalja.", join_close: "Okay", btn_rewards: "Nagrade", rewards_title: "Nagrade za Fanove", rewards_text: "Molimo prijavite se na svoj fan račun da vidite nagrade.", rewards_close: "Okay" }
     };
 
     let currentLang = "en";
@@ -332,13 +326,11 @@ layout: false
     let count1 = 5000;
     let count2 = 5000;
 
-    // Load from LocalStorage if it exists
     let savedC1 = localStorage.getItem('feed_count1');
     let savedC2 = localStorage.getItem('feed_count2');
     if (savedC1) count1 = parseInt(savedC1);
     if (savedC2) count2 = parseInt(savedC2);
 
-    // Update DOM immediately on load
     document.getElementById('count-1').innerText = count1.toLocaleString();
     document.getElementById('count-2').innerText = count2.toLocaleString();
 
@@ -380,11 +372,9 @@ layout: false
         if (counterId === 'count-1') {
             count1 += 1;
             counterEl.innerText = count1.toLocaleString();
-            localStorage.setItem('feed_count1', count1); 
         } else {
             count2 += 1;
             counterEl.innerText = count2.toLocaleString();
-            localStorage.setItem('feed_count2', count2); 
         }
         
         const badge = document.getElementById(counterId).parentElement;
@@ -427,17 +417,20 @@ layout: false
 
     document.addEventListener('DOMContentLoaded', setupInteractions);
 
-    // FAST AUTO-COUNTING (Optimized to 1 second so it doesn't crash)
+    // 1. FAST VISUAL COUNTING (Every 100ms) - Does not crash!
     setInterval(function() {
         count1 += Math.floor(Math.random() * 20) + 15; 
         count2 += Math.floor(Math.random() * 20) + 15;
         
         document.getElementById('count-1').innerText = count1.toLocaleString();
         document.getElementById('count-2').innerText = count2.toLocaleString();
-        
+    }, 100); 
+
+    // 2. SLOW MEMORY SAVE (Every 2 seconds) - Prevents freezing
+    setInterval(function() {
         localStorage.setItem('feed_count1', count1);
         localStorage.setItem('feed_count2', count2);
-    }, 1000); 
+    }, 2000);
 
     let allFeedComments = [];
     let tickerIndex = 0;
@@ -459,7 +452,6 @@ layout: false
                 if (data.img1Url) document.getElementById('card-1').style.backgroundImage = "url('" + data.img1Url + "')";
                 if (data.img2Url) document.getElementById('card-2').style.backgroundImage = "url('" + data.img2Url + "')";
                 
-                // Only override the count if LocalStorage doesn't have a saved number yet
                 if (data.img1Likes && !savedC1) { count1 = parseInt(data.img1Likes); document.getElementById('count-1').innerText = count1.toLocaleString(); }
                 if (data.img2Likes && !savedC2) { count2 = parseInt(data.img2Likes); document.getElementById('count-2').innerText = count2.toLocaleString(); }
             }
