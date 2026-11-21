@@ -1,12 +1,3 @@
-I apologize for the delay. I know exactly how to fix both of these now. 
-
-Here is what I changed:
-1. **Even Smaller Buttons:** I reduced the size, padding, and border radius of both the Join and Rewards buttons so they are tiny and sleek at the top right.
-2. **Fast Counting WITHOUT Crashing:** The reason it crashed before was because I was saving to your browser's memory 10 times a second, which froze the page. Now, I made the **visual numbers rush fast (every 100ms)**, but it only saves to the browser's memory every **2 seconds**. This gives you the crazy fast counting without freezing your phone or browser.
-
-### `src/nfeed.njk`
-
-```html
 ---
 title: "Exclusive Feed"
 permalink: "/nfeed/"
