@@ -92,7 +92,7 @@ layout: false
             background: rgba(5, 10, 25, 0.9);
             padding: 20px 15px; border-bottom: 1px solid rgba(180, 190, 210, 0.15);
             z-index: 20; flex-shrink: 0;
-            height: 100px; /* Taller region */
+            height: 100px; 
         }
         
         .ticker-container { 
@@ -126,11 +126,11 @@ layout: false
             justify-content: center; align-items: center;
         }
 
-        /* BOUNCING IMAGES & FULLER SCREEN */
+        /* BOUNCING IMAGES */
         .image-card {
             position: relative;
             flex: 1; 
-            height: 82vh; /* Taller */
+            height: 82vh; 
             border-radius: 20px;
             border: 1px solid rgba(180, 190, 210, 0.3);
             background-color: #111827;
@@ -141,7 +141,6 @@ layout: false
             animation: bounceImage 4s ease-in-out infinite;
         }
         
-        /* Stagger the bounce so they alternate */
         .image-card:nth-child(2) { animation-delay: 2s; }
 
         @keyframes bounceImage {
@@ -157,23 +156,23 @@ layout: false
             pointer-events: none;
         }
 
-        /* TARGET COUNTER BADGE */
+        /* SMALL RECTANGLE COUNTER BADGE */
         .counter-badge {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(8px);
-            border: 2px solid rgba(226, 232, 240, 0.4);
-            border-radius: 50%; /* Circle target */
-            width: 65px; height: 65px;
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            border-radius: 8px; /* Rectangle */
+            padding: 4px 12px;
             color: #e2e8f0;
-            font-family: sans-serif; font-weight: bold; font-size: 13px;
-            box-shadow: 0 0 20px rgba(226,232,240,0.2), inset 0 0 15px rgba(0,0,0,0.8);
-            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;
+            font-family: sans-serif; font-weight: bold; font-size: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 6px;
             transition: transform 0.1s;
             pointer-events: none;
         }
         /* SMALLER EMOJI IN BADGE */
-        .counter-badge span:first-child { font-size: 12px; }
+        .counter-badge span:first-child { font-size: 10px; }
 
         .floating-icon {
             position: absolute;
@@ -280,7 +279,9 @@ layout: false
         { id: 'star', path: 'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' },
         { id: 'gift', path: 'M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z' }
     ];
-    const colors = ['#ff4d4d', '#ffd700', '#00d2ff', '#ff00cc', '#33ff33'];
+    
+    // EXPANDED COLOR PALETTE
+    const colors = ['#FF3366', '#FF9933', '#FFD700', '#33FF57', '#00FA9A', '#00BFFF', '#8A2BE2', '#FF00FF', '#FF1493', '#00FFFF'];
 
     let swipeCooldown = false;
     let count1 = 5000;
@@ -290,14 +291,14 @@ layout: false
         if (swipeCooldown) return;
         swipeCooldown = true;
         triggerReaction(x, y, counterId);
-        setTimeout(function() { swipeCooldown = false; }, 500);
+        setTimeout(function() { swipeCooldown = false; }, 300); // Slightly faster reset
     }
 
     function handleTap(event, counterId) {
         if (swipeCooldown) return;
         swipeCooldown = true;
         triggerReaction(event.clientX, event.clientY, counterId);
-        setTimeout(function() { swipeCooldown = false; }, 500);
+        setTimeout(function() { swipeCooldown = false; }, 300);
     }
 
     function setupInteractions() {
@@ -355,7 +356,6 @@ layout: false
         svg.style.fill = randomColor;
         svg.style.filter = "drop-shadow(0 4px 10px rgba(0,0,0,0.8)) drop-shadow(0 0 15px " + randomColor + ")";
 
-        // SMALLER SIZE
         const size = 20 + Math.random() * 15; 
         svg.style.width = size + "px";
         svg.style.height = size + "px";
@@ -368,17 +368,17 @@ layout: false
 
     document.addEventListener('DOMContentLoaded', setupInteractions);
 
+    // FAST AUTO-COUNTING LOGIC
     setInterval(function() {
-        count1 += 10;
-        count2 += 10;
+        count1 += Math.floor(Math.random() * 20) + 10;
+        count2 += Math.floor(Math.random() * 20) + 10;
         document.getElementById('count-1').innerText = count1.toLocaleString();
         document.getElementById('count-2').innerText = count2.toLocaleString();
-    }, 1000); 
+    }, 100); // 100ms intervals = very fast rush
 
     let allFeedComments = [];
     let tickerIndex = 0;
 
-    // FALLBACK RANDOM MESSAGES
     const defaultMessages = [
         { user: "Alex", text: "Just unlocked VIP access!" },
         { user: "Sarah", text: "Sent a gift!" },
@@ -404,7 +404,6 @@ layout: false
             allFeedComments = [];
             snapshot.forEach(function(d) { allFeedComments.push(d.data()); });
             
-            // If database is empty, use the default messages
             if (allFeedComments.length === 0) {
                 allFeedComments = defaultMessages;
             }
