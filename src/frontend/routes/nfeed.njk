@@ -1,3 +1,13 @@
+Here is the updated `src/nfeed.njk`. 
+
+I have made the following changes:
+1. **Smaller Buttons:** Both "Join" and the new "Rewards" buttons are now much smaller and stacked vertically in the top right corner.
+2. **Rewards Button:** Added the "Rewards" button (translated into all 5 languages) which pops up a beautiful modal saying "Please log into your fan account to view your rewards."
+3. **Persistent Counting (Refresh Proof):** I used your browser's `localStorage` to save the numbers. Now, when you refresh the page, the numbers will pick up exactly where they left off instead of resetting to 5,000. *(Note: Since this is saved on your device, it will keep your numbers running no matter how many times you refresh).*
+
+### `src/nfeed.njk`
+
+```html
 ---
 title: "Exclusive Feed"
 permalink: "/nfeed/"
@@ -90,7 +100,7 @@ layout: false
         .top-bar {
             display: flex; align-items: center; justify-content: space-between; gap: 15px;
             background: rgba(5, 10, 25, 0.9);
-            padding: 20px 15px; border-bottom: 1px solid rgba(180, 190, 210, 0.15);
+            padding: 15px; border-bottom: 1px solid rgba(180, 190, 210, 0.15);
             z-index: 20; flex-shrink: 0;
             height: 100px; 
         }
@@ -110,15 +120,28 @@ layout: false
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .rainbow-username { font-family: 'Caveat', cursive; font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-right: 5px; }
         
-        .btn-join {
+        /* STACKED, SMALLER BUTTONS */
+        .button-stack {
+            display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
+        }
+        
+        .btn-join, .btn-rewards {
             background: transparent;
             color: #e2e8f0; border: 1px solid #e2e8f0; 
-            padding: 8px 16px; border-radius: 20px; 
-            font-size: 12px; font-weight: bold; letter-spacing: 1px;
+            padding: 6px 12px; border-radius: 15px; 
+            font-size: 10px; font-weight: bold; letter-spacing: 1px;
             cursor: pointer; transition: 0.3s; text-transform: uppercase;
-            flex-shrink: 0;
+            width: 85px;
+            text-align: center;
         }
+        
         .btn-join:hover { background: rgba(226, 232, 240, 0.1); }
+        
+        .btn-rewards {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        .btn-rewards:hover { background: rgba(59, 130, 246, 0.1); }
 
         .feed-content {
             flex-grow: 1; padding: 15px;
@@ -162,7 +185,7 @@ layout: false
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(8px);
             border: 1px solid rgba(226, 232, 240, 0.5);
-            border-radius: 8px; /* Rectangle */
+            border-radius: 8px; 
             padding: 4px 12px;
             color: #e2e8f0;
             font-family: sans-serif; font-weight: bold; font-size: 12px;
@@ -171,7 +194,6 @@ layout: false
             transition: transform 0.1s;
             pointer-events: none;
         }
-        /* SMALLER EMOJI IN BADGE */
         .counter-badge span:first-child { font-size: 10px; }
 
         .floating-icon {
@@ -214,7 +236,12 @@ layout: false
     <div class="app-wrapper">
         <div class="top-bar">
             <div class="ticker-container" id="tickerContainer"></div>
-            <button class="btn-join" onclick="openJoinModal()" data-i18n="btn_join">Join</button>
+            
+            <!-- NEW STACKED BUTTONS -->
+            <div class="button-stack">
+                <button class="btn-join" onclick="openJoinModal()" data-i18n="btn_join">Join</button>
+                <button class="btn-rewards" onclick="openRewardsModal()" data-i18n="btn_rewards">Rewards</button>
+            </div>
         </div>
 
         <div class="feed-content">
@@ -234,11 +261,21 @@ layout: false
         </div>
     </div>
 
+    <!-- Join Modal -->
     <div class="modal-overlay" id="joinModal" onclick="closeJoinModal()">
         <div class="modal-box" onclick="event.stopPropagation()">
             <h2 data-i18n="join_title">Join the Club</h2>
             <p data-i18n="join_text">You have clicked Join! We will add more details here soon.</p>
             <button onclick="closeJoinModal()" data-i18n="join_close">Okay</button>
+        </div>
+    </div>
+
+    <!-- Rewards Modal -->
+    <div class="modal-overlay" id="rewardsModal" onclick="closeRewardsModal()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <h2 data-i18n="rewards_title">Fan Rewards</h2>
+            <p data-i18n="rewards_text">Please log into your fan account to view your rewards.</p>
+            <button onclick="closeRewardsModal()" data-i18n="rewards_close">Okay</button>
         </div>
     </div>
 
@@ -248,11 +285,26 @@ layout: false
     }
 
     const translations = {
-        en: { btn_join: "Join", join_title: "Join the Club", join_text: "You have clicked Join! We will add more details here soon.", join_close: "Okay" },
-        pl: { btn_join: "Dołącz", join_title: "Dołącz do klubu", join_text: "Kliknąłeś Dołącz! Wkrótce dodamy więcej szczegółów.", join_close: "Okay" },
-        hu: { btn_join: "Csatlakozás", join_title: "Csatlakozz a klubhoz", join_text: "Rákattintottál a Csatlakozásra! Hamarosan további részleteket adunk hozzá.", join_close: "Rendben" },
-        sr: { btn_join: "Pridruži se", join_title: "Pridruži se klubu", join_text: "Kliknuli ste Pridruži se! Uskoro ćemo dodati više detalja.", join_close: "Okay" },
-        bs: { btn_join: "Pridruži se", join_title: "Pridruži se klubu", join_text: "Kliknuli ste Pridruži se! Uskoro ćemo dodati više detalja.", join_close: "Okay" }
+        en: { 
+            btn_join: "Join", join_title: "Join the Club", join_text: "You have clicked Join! We will add more details here soon.", join_close: "Okay",
+            btn_rewards: "Rewards", rewards_title: "Fan Rewards", rewards_text: "Please log into your fan account to view your rewards.", rewards_close: "Okay"
+        },
+        pl: { 
+            btn_join: "Dołącz", join_title: "Dołącz do klubu", join_text: "Kliknąłeś Dołącz! Wkrótce dodamy więcej szczegółów.", join_close: "Okay",
+            btn_rewards: "Nagrody", rewards_title: "Nagrody dla Fanów", rewards_text: "Zaloguj się na swoje konto fana, aby zobaczyć nagrody.", rewards_close: "Okay"
+        },
+        hu: { 
+            btn_join: "Csatlakozás", join_title: "Csatlakozz a klubhoz", join_text: "Rákattintottál a Csatlakozásra! Hamarosan további részleteket adunk hozzá.", join_close: "Rendben",
+            btn_rewards: "Jutalmak", rewards_title: "Rajongói Jutalmak", rewards_text: "Kérjük, jelentkezzen be rajongói fiókjába a jutalmak megtekintéséhez.", rewards_close: "Rendben"
+        },
+        sr: { 
+            btn_join: "Pridruži se", join_title: "Pridruži se klubu", join_text: "Kliknuli ste Pridruži se! Uskoro ćemo dodati više detalja.", join_close: "Okay",
+            btn_rewards: "Nagrade", rewards_title: "Nagrade za Fanove", rewards_text: "Molimo prijavite se na svoj fan račun da vidite nagrade.", rewards_close: "Okay"
+        },
+        bs: { 
+            btn_join: "Pridruži se", join_title: "Pridruži se klubu", join_text: "Kliknuli ste Pridruži se! Uskoro ćemo dodati više detalja.", join_close: "Okay",
+            btn_rewards: "Nagrade", rewards_title: "Nagrade za Fanove", rewards_text: "Molimo prijavite se na svoj fan račun da vidite nagrade.", rewards_close: "Okay"
+        }
     };
 
     let currentLang = "en";
@@ -271,8 +323,12 @@ layout: false
     }
     document.addEventListener('DOMContentLoaded', applyTranslations);
 
+    // Modals
     function openJoinModal() { document.getElementById('joinModal').classList.add('active'); }
     function closeJoinModal() { document.getElementById('joinModal').classList.remove('active'); }
+    
+    function openRewardsModal() { document.getElementById('rewardsModal').classList.add('active'); }
+    function closeRewardsModal() { document.getElementById('rewardsModal').classList.remove('active'); }
 
     const icons = [
         { id: 'heart', path: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' },
@@ -280,18 +336,29 @@ layout: false
         { id: 'gift', path: 'M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z' }
     ];
     
-    // EXPANDED COLOR PALETTE
     const colors = ['#FF3366', '#FF9933', '#FFD700', '#33FF57', '#00FA9A', '#00BFFF', '#8A2BE2', '#FF00FF', '#FF1493', '#00FFFF'];
 
-    let swipeCooldown = false;
+    // PERSISTENT COUNTING LOGIC
     let count1 = 5000;
     let count2 = 5000;
+
+    // Load from LocalStorage if it exists
+    let savedC1 = localStorage.getItem('feed_count1');
+    let savedC2 = localStorage.getItem('feed_count2');
+    if (savedC1) count1 = parseInt(savedC1);
+    if (savedC2) count2 = parseInt(savedC2);
+
+    // Update DOM immediately on load
+    document.getElementById('count-1').innerText = count1.toLocaleString();
+    document.getElementById('count-2').innerText = count2.toLocaleString();
+
+    let swipeCooldown = false;
 
     function handleSwipe(x, y, counterId) {
         if (swipeCooldown) return;
         swipeCooldown = true;
         triggerReaction(x, y, counterId);
-        setTimeout(function() { swipeCooldown = false; }, 300); // Slightly faster reset
+        setTimeout(function() { swipeCooldown = false; }, 300); 
     }
 
     function handleTap(event, counterId) {
@@ -323,9 +390,11 @@ layout: false
         if (counterId === 'count-1') {
             count1 += 1;
             counterEl.innerText = count1.toLocaleString();
+            localStorage.setItem('feed_count1', count1); // Save to local storage
         } else {
             count2 += 1;
             counterEl.innerText = count2.toLocaleString();
+            localStorage.setItem('feed_count2', count2); // Save to local storage
         }
         
         const badge = document.getElementById(counterId).parentElement;
@@ -368,13 +437,17 @@ layout: false
 
     document.addEventListener('DOMContentLoaded', setupInteractions);
 
-    // FAST AUTO-COUNTING LOGIC
+    // FAST AUTO-COUNTING + SAVE TO LOCALSTORAGE
     setInterval(function() {
         count1 += Math.floor(Math.random() * 20) + 10;
         count2 += Math.floor(Math.random() * 20) + 10;
+        
         document.getElementById('count-1').innerText = count1.toLocaleString();
         document.getElementById('count-2').innerText = count2.toLocaleString();
-    }, 100); // 100ms intervals = very fast rush
+        
+        localStorage.setItem('feed_count1', count1);
+        localStorage.setItem('feed_count2', count2);
+    }, 100); 
 
     let allFeedComments = [];
     let tickerIndex = 0;
@@ -395,8 +468,10 @@ layout: false
                 const data = feedSnap.data();
                 if (data.img1Url) document.getElementById('card-1').style.backgroundImage = "url('" + data.img1Url + "')";
                 if (data.img2Url) document.getElementById('card-2').style.backgroundImage = "url('" + data.img2Url + "')";
-                if (data.img1Likes) { count1 = parseInt(data.img1Likes); document.getElementById('count-1').innerText = count1.toLocaleString(); }
-                if (data.img2Likes) { count2 = parseInt(data.img2Likes); document.getElementById('count-2').innerText = count2.toLocaleString(); }
+                
+                // Only override the count if LocalStorage doesn't have a saved number yet
+                if (data.img1Likes && !savedC1) { count1 = parseInt(data.img1Likes); document.getElementById('count-1').innerText = count1.toLocaleString(); }
+                if (data.img2Likes && !savedC2) { count2 = parseInt(data.img2Likes); document.getElementById('count-2').innerText = count2.toLocaleString(); }
             }
 
             const q = window.query(window.collection(window.db, "feed_comments"), window.orderBy("createdAt"));
@@ -447,3 +522,4 @@ layout: false
 </body>
 </html>
 {% endraw %}
+```
