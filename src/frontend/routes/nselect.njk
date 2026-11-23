@@ -13,7 +13,7 @@ layout: false
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-      import { getFirestore, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
@@ -28,7 +28,6 @@ layout: false
       window.db = getFirestore(app);
       window.collection = collection;
       window.getDocs = getDocs;
-      window.query = query;
 
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
@@ -67,9 +66,11 @@ layout: false
 
         .artist-side {
             display: flex; flex-direction: column; align-items: center;
-            width: 35%;
+            width: 40%;
             animation: slideIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transition: transform 0.2s;
         }
+        .artist-side:hover { transform: scale(1.05); }
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(-50px); }
             to { opacity: 1; transform: translateX(0); }
@@ -84,10 +85,10 @@ layout: false
         }
 
         .artist-img {
-            width: 100px; height: 100px;
+            width: 120px; height: 120px;
             border-radius: 50%;
             background-size: cover; background-position: center;
-            border: 3px solid #e2e8f0;
+            border: 4px solid #e2e8f0;
             box-shadow: 0 0 30px rgba(226, 232, 240, 0.4);
             margin-bottom: 20px;
             background-color: #111827;
@@ -95,7 +96,7 @@ layout: false
 
         .artist-name {
             font-family: 'Caveat', cursive;
-            font-size: 32px; color: #e2e8f0;
+            font-size: 36px; color: #e2e8f0;
             text-align: center; line-height: 1.1;
             text-shadow: 0 0 20px rgba(226, 232, 240, 0.5);
         }
@@ -110,31 +111,59 @@ layout: false
             to { transform: scale(1.1); opacity: 1; }
         }
 
+        /* Restricted Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
+        .modal-box {
+            background: #111827; border: 2px solid #ef4444;
+            padding: 30px; border-radius: 15px; max-width: 320px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+        .modal-box h2 { font-family: 'Caveat', cursive; color: #ef4444; font-size: 32px; margin-bottom: 10px; }
+        .modal-box p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+        .modal-box button {
+            background: #ef4444; color: white; border: none; padding: 10px 20px;
+            border-radius: 8px; font-weight: bold; cursor: pointer;
+        }
+
         @media (max-width: 600px) {
-            .artist-img { width: 80px; height: 80px; }
-            .artist-name { font-size: 24px; }
+            .artist-img { width: 90px; height: 90px; }
+            .artist-name { font-size: 26px; }
             .vs-text { font-size: 48px; }
         }
     </style>
 </head>
-<body onclick="goToFeed()">
+<body>
 
     <div class="bg-mesh"></div>
 
     <div class="vs-container">
-        <!-- Left Artist -->
-        <div class="artist-side left">
-            <div class="artist-img" id="img1" style="background-image: url('https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg');"></div>
-            <div class="artist-name" id="name1">Artist One</div>
+        <!-- Left Artist (Open) -->
+        <div class="artist-side left" onclick="goToFeed()">
+            <div class="artist-img" id="img1"></div>
+            <div class="artist-name" id="name1">Loading...</div>
         </div>
 
         <!-- VS -->
         <div class="vs-text">VS</div>
 
-        <!-- Right Artist -->
-        <div class="artist-side right">
-            <div class="artist-img" id="img2" style="background-image: url('https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg');"></div>
-            <div class="artist-name" id="name2">Artist Two</div>
+        <!-- Right Artist (Gated) -->
+        <div class="artist-side right" onclick="showRestricted()">
+            <div class="artist-img" id="img2"></div>
+            <div class="artist-name" id="name2">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Restricted Modal -->
+    <div class="modal-overlay" id="restrictedModal" onclick="closeModal()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <h2>Access Denied</h2>
+            <p>Sorry, you do not seem to have a record with this artist.</p>
+            <button onclick="closeModal()">Understood</button>
         </div>
     </div>
 
@@ -143,35 +172,43 @@ layout: false
         window.location.href = '/my-website/nlogin/';
     }
 
-    // Fetch two random artists to display on the VS screen
+    function showRestricted() {
+        document.getElementById('restrictedModal').classList.add('active');
+    }
+    function closeModal() {
+        document.getElementById('restrictedModal').classList.remove('active');
+    }
+
+    function goToFeed() {
+        window.location.href = '/my-website/nfeed/';
+    }
+
+    // Fetch 2 artists (1 Open, 1 Gated)
     window.addEventListener('firebaseLoaded', async () => {
         try {
             const snapshot = await window.getDocs(window.collection(window.db, "celebrities"));
             const artists = [];
             snapshot.forEach(doc => artists.push(doc.data()));
 
-            if (artists.length >= 2) {
-                // Pick 2 random artists
-                const shuffled = artists.sort(() => 0.5 - Math.random());
-                const a1 = shuffled[0];
-                const a2 = shuffled[1];
+            if (artists.length > 0) {
+                let openArtist = artists.find(a => a.access !== 'gated');
+                let gatedArtist = artists.find(a => a.access === 'gated');
+                
+                // Fallbacks if database doesn't have both
+                if (!openArtist) openArtist = artists[0];
+                if (!gatedArtist) gatedArtist = artists[artists.length - 1];
 
-                document.getElementById('name1').innerText = a1.name;
-                if (a1.imageUrl) document.getElementById('img1').style.backgroundImage = "url('" + a1.imageUrl + "')";
+                document.getElementById('name1').innerText = openArtist.name;
+                if (openArtist.imageUrl) document.getElementById('img1').style.backgroundImage = "url('" + openArtist.imageUrl + "')";
 
-                document.getElementById('name2').innerText = a2.name;
-                if (a2.imageUrl) document.getElementById('img2').style.backgroundImage = "url('" + a2.imageUrl + "')";
+                document.getElementById('name2').innerText = gatedArtist.name;
+                if (gatedArtist.imageUrl) document.getElementById('img2').style.backgroundImage = "url('" + gatedArtist.imageUrl + "')";
             }
         } catch(e) { console.log("Error loading artists:", e); }
     });
 
-    // Auto proceed after 5 seconds, or click anywhere to proceed
-    let timer = setTimeout(goToFeed, 5000);
-
-    function goToFeed() {
-        clearTimeout(timer);
-        window.location.href = '/my-website/nfeed/';
-    }
+    // Auto proceed to feed after 12 seconds
+    let timer = setTimeout(goToFeed, 12000);
 </script>
 </body>
 </html>

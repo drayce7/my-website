@@ -85,8 +85,7 @@ layout: false
         </div>
 
         <div class="card">
-            <h2>1. Image Settings & Base Likes</h2>
-            <p class="section-help">Upload Postimages links and set the starting like numbers for the two images.</p>
+            <h2>1. Image Settings, Counts & Locks</h2>
             
             <div style="display:flex; gap:20px; flex-wrap:wrap;">
                 <div style="flex:1; min-width:250px;">
@@ -96,8 +95,16 @@ layout: false
                         <input type="text" id="img1Url" placeholder="https://i.postimg.cc/...">
                     </div>
                     <div class="input-group">
-                        <label>Base Likes (Starting Number)</label>
+                        <label>Current Base Count</label>
                         <input type="number" id="img1Likes" placeholder="e.g. 5000">
+                    </div>
+                    <div class="input-group">
+                        <label>Target Number (Goal)</label>
+                        <input type="number" id="img1Target" placeholder="e.g. 50000">
+                    </div>
+                    <div class="input-group" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+                        <input type="checkbox" id="img1Locked" style="width:20px; height:20px; cursor:pointer;">
+                        <label style="margin:0; text-transform:none; color:#ef4444; font-weight:bold;">Lock Image 1</label>
                     </div>
                 </div>
                 
@@ -108,24 +115,29 @@ layout: false
                         <input type="text" id="img2Url" placeholder="https://i.postimg.cc/...">
                     </div>
                     <div class="input-group">
-                        <label>Base Likes (Starting Number)</label>
+                        <label>Current Base Count</label>
                         <input type="number" id="img2Likes" placeholder="e.g. 5000">
+                    </div>
+                    <div class="input-group">
+                        <label>Target Number (Goal)</label>
+                        <input type="number" id="img2Target" placeholder="e.g. 50000">
+                    </div>
+                    <div class="input-group" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+                        <input type="checkbox" id="img2Locked" style="width:20px; height:20px; cursor:pointer;">
+                        <label style="margin:0; text-transform:none; color:#ef4444; font-weight:bold;">Lock Image 2</label>
                     </div>
                 </div>
             </div>
-            <button class="btn-save" onclick="saveImages()">Save Images & Numbers</button>
+            <button class="btn-save" onclick="saveImages()">Save Settings</button>
         </div>
 
         <div class="card">
             <h2>2. Looping Top Messages</h2>
-            <p class="section-help">These texts will slide up in the top bar of the feed page.</p>
-            
             <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <input type="text" id="newCommentUser" placeholder="Username" style="flex:1; padding:12px; background:#1f2937; border:1px solid #374151; border-radius:8px; color:white;">
                 <input type="text" id="newCommentText" placeholder="Message text..." style="flex:2; padding:12px; background:#1f2937; border:1px solid #374151; border-radius:8px; color:white;">
                 <button class="btn-add" style="margin-bottom:0;" onclick="addComment()">Add</button>
             </div>
-            
             <div class="item-list" id="commentList"></div>
         </div>
     </div>
@@ -139,8 +151,7 @@ layout: false
         if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('editorContent').classList.add('active');
-            loadSettings();
-            loadComments();
+            loadSettings(); loadComments();
         } else { alert("Wrong password"); }
     }
 
@@ -163,8 +174,13 @@ layout: false
                 const data = snap.data();
                 document.getElementById('img1Url').value = data.img1Url || "";
                 document.getElementById('img1Likes').value = data.img1Likes || "";
+                document.getElementById('img1Target').value = data.img1Target || "";
+                document.getElementById('img1Locked').checked = data.img1Locked || false;
+                
                 document.getElementById('img2Url').value = data.img2Url || "";
                 document.getElementById('img2Likes').value = data.img2Likes || "";
+                document.getElementById('img2Target').value = data.img2Target || "";
+                document.getElementById('img2Locked').checked = data.img2Locked || false;
             }
         } catch(e) { console.log(e); }
     }
@@ -174,8 +190,12 @@ layout: false
             await window.setDoc(window.doc(window.db, "app_settings", "feed"), {
                 img1Url: document.getElementById('img1Url').value,
                 img1Likes: document.getElementById('img1Likes').value,
+                img1Target: document.getElementById('img1Target').value,
+                img1Locked: document.getElementById('img1Locked').checked,
                 img2Url: document.getElementById('img2Url').value,
-                img2Likes: document.getElementById('img2Likes').value
+                img2Likes: document.getElementById('img2Likes').value,
+                img2Target: document.getElementById('img2Target').value,
+                img2Locked: document.getElementById('img2Locked').checked
             });
             showToast();
         } catch(e) { alert("Error saving"); }
@@ -194,11 +214,9 @@ layout: false
                 const data = docSnap.data();
                 const div = document.createElement('div');
                 div.className = 'list-item';
-                
                 div.innerHTML = '<strong style="color:#3b82f6; min-width:80px;">' + data.user + '</strong>' +
                                 '<input type="text" value="' + data.text + '" readonly>' +
                                 '<button class="btn-delete" onclick="deleteComment(\'' + docSnap.id + '\')">Delete</button>';
-                
                 list.appendChild(div);
             });
         } catch(e) { console.log(e); }
@@ -208,15 +226,10 @@ layout: false
         const user = document.getElementById('newCommentUser').value;
         const text = document.getElementById('newCommentText').value;
         if (!user || !text) return alert("Fill both fields");
-        
-        await window.addDoc(window.collection(window.db, "feed_comments"), {
-            user: user, text: text, createdAt: new Date().toISOString()
-        });
-        
+        await window.addDoc(window.collection(window.db, "feed_comments"), { user: user, text: text, createdAt: new Date().toISOString() });
         document.getElementById('newCommentUser').value = "";
         document.getElementById('newCommentText').value = "";
-        loadComments();
-        showToast();
+        loadComments(); showToast();
     }
 
     async function deleteComment(id) {
