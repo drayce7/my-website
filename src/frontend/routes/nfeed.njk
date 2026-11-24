@@ -120,8 +120,20 @@ layout: false
             width: 72px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .btn-top:hover { background: rgba(255, 255, 255, 0.15); border-color: #e2e8f0; }
-        .btn-rewards { color: #60a5fa; border-color: rgba(96, 165, 250, 0.3); }
+        
+        .btn-rewards {
+            color: #60a5fa;
+            border-color: rgba(96, 165, 250, 0.3);
+            position: relative;
+        }
         .btn-rewards:hover { background: rgba(96, 165, 250, 0.15); border-color: #60a5fa; }
+        
+        .red-dot {
+            position: absolute; top: -3px; right: -3px;
+            width: 8px; height: 8px;
+            background-color: #ef4444; border-radius: 50%;
+            box-shadow: 0 0 5px rgba(239, 68, 68, 0.8);
+        }
 
         .feed-content {
             flex-grow: 1; padding: 15px;
@@ -162,7 +174,6 @@ layout: false
             100% { transform: translateX(0) rotate(0); }
         }
 
-        .image-card.bounce-anim { animation: fallTop 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards !important; }
         .image-card:active { cursor: grabbing; transform: scale(0.98) !important; animation: none !important; }
 
         .image-overlay {
@@ -171,7 +182,6 @@ layout: false
             pointer-events: none;
         }
 
-        /* COUNTER BADGE WITH TARGET */
         .counter-badge {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.7);
@@ -180,7 +190,7 @@ layout: false
             border-radius: 8px; 
             padding: 4px 8px;
             color: #e2e8f0;
-            font-family: sans-serif; font-weight: bold; font-size: 10px; /* Smaller font */
+            font-family: sans-serif; font-weight: bold; font-size: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.6);
             display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 4px;
             transition: transform 0.1s;
@@ -228,7 +238,10 @@ layout: false
             <div class="ticker-container" id="tickerContainer"></div>
             <div class="button-stack">
                 <button class="btn-top btn-join" onclick="openJoinModal()" data-i18n="btn_join">Join</button>
-                <button class="btn-top btn-rewards" onclick="openRewardsModal()" data-i18n="btn_rewards">Rewards</button>
+                <button class="btn-top btn-rewards" onclick="openRewardsModal()" data-i18n="btn_rewards">
+                    Rewards
+                    <div class="red-dot"></div>
+                </button>
             </div>
         </div>
 
@@ -308,13 +321,10 @@ layout: false
     ];
     
     const colors = ['#FF3366', '#FF9933', '#FFD700', '#33FF57', '#00FA9A', '#00BFFF', '#8A2BE2', '#FF00FF', '#FF1493', '#00FFFF'];
-    const imagePool = [
-        'https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg',
-        'https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg',
-        'https://i.postimg.cc/QM8G2K1s/pexels-photo-1183266.jpg',
-        'https://i.postimg.cc/9MvKq9Z7/pexels-photo-1681010.jpg',
-        'https://i.postimg.cc/gkXzK8Yx/pexels-photo-1043474.jpg'
-    ];
+    
+    // Fallback images if admin leaves blank
+    let leftPool = ['https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg'];
+    let rightPool = ['https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg'];
 
     let count1 = 5000;
     let count2 = 5000;
@@ -322,6 +332,9 @@ layout: false
     let target2 = 50000;
     let img1Locked = false;
     let img2Locked = false;
+    
+    // PAUSE INTERACTIONS FLAG
+    let isTransitioning = false; 
 
     let savedC1 = localStorage.getItem('feed_count1');
     let savedC2 = localStorage.getItem('feed_count2');
@@ -334,14 +347,14 @@ layout: false
     let swipeCooldown = false;
 
     function handleSwipe(x, y, counterId) {
-        if (swipeCooldown) return;
+        if (swipeCooldown || isTransitioning) return; // Stop if transitioning
         swipeCooldown = true;
         triggerReaction(x, y, counterId);
         setTimeout(function() { swipeCooldown = false; }, 300); 
     }
 
     function handleTap(event, counterId) {
-        if (swipeCooldown) return;
+        if (swipeCooldown || isTransitioning) return; // Stop if transitioning
         swipeCooldown = true;
         triggerReaction(event.clientX, event.clientY, counterId);
         setTimeout(function() { swipeCooldown = false; }, 300);
@@ -415,33 +428,33 @@ layout: false
 
     document.addEventListener('DOMContentLoaded', setupInteractions);
 
-    // Random image falling and bouncing
+    // RANDOM IMAGE FALLING + BOUNCING (PAUSES INTERACTIONS)
     setInterval(function() {
+        isTransitioning = true; // PAUSE INTERACTIONS
+        
         const card1 = document.getElementById('card-1');
         const card2 = document.getElementById('card-2');
         
-        // Randomly pick one of the cards to change
         const targetCard = Math.random() > 0.5 ? card1 : card2;
+        const poolToUse = targetCard.id === 'card-1' ? leftPool : rightPool;
         
-        // Pick a random animation
         const anims = ['fallTop', 'fallLeft', 'fallRight'];
         const randomAnim = anims[Math.floor(Math.random() * anims.length)];
         
-        // Apply the animation
         targetCard.style.animation = randomAnim + ' 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
         
-        // Change the image mid-fall
         setTimeout(function() {
-            const randomImg = imagePool[Math.floor(Math.random() * imagePool.length)];
+            const randomImg = poolToUse[Math.floor(Math.random() * poolToUse.length)];
             targetCard.style.backgroundImage = "url('" + randomImg + "')";
         }, 750);
 
-        // Reset animation class after it finishes
+        // RESUME INTERACTIONS AFTER ANIMATION FINISHES
         setTimeout(function() {
             targetCard.style.animation = '';
+            isTransitioning = false; 
         }, 1600);
 
-    }, 10000); // Trigger every 10 seconds
+    }, 10000); 
 
     // FAST VISUAL COUNTING
     setInterval(function() {
@@ -475,10 +488,21 @@ layout: false
             const feedSnap = await window.getDoc(window.doc(window.db, "app_settings", "feed"));
             if (feedSnap.exists()) {
                 const data = feedSnap.data();
-                if (data.img1Url) document.getElementById('card-1').style.backgroundImage = "url('" + data.img1Url + "')";
-                if (data.img2Url) document.getElementById('card-2').style.backgroundImage = "url('" + data.img2Url + "')";
                 
-                // Force update local count if admin changed it
+                // Build Image Pools
+                let tempLeft = []; let tempRight = [];
+                for(let i=1; i<=10; i++) {
+                    if(data['img1Pool_' + i]) tempLeft.push(data['img1Pool_' + i]);
+                    if(data['img2Pool_' + i]) tempRight.push(data['img2Pool_' + i]);
+                }
+                if (tempLeft.length > 0) leftPool = tempLeft;
+                if (tempRight.length > 0) rightPool = tempRight;
+
+                // Set initial images from pool
+                document.getElementById('card-1').style.backgroundImage = "url('" + leftPool[0] + "')";
+                document.getElementById('card-2').style.backgroundImage = "url('" + rightPool[0] + "')";
+                
+                // Counts & Targets
                 if (data.img1Likes && parseInt(data.img1Likes) !== count1) {
                     count1 = parseInt(data.img1Likes);
                     localStorage.setItem('feed_count1', count1);

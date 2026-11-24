@@ -58,7 +58,10 @@ layout: false
         .input-group label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
         .input-group input, .input-group textarea { width: 100%; padding: 12px; background: #1f2937; border: 1px solid #374151; border-radius: 8px; color: white; font-size: 14px; outline: none; }
         
-        .btn-save { background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .image-pool { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .image-pool input { padding: 8px; font-size: 12px; }
+
+        .btn-save { background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; width: 100%; margin-top: 10px; }
         .btn-save:hover { background: #059669; }
         .btn-add { background: #3b82f6; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
         
@@ -84,55 +87,75 @@ layout: false
             <button class="btn-logout" onclick="logout()">Logout</button>
         </div>
 
+        <!-- SECTION 1: Feed Pools -->
         <div class="card">
-            <h2>1. Image Settings, Counts & Locks</h2>
+            <h2>1. Feed Image Pools & Settings</h2>
+            <p class="section-help">Add up to 10 images per side. The feed will randomly pick from these when the image bounces.</p>
             
             <div style="display:flex; gap:20px; flex-wrap:wrap;">
                 <div style="flex:1; min-width:250px;">
-                    <h3 style="color:#9ca3af; margin-bottom:10px; font-size:14px;">Image 1 (Left)</h3>
-                    <div class="input-group">
-                        <label>Image URL</label>
-                        <input type="text" id="img1Url" placeholder="https://i.postimg.cc/...">
+                    <h3 style="color:#60a5fa; margin-bottom:10px; font-size:14px;">Left Side Images (❤️)</h3>
+                    <div class="image-pool" id="pool-1"></div>
+                    
+                    <div class="input-group" style="margin-top:15px;">
+                        <label>Base Count</label>
+                        <input type="number" id="img1Likes">
                     </div>
                     <div class="input-group">
-                        <label>Current Base Count</label>
-                        <input type="number" id="img1Likes" placeholder="e.g. 5000">
+                        <label>Target Goal</label>
+                        <input type="number" id="img1Target">
                     </div>
-                    <div class="input-group">
-                        <label>Target Number (Goal)</label>
-                        <input type="number" id="img1Target" placeholder="e.g. 50000">
-                    </div>
-                    <div class="input-group" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
-                        <input type="checkbox" id="img1Locked" style="width:20px; height:20px; cursor:pointer;">
-                        <label style="margin:0; text-transform:none; color:#ef4444; font-weight:bold;">Lock Image 1</label>
+                    <div class="input-group" style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" id="img1Locked" style="width:20px; height:20px;">
+                        <label style="margin:0; text-transform:none; color:#ef4444;">Lock Left Side</label>
                     </div>
                 </div>
                 
                 <div style="flex:1; min-width:250px;">
-                    <h3 style="color:#9ca3af; margin-bottom:10px; font-size:14px;">Image 2 (Right)</h3>
-                    <div class="input-group">
-                        <label>Image URL</label>
-                        <input type="text" id="img2Url" placeholder="https://i.postimg.cc/...">
+                    <h3 style="color:#60a5fa; margin-bottom:10px; font-size:14px;">Right Side Images (⭐)</h3>
+                    <div class="image-pool" id="pool-2"></div>
+
+                    <div class="input-group" style="margin-top:15px;">
+                        <label>Base Count</label>
+                        <input type="number" id="img2Likes">
                     </div>
                     <div class="input-group">
-                        <label>Current Base Count</label>
-                        <input type="number" id="img2Likes" placeholder="e.g. 5000">
+                        <label>Target Goal</label>
+                        <input type="number" id="img2Target">
                     </div>
-                    <div class="input-group">
-                        <label>Target Number (Goal)</label>
-                        <input type="number" id="img2Target" placeholder="e.g. 50000">
-                    </div>
-                    <div class="input-group" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
-                        <input type="checkbox" id="img2Locked" style="width:20px; height:20px; cursor:pointer;">
-                        <label style="margin:0; text-transform:none; color:#ef4444; font-weight:bold;">Lock Image 2</label>
+                    <div class="input-group" style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" id="img2Locked" style="width:20px; height:20px;">
+                        <label style="margin:0; text-transform:none; color:#ef4444;">Lock Right Side</label>
                     </div>
                 </div>
             </div>
-            <button class="btn-save" onclick="saveImages()">Save Settings</button>
+            <button class="btn-save" onclick="saveSettings()">Save Feed Settings</button>
         </div>
 
+        <!-- SECTION 2: VS Screen -->
         <div class="card">
-            <h2>2. Looping Top Messages</h2>
+            <h2>2. VS Screen Setup</h2>
+            <p class="section-help">Manually set the names and images for the VS selection screen.</p>
+            
+            <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:250px;">
+                    <h3 style="color:#e2e8f0; margin-bottom:10px; font-size:14px;">Left Artist</h3>
+                    <div class="input-group"><label>Name</label><input type="text" id="vsName1"></div>
+                    <div class="input-group"><label>Image URL</label><input type="text" id="vsImg1"></div>
+                </div>
+                
+                <div style="flex:1; min-width:250px;">
+                    <h3 style="color:#e2e8f0; margin-bottom:10px; font-size:14px;">Right Artist</h3>
+                    <div class="input-group"><label>Name</label><input type="text" id="vsName2"></div>
+                    <div class="input-group"><label>Image URL</label><input type="text" id="vsImg2"></div>
+                </div>
+            </div>
+            <button class="btn-save" onclick="saveSettings()">Save VS Settings</button>
+        </div>
+
+        <!-- SECTION 3: Comments -->
+        <div class="card">
+            <h2>3. Looping Top Messages</h2>
             <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <input type="text" id="newCommentUser" placeholder="Username" style="flex:1; padding:12px; background:#1f2937; border:1px solid #374151; border-radius:8px; color:white;">
                 <input type="text" id="newCommentText" placeholder="Message text..." style="flex:2; padding:12px; background:#1f2937; border:1px solid #374151; border-radius:8px; color:white;">
@@ -146,6 +169,18 @@ layout: false
 
 <script>
     const ADMIN_PASSWORD = "admin123";
+
+    // Generate 10 input boxes for each side
+    function buildImagePools() {
+        let html1 = ''; let html2 = '';
+        for(let i=1; i<=10; i++) {
+            html1 += '<input type="text" id="img1Pool_' + i + '" placeholder="Image ' + i + ' URL">';
+            html2 += '<input type="text" id="img2Pool_' + i + '" placeholder="Image ' + i + ' URL">';
+        }
+        document.getElementById('pool-1').innerHTML = html1;
+        document.getElementById('pool-2').innerHTML = html2;
+    }
+    document.addEventListener('DOMContentLoaded', buildImagePools);
 
     function login() {
         if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
@@ -172,31 +207,52 @@ layout: false
             const snap = await window.getDoc(window.doc(window.db, "app_settings", "feed"));
             if (snap.exists()) {
                 const data = snap.data();
-                document.getElementById('img1Url').value = data.img1Url || "";
+                
+                // Feed Settings
                 document.getElementById('img1Likes').value = data.img1Likes || "";
                 document.getElementById('img1Target').value = data.img1Target || "";
                 document.getElementById('img1Locked').checked = data.img1Locked || false;
                 
-                document.getElementById('img2Url').value = data.img2Url || "";
                 document.getElementById('img2Likes').value = data.img2Likes || "";
                 document.getElementById('img2Target').value = data.img2Target || "";
                 document.getElementById('img2Locked').checked = data.img2Locked || false;
+
+                // Image Pools
+                for(let i=1; i<=10; i++) {
+                    if(data['img1Pool_' + i]) document.getElementById('img1Pool_' + i).value = data['img1Pool_' + i];
+                    if(data['img2Pool_' + i]) document.getElementById('img2Pool_' + i).value = data['img2Pool_' + i];
+                }
+
+                // VS Settings
+                document.getElementById('vsName1').value = data.vsName1 || "";
+                document.getElementById('vsImg1').value = data.vsImg1 || "";
+                document.getElementById('vsName2').value = data.vsName2 || "";
+                document.getElementById('vsImg2').value = data.vsImg2 || "";
             }
         } catch(e) { console.log(e); }
     }
 
-    async function saveImages() {
+    async function saveSettings() {
         try {
-            await window.setDoc(window.doc(window.db, "app_settings", "feed"), {
-                img1Url: document.getElementById('img1Url').value,
+            let updateData = {
                 img1Likes: document.getElementById('img1Likes').value,
                 img1Target: document.getElementById('img1Target').value,
                 img1Locked: document.getElementById('img1Locked').checked,
-                img2Url: document.getElementById('img2Url').value,
                 img2Likes: document.getElementById('img2Likes').value,
                 img2Target: document.getElementById('img2Target').value,
-                img2Locked: document.getElementById('img2Locked').checked
-            });
+                img2Locked: document.getElementById('img2Locked').checked,
+                vsName1: document.getElementById('vsName1').value,
+                vsImg1: document.getElementById('vsImg1').value,
+                vsName2: document.getElementById('vsName2').value,
+                vsImg2: document.getElementById('vsImg2').value
+            };
+
+            for(let i=1; i<=10; i++) {
+                updateData['img1Pool_' + i] = document.getElementById('img1Pool_' + i).value;
+                updateData['img2Pool_' + i] = document.getElementById('img2Pool_' + i).value;
+            }
+
+            await window.setDoc(window.doc(window.db, "app_settings", "feed"), updateData);
             showToast();
         } catch(e) { alert("Error saving"); }
     }
