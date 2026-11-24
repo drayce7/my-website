@@ -152,6 +152,14 @@ layout: false
             box-shadow: 0 15px 40px rgba(0,0,0,0.9);
             overflow: hidden;
             cursor: grab;
+            
+            /* ANTI-COPY STYLES */
+            -webkit-touch-callout: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
         }
         
         /* DRAMATIC FALLING ANIMATIONS */
@@ -246,7 +254,8 @@ layout: false
         </div>
 
         <div class="feed-content">
-            <div class="image-card" id="card-1" data-counter="count-1" onclick="handleTap(event, 'count-1')" style="background-image: url('https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg');">
+            <!-- ADDED oncontextmenu and ondragstart to stop copy/drag -->
+            <div class="image-card" id="card-1" data-counter="count-1" onclick="handleTap(event, 'count-1')" oncontextmenu="return false;" ondragstart="return false;" style="background-image: url('https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg');">
                 <div class="image-overlay"></div>
                 <div class="counter-badge" id="badge-1">
                     <span class="lock-icon" id="lock-1">🔓</span>
@@ -254,7 +263,8 @@ layout: false
                 </div>
             </div>
 
-            <div class="image-card" id="card-2" data-counter="count-2" onclick="handleTap(event, 'count-2')" style="background-image: url('https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg');">
+            <!-- ADDED oncontextmenu and ondragstart to stop copy/drag -->
+            <div class="image-card" id="card-2" data-counter="count-2" onclick="handleTap(event, 'count-2')" oncontextmenu="return false;" ondragstart="return false;" style="background-image: url('https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg');">
                 <div class="image-overlay"></div>
                 <div class="counter-badge" id="badge-2">
                     <span class="lock-icon" id="lock-2">🔓</span>
@@ -322,7 +332,6 @@ layout: false
     
     const colors = ['#FF3366', '#FF9933', '#FFD700', '#33FF57', '#00FA9A', '#00BFFF', '#8A2BE2', '#FF00FF', '#FF1493', '#00FFFF'];
     
-    // Fallback images if admin leaves blank
     let leftPool = ['https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg'];
     let rightPool = ['https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg'];
 
@@ -333,8 +342,11 @@ layout: false
     let img1Locked = false;
     let img2Locked = false;
     
-    // PAUSE INTERACTIONS FLAG
-    let isTransitioning = false; 
+    // INDEPENDENT PAUSE FLAGS & TIMERS
+    let leftTransitioning = false; 
+    let rightTransitioning = false;
+    let lastTapLeft = 0;
+    let lastTapRight = 0;
 
     let savedC1 = localStorage.getItem('feed_count1');
     let savedC2 = localStorage.getItem('feed_count2');
@@ -347,14 +359,20 @@ layout: false
     let swipeCooldown = false;
 
     function handleSwipe(x, y, counterId) {
-        if (swipeCooldown || isTransitioning) return; // Stop if transitioning
+        if (swipeCooldown) return;
+        if (counterId === 'count-1' && leftTransitioning) return;
+        if (counterId === 'count-2' && rightTransitioning) return;
+
         swipeCooldown = true;
         triggerReaction(x, y, counterId);
         setTimeout(function() { swipeCooldown = false; }, 300); 
     }
 
     function handleTap(event, counterId) {
-        if (swipeCooldown || isTransitioning) return; // Stop if transitioning
+        if (swipeCooldown) return;
+        if (counterId === 'count-1' && leftTransitioning) return;
+        if (counterId === 'count-2' && rightTransitioning) return;
+
         swipeCooldown = true;
         triggerReaction(event.clientX, event.clientY, counterId);
         setTimeout(function() { swipeCooldown = false; }, 300);
@@ -377,6 +395,10 @@ layout: false
     function triggerReaction(x, y, counterId) {
         if (counterId === 'count-1' && img1Locked) return;
         if (counterId === 'count-2' && img2Locked) return;
+
+        // RESET THE TIMERS ON TAP
+        if (counterId === 'count-1') lastTapLeft = Date.now();
+        if (counterId === 'count-2') lastTapRight = Date.now();
 
         const counterEl = document.getElementById(counterId);
         
@@ -428,33 +450,49 @@ layout: false
 
     document.addEventListener('DOMContentLoaded', setupInteractions);
 
-    // RANDOM IMAGE FALLING + BOUNCING (PAUSES INTERACTIONS)
+    // INDEPENDENT CHECK FOR FALLING ANIMATION
     setInterval(function() {
-        isTransitioning = true; // PAUSE INTERACTIONS
+        let now = Date.now();
         
-        const card1 = document.getElementById('card-1');
-        const card2 = document.getElementById('card-2');
-        
-        const targetCard = Math.random() > 0.5 ? card1 : card2;
-        const poolToUse = targetCard.id === 'card-1' ? leftPool : rightPool;
-        
-        const anims = ['fallTop', 'fallLeft', 'fallRight'];
-        const randomAnim = anims[Math.floor(Math.random() * anims.length)];
-        
-        targetCard.style.animation = randomAnim + ' 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
-        
-        setTimeout(function() {
-            const randomImg = poolToUse[Math.floor(Math.random() * poolToUse.length)];
-            targetCard.style.backgroundImage = "url('" + randomImg + "')";
-        }, 750);
+        // Check Left Side
+        if (now - lastTapLeft > 10000 && !leftTransitioning) {
+            leftTransitioning = true;
+            let card1 = document.getElementById('card-1');
+            const anims = ['fallTop', 'fallLeft', 'fallRight'];
+            let randomAnim = anims[Math.floor(Math.random() * anims.length)];
+            card1.style.animation = randomAnim + ' 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+            
+            setTimeout(function() {
+                let randomImg = leftPool[Math.floor(Math.random() * leftPool.length)];
+                card1.style.backgroundImage = "url('" + randomImg + "')";
+            }, 750);
 
-        // RESUME INTERACTIONS AFTER ANIMATION FINISHES
-        setTimeout(function() {
-            targetCard.style.animation = '';
-            isTransitioning = false; 
-        }, 1600);
+            setTimeout(function() {
+                card1.style.animation = '';
+                leftTransitioning = false; 
+            }, 1600);
+        }
 
-    }, 10000); 
+        // Check Right Side
+        if (now - lastTapRight > 10000 && !rightTransitioning) {
+            rightTransitioning = true;
+            let card2 = document.getElementById('card-2');
+            const anims = ['fallTop', 'fallLeft', 'fallRight'];
+            let randomAnim = anims[Math.floor(Math.random() * anims.length)];
+            card2.style.animation = randomAnim + ' 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+            
+            setTimeout(function() {
+                let randomImg = rightPool[Math.floor(Math.random() * rightPool.length)];
+                card2.style.backgroundImage = "url('" + randomImg + "')";
+            }, 750);
+
+            setTimeout(function() {
+                card2.style.animation = '';
+                rightTransitioning = false; 
+            }, 1600);
+        }
+
+    }, 1000); 
 
     // FAST VISUAL COUNTING
     setInterval(function() {
@@ -489,7 +527,6 @@ layout: false
             if (feedSnap.exists()) {
                 const data = feedSnap.data();
                 
-                // Build Image Pools
                 let tempLeft = []; let tempRight = [];
                 for(let i=1; i<=10; i++) {
                     if(data['img1Pool_' + i]) tempLeft.push(data['img1Pool_' + i]);
@@ -498,11 +535,9 @@ layout: false
                 if (tempLeft.length > 0) leftPool = tempLeft;
                 if (tempRight.length > 0) rightPool = tempRight;
 
-                // Set initial images from pool
                 document.getElementById('card-1').style.backgroundImage = "url('" + leftPool[0] + "')";
                 document.getElementById('card-2').style.backgroundImage = "url('" + rightPool[0] + "')";
                 
-                // Counts & Targets
                 if (data.img1Likes && parseInt(data.img1Likes) !== count1) {
                     count1 = parseInt(data.img1Likes);
                     localStorage.setItem('feed_count1', count1);
