@@ -125,39 +125,43 @@ layout: false
 
         .feed-content {
             flex-grow: 1; padding: 15px;
-            display: flex; flex-direction: row; gap: 20px; /* Increased gap for lines */
+            display: flex; flex-direction: row; gap: 20px; 
             justify-content: center; align-items: center;
             position: relative;
         }
 
-        /* THE RACE LINES IN THE MIDDLE */
+        /* ORGANIC RACE LINES */
         .race-container {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            height: 75vh; width: 40px;
+            height: 75vh; width: 30px;
             display: flex; justify-content: space-between; align-items: flex-end;
             z-index: 5; pointer-events: none;
         }
 
         .race-side {
-            width: 12px; height: 100%;
+            width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+            position: relative;
         }
 
         .race-pct {
             font-family: sans-serif; font-size: 9px; font-weight: bold;
             color: #e2e8f0; margin-bottom: 5px;
-            background: rgba(0,0,0,0.5); padding: 2px 4px; border-radius: 4px;
+            background: rgba(0,0,0,0.7); padding: 2px 5px; border-radius: 4px;
+            position: absolute; white-space: nowrap;
+            transition: bottom 0.1s linear;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
         .race-line {
-            width: 4px; border-radius: 4px 4px 0 0;
-            transition: height 0.5s ease-in-out;
-            box-shadow: 0 0 10px currentColor;
+            width: 6px; border-radius: 6px 6px 0 0;
+            position: absolute; bottom: 0;
+            transition: height 0.1s linear;
         }
 
-        .race-line.left-line { background-color: #3b82f6; color: #3b82f6; height: 30%; }
-        .race-line.right-line { background-color: #ef4444; color: #ef4444; height: 30%; }
+        .race-line.left-line { background: linear-gradient(to top, transparent, #00d2ff); box-shadow: 0 0 10px #00d2ff; }
+        .race-line.right-line { background: linear-gradient(to top, transparent, #ff00cc); box-shadow: 0 0 10px #ff00cc; }
 
         .image-card {
             position: relative;
@@ -172,10 +176,6 @@ layout: false
             cursor: grab;
             -webkit-touch-callout: none;
             -webkit-user-drag: none;
-            -khtml-user-drag: none;
-            -moz-user-drag: none;
-            -o-user-drag: none;
-            user-drag: none;
         }
         
         /* DRAMATIC FALLING ANIMATIONS */
@@ -198,7 +198,8 @@ layout: false
             100% { transform: translateX(0) rotate(0); }
         }
 
-        .image-card:active { cursor: grabbing; transform: scale(0.98) !important; animation: none !important; }
+        /* REMOVED animation: none !important so tapping does not break the falling animation */
+        .image-card:active { cursor: grabbing; transform: scale(0.98); }
 
         .image-overlay {
             position: absolute; inset: 0;
@@ -270,7 +271,7 @@ layout: false
 
         <div class="feed-content">
             
-            <!-- RACE LINES -->
+            <!-- ORGANIC RACE LINES -->
             <div class="race-container">
                 <div class="race-side">
                     <div class="race-pct" id="race-pct-1">30%</div>
@@ -368,8 +369,6 @@ layout: false
     let img1Locked = false;
     let img2Locked = false;
     
-    let leftTransitioning = false; 
-    let rightTransitioning = false;
     let lastTapLeft = 0;
     let lastTapRight = 0;
 
@@ -385,9 +384,6 @@ layout: false
 
     function handleSwipe(x, y, counterId) {
         if (swipeCooldown) return;
-        if (counterId === 'count-1' && leftTransitioning) return;
-        if (counterId === 'count-2' && rightTransitioning) return;
-
         swipeCooldown = true;
         triggerReaction(x, y, counterId);
         setTimeout(function() { swipeCooldown = false; }, 300); 
@@ -395,9 +391,6 @@ layout: false
 
     function handleTap(event, counterId) {
         if (swipeCooldown) return;
-        if (counterId === 'count-1' && leftTransitioning) return;
-        if (counterId === 'count-2' && rightTransitioning) return;
-
         swipeCooldown = true;
         triggerReaction(event.clientX, event.clientY, counterId);
         setTimeout(function() { swipeCooldown = false; }, 300);
@@ -421,8 +414,15 @@ layout: false
         if (counterId === 'count-1' && img1Locked) return;
         if (counterId === 'count-2' && img2Locked) return;
 
-        if (counterId === 'count-1') lastTapLeft = Date.now();
-        if (counterId === 'count-2') lastTapRight = Date.now();
+        // Add momentum to the race lines based on taps
+        if (counterId === 'count-1') {
+            lastTapLeft = Date.now();
+            vel1 += (Math.random() * 3) + 4; // Push left line up
+        }
+        if (counterId === 'count-2') {
+            lastTapRight = Date.now();
+            vel2 += (Math.random() * 3) + 4; // Push right line up
+        }
 
         const counterEl = document.getElementById(counterId);
         
@@ -474,72 +474,91 @@ layout: false
 
     document.addEventListener('DOMContentLoaded', setupInteractions);
 
-    // RACE LINES ANIMATION LOGIC
-    function startRace() {
-        setInterval(function() {
-            // Left line moves randomly between 30% and 99%
-            let newHeight1 = Math.floor(Math.random() * 69) + 30;
-            document.getElementById('race-line-1').style.height = newHeight1 + '%';
-            document.getElementById('race-pct-1').innerText = newHeight1 + '%';
+    // ==========================================
+    // ORGANIC PHYSICS RACE LINES
+    // ==========================================
+    let pos1 = 30, pos2 = 30;
+    let vel1 = 0, vel2 = 0;
 
-            // Right line moves randomly (slightly delayed feel)
-            setTimeout(function() {
-                let newHeight2 = Math.floor(Math.random() * 69) + 30;
-                document.getElementById('race-line-2').style.height = newHeight2 + '%';
-                document.getElementById('race-pct-2').innerText = newHeight2 + '%';
-            }, Math.random() * 300); 
-        }, 800); // Updates every 0.8 seconds
-    }
-    startRace();
+    setInterval(function() {
+        // Virtual effort (simulating other users tapping)
+        if (Math.random() < 0.3) vel1 += Math.random() * 2;
+        if (Math.random() < 0.3) vel2 += Math.random() * 2;
 
+        // Gravity/Resistance (pulls lines down)
+        vel1 -= 1.0;
+        vel2 -= 1.0;
+
+        // Apply velocity
+        pos1 += vel1;
+        pos2 += vel2;
+
+        // Bounce off 30% and 99% limits
+        if (pos1 > 99) { pos1 = 99; vel1 = -Math.abs(vel1) * 0.3; }
+        if (pos1 < 30) { pos1 = 30; vel1 = Math.abs(vel1) * 0.3; }
+        if (pos2 > 99) { pos2 = 99; vel2 = -Math.abs(vel2) * 0.3; }
+        if (pos2 < 30) { pos2 = 30; vel2 = Math.abs(vel2) * 0.3; }
+
+        // Update UI
+        let line1 = document.getElementById('race-line-1');
+        let line2 = document.getElementById('race-line-2');
+        let pct1 = document.getElementById('race-pct-1');
+        let pct2 = document.getElementById('race-pct-2');
+
+        line1.style.height = pos1 + '%';
+        pct1.innerText = Math.round(pos1) + '%';
+        pct1.style.bottom = "calc(" + pos1 + "% + 8px)"; 
+
+        line2.style.height = pos2 + '%';
+        pct2.innerText = Math.round(pos2) + '%';
+        pct2.style.bottom = "calc(" + pos2 + "% + 8px)";
+
+    }, 50); // Updates every 50ms for smooth organic movement
+
+    // ==========================================
     // INDEPENDENT IMAGE FALLING LOGIC
+    // ==========================================
     function triggerLeftFall() {
-        if (!leftTransitioning) {
-            leftTransitioning = true;
-            let card1 = document.getElementById('card-1');
-            const anims = ['fallTop', 'fallLeft', 'fallRight'];
-            let randomAnim = anims[Math.floor(Math.random() * anims.length)];
-            card1.style.animation = randomAnim + ' 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
-            
-            setTimeout(function() {
-                let randomImg = leftPool[Math.floor(Math.random() * leftPool.length)];
-                card1.style.backgroundImage = "url('" + randomImg + "')";
-            }, 750);
+        let card1 = document.getElementById('card-1');
+        const anims = ['fallTop', 'fallLeft', 'fallRight'];
+        let randomAnim = anims[Math.floor(Math.random() * anims.length)];
+        card1.style.animation = randomAnim + ' 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+        
+        setTimeout(function() {
+            let randomImg = leftPool[Math.floor(Math.random() * leftPool.length)];
+            card1.style.backgroundImage = "url('" + randomImg + "')";
+        }, 750);
 
-            setTimeout(function() {
-                card1.style.animation = '';
-                leftTransitioning = false; 
-            }, 1600);
-        }
+        setTimeout(function() {
+            card1.style.animation = '';
+        }, 1600);
+
         // Schedule next fall independently (Random 8 to 15 seconds)
         let nextTime = Math.random() * 7000 + 8000;
         setTimeout(triggerLeftFall, nextTime);
     }
 
     function triggerRightFall() {
-        if (!rightTransitioning) {
-            rightTransitioning = true;
-            let card2 = document.getElementById('card-2');
-            const anims = ['fallTop', 'fallLeft', 'fallRight'];
-            let randomAnim = anims[Math.floor(Math.random() * anims.length)];
-            card2.style.animation = randomAnim + ' 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
-            
-            setTimeout(function() {
-                let randomImg = rightPool[Math.floor(Math.random() * rightPool.length)];
-                card2.style.backgroundImage = "url('" + randomImg + "')";
-            }, 750);
+        let card2 = document.getElementById('card-2');
+        const anims = ['fallTop', 'fallLeft', 'fallRight'];
+        let randomAnim = anims[Math.floor(Math.random() * anims.length)];
+        card2.style.animation = randomAnim + ' 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+        
+        setTimeout(function() {
+            let randomImg = rightPool[Math.floor(Math.random() * rightPool.length)];
+            card2.style.backgroundImage = "url('" + randomImg + "')";
+        }, 750);
 
-            setTimeout(function() {
-                card2.style.animation = '';
-                rightTransitioning = false; 
-            }, 1600);
-        }
+        setTimeout(function() {
+            card2.style.animation = '';
+        }, 1600);
+
         // Schedule next fall independently (Random 8 to 15 seconds)
         let nextTime = Math.random() * 7000 + 8000;
         setTimeout(triggerRightFall, nextTime);
     }
 
-    // Start the independent loops after a short delay
+    // Start the independent loops
     setTimeout(triggerLeftFall, 10000);
     setTimeout(triggerRightFall, 13000);
 
@@ -587,11 +606,9 @@ layout: false
                 document.getElementById('card-1').style.backgroundImage = "url('" + leftPool[0] + "')";
                 document.getElementById('card-2').style.backgroundImage = "url('" + rightPool[0] + "')";
                 
-                // FIX: Admin Base Count Sync
                 let adminBase1 = parseInt(data.img1Likes) || 5000;
                 let adminBase2 = parseInt(data.img2Likes) || 5000;
 
-                // If the admin number is different from what we remember, OVERRIDE local storage
                 let storedAdminBase1 = localStorage.getItem('admin_base_1');
                 let storedAdminBase2 = localStorage.getItem('admin_base_2');
 
