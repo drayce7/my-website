@@ -62,18 +62,6 @@ layout: false
             100% { transform: rotate(10deg) scale(1.1); }
         }
 
-        .target-bg {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 80vw; height: 80vw; max-width: 600px; max-height: 600px;
-            border-radius: 50%; border: 2px dashed rgba(180, 190, 210, 0.1);
-            box-shadow: 0 0 50px rgba(20, 40, 90, 0.5) inset;
-            z-index: 1; pointer-events: none;
-        }
-        .target-bg::after {
-            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 50%; height: 50%; border-radius: 50%; border: 2px solid rgba(180, 190, 210, 0.15);
-        }
-
         .app-wrapper {
             position: relative; z-index: 10;
             width: 100%; max-width: 500px; height: 100vh;
@@ -137,9 +125,39 @@ layout: false
 
         .feed-content {
             flex-grow: 1; padding: 15px;
-            display: flex; flex-direction: row; gap: 15px;
+            display: flex; flex-direction: row; gap: 20px; /* Increased gap for lines */
             justify-content: center; align-items: center;
+            position: relative;
         }
+
+        /* THE RACE LINES IN THE MIDDLE */
+        .race-container {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            height: 75vh; width: 40px;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            z-index: 5; pointer-events: none;
+        }
+
+        .race-side {
+            width: 12px; height: 100%;
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+        }
+
+        .race-pct {
+            font-family: sans-serif; font-size: 9px; font-weight: bold;
+            color: #e2e8f0; margin-bottom: 5px;
+            background: rgba(0,0,0,0.5); padding: 2px 4px; border-radius: 4px;
+        }
+
+        .race-line {
+            width: 4px; border-radius: 4px 4px 0 0;
+            transition: height 0.5s ease-in-out;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .race-line.left-line { background-color: #3b82f6; color: #3b82f6; height: 30%; }
+        .race-line.right-line { background-color: #ef4444; color: #ef4444; height: 30%; }
 
         .image-card {
             position: relative;
@@ -152,8 +170,6 @@ layout: false
             box-shadow: 0 15px 40px rgba(0,0,0,0.9);
             overflow: hidden;
             cursor: grab;
-            
-            /* ANTI-COPY STYLES */
             -webkit-touch-callout: none;
             -webkit-user-drag: none;
             -khtml-user-drag: none;
@@ -239,7 +255,6 @@ layout: false
 <body>
 
     <div class="bg-mesh"></div>
-    <div class="target-bg"></div>
 
     <div class="app-wrapper">
         <div class="top-bar">
@@ -254,7 +269,19 @@ layout: false
         </div>
 
         <div class="feed-content">
-            <!-- ADDED oncontextmenu and ondragstart to stop copy/drag -->
+            
+            <!-- RACE LINES -->
+            <div class="race-container">
+                <div class="race-side">
+                    <div class="race-pct" id="race-pct-1">30%</div>
+                    <div class="race-line left-line" id="race-line-1"></div>
+                </div>
+                <div class="race-side">
+                    <div class="race-pct" id="race-pct-2">30%</div>
+                    <div class="race-line right-line" id="race-line-2"></div>
+                </div>
+            </div>
+
             <div class="image-card" id="card-1" data-counter="count-1" onclick="handleTap(event, 'count-1')" oncontextmenu="return false;" ondragstart="return false;" style="background-image: url('https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg');">
                 <div class="image-overlay"></div>
                 <div class="counter-badge" id="badge-1">
@@ -263,7 +290,6 @@ layout: false
                 </div>
             </div>
 
-            <!-- ADDED oncontextmenu and ondragstart to stop copy/drag -->
             <div class="image-card" id="card-2" data-counter="count-2" onclick="handleTap(event, 'count-2')" oncontextmenu="return false;" ondragstart="return false;" style="background-image: url('https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg');">
                 <div class="image-overlay"></div>
                 <div class="counter-badge" id="badge-2">
@@ -342,7 +368,6 @@ layout: false
     let img1Locked = false;
     let img2Locked = false;
     
-    // INDEPENDENT PAUSE FLAGS & TIMERS
     let leftTransitioning = false; 
     let rightTransitioning = false;
     let lastTapLeft = 0;
@@ -396,7 +421,6 @@ layout: false
         if (counterId === 'count-1' && img1Locked) return;
         if (counterId === 'count-2' && img2Locked) return;
 
-        // RESET THE TIMERS ON TAP
         if (counterId === 'count-1') lastTapLeft = Date.now();
         if (counterId === 'count-2') lastTapRight = Date.now();
 
@@ -450,12 +474,27 @@ layout: false
 
     document.addEventListener('DOMContentLoaded', setupInteractions);
 
-    // INDEPENDENT CHECK FOR FALLING ANIMATION
-    setInterval(function() {
-        let now = Date.now();
-        
-        // Check Left Side
-        if (now - lastTapLeft > 10000 && !leftTransitioning) {
+    // RACE LINES ANIMATION LOGIC
+    function startRace() {
+        setInterval(function() {
+            // Left line moves randomly between 30% and 99%
+            let newHeight1 = Math.floor(Math.random() * 69) + 30;
+            document.getElementById('race-line-1').style.height = newHeight1 + '%';
+            document.getElementById('race-pct-1').innerText = newHeight1 + '%';
+
+            // Right line moves randomly (slightly delayed feel)
+            setTimeout(function() {
+                let newHeight2 = Math.floor(Math.random() * 69) + 30;
+                document.getElementById('race-line-2').style.height = newHeight2 + '%';
+                document.getElementById('race-pct-2').innerText = newHeight2 + '%';
+            }, Math.random() * 300); 
+        }, 800); // Updates every 0.8 seconds
+    }
+    startRace();
+
+    // INDEPENDENT IMAGE FALLING LOGIC
+    function triggerLeftFall() {
+        if (!leftTransitioning) {
             leftTransitioning = true;
             let card1 = document.getElementById('card-1');
             const anims = ['fallTop', 'fallLeft', 'fallRight'];
@@ -472,9 +511,13 @@ layout: false
                 leftTransitioning = false; 
             }, 1600);
         }
+        // Schedule next fall independently (Random 8 to 15 seconds)
+        let nextTime = Math.random() * 7000 + 8000;
+        setTimeout(triggerLeftFall, nextTime);
+    }
 
-        // Check Right Side
-        if (now - lastTapRight > 10000 && !rightTransitioning) {
+    function triggerRightFall() {
+        if (!rightTransitioning) {
             rightTransitioning = true;
             let card2 = document.getElementById('card-2');
             const anims = ['fallTop', 'fallLeft', 'fallRight'];
@@ -491,8 +534,14 @@ layout: false
                 rightTransitioning = false; 
             }, 1600);
         }
+        // Schedule next fall independently (Random 8 to 15 seconds)
+        let nextTime = Math.random() * 7000 + 8000;
+        setTimeout(triggerRightFall, nextTime);
+    }
 
-    }, 1000); 
+    // Start the independent loops after a short delay
+    setTimeout(triggerLeftFall, 10000);
+    setTimeout(triggerRightFall, 13000);
 
     // FAST VISUAL COUNTING
     setInterval(function() {
@@ -538,13 +587,24 @@ layout: false
                 document.getElementById('card-1').style.backgroundImage = "url('" + leftPool[0] + "')";
                 document.getElementById('card-2').style.backgroundImage = "url('" + rightPool[0] + "')";
                 
-                if (data.img1Likes && parseInt(data.img1Likes) !== count1) {
-                    count1 = parseInt(data.img1Likes);
+                // FIX: Admin Base Count Sync
+                let adminBase1 = parseInt(data.img1Likes) || 5000;
+                let adminBase2 = parseInt(data.img2Likes) || 5000;
+
+                // If the admin number is different from what we remember, OVERRIDE local storage
+                let storedAdminBase1 = localStorage.getItem('admin_base_1');
+                let storedAdminBase2 = localStorage.getItem('admin_base_2');
+
+                if (adminBase1 !== parseInt(storedAdminBase1)) {
+                    count1 = adminBase1;
+                    localStorage.setItem('admin_base_1', adminBase1);
                     localStorage.setItem('feed_count1', count1);
                     document.getElementById('count-1').innerText = count1.toLocaleString();
                 }
-                if (data.img2Likes && parseInt(data.img2Likes) !== count2) {
-                    count2 = parseInt(data.img2Likes);
+
+                if (adminBase2 !== parseInt(storedAdminBase2)) {
+                    count2 = adminBase2;
+                    localStorage.setItem('admin_base_2', adminBase2);
                     localStorage.setItem('feed_count2', count2);
                     document.getElementById('count-2').innerText = count2.toLocaleString();
                 }
