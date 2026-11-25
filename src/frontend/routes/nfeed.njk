@@ -73,28 +73,35 @@ layout: false
             overflow: hidden;
         }
 
+        /* ENHANCED UPPER REGION */
         .top-bar {
             display: flex; align-items: center; justify-content: space-between; gap: 10px;
-            background: rgba(5, 10, 25, 0.9);
-            padding: 12px 15px; border-bottom: 1px solid rgba(180, 190, 210, 0.15);
+            background: rgba(5, 10, 25, 0.95);
+            padding: 12px 15px; border-bottom: 2px solid rgba(59, 130, 246, 0.3);
             z-index: 20; flex-shrink: 0;
-            height: 95px; 
+            height: 100px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         
         .ticker-container { 
-            flex-grow: 1; height: 60px;
+            flex-grow: 1; height: 65px;
             overflow: hidden; position: relative; 
             display: flex; flex-direction: column; justify-content: flex-end; 
-            mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent); 
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent); 
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 5px;
+            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); 
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); 
         }
         .comment-line { 
-            font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px; 
+            font-size: 13px; /* Slightly larger */
+            font-weight: 600; color: #ffffff; margin-bottom: 6px; 
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
             animation: slideUp 0.4s ease-out forwards; font-family: sans-serif; line-height: 1.3; 
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .rainbow-username { font-family: 'Caveat', cursive; font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-right: 5px; }
+        .rainbow-username { font-family: 'Caveat', cursive; font-size: 16px; font-weight: 700; background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-right: 5px; }
         
         .button-stack {
             display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;
@@ -102,10 +109,10 @@ layout: false
         
         .btn-top {
             background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(226, 232, 240, 0.2);
-            color: #e2e8f0; padding: 5px 10px; border-radius: 6px;
-            font-size: 9px; font-weight: bold; text-transform: uppercase;
+            color: #e2e8f0; padding: 6px 12px; border-radius: 6px;
+            font-size: 10px; font-weight: bold; text-transform: uppercase;
             letter-spacing: 0.5px; cursor: pointer; transition: 0.2s;
-            width: 72px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            width: 75px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .btn-top:hover { background: rgba(255, 255, 255, 0.15); border-color: #e2e8f0; }
         
@@ -130,7 +137,7 @@ layout: false
             position: relative;
         }
 
-        /* ORGANIC RACE LINES */
+        /* ORGANIC RACE LINES (12% - 60% range) */
         .race-container {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
@@ -198,7 +205,6 @@ layout: false
             100% { transform: translateX(0) rotate(0); }
         }
 
-        /* REMOVED animation: none !important so tapping does not break the falling animation */
         .image-card:active { cursor: grabbing; transform: scale(0.98); }
 
         .image-overlay {
@@ -271,15 +277,15 @@ layout: false
 
         <div class="feed-content">
             
-            <!-- ORGANIC RACE LINES -->
+            <!-- RACE LINES (Starting at 36% which is middle of 12-60) -->
             <div class="race-container">
                 <div class="race-side">
-                    <div class="race-pct" id="race-pct-1">30%</div>
-                    <div class="race-line left-line" id="race-line-1"></div>
+                    <div class="race-pct" id="race-pct-1">36%</div>
+                    <div class="race-line left-line" id="race-line-1" style="height: 36%;"></div>
                 </div>
                 <div class="race-side">
-                    <div class="race-pct" id="race-pct-2">30%</div>
-                    <div class="race-line right-line" id="race-line-2"></div>
+                    <div class="race-pct" id="race-pct-2">36%</div>
+                    <div class="race-line right-line" id="race-line-2" style="height: 36%;"></div>
                 </div>
             </div>
 
@@ -369,17 +375,6 @@ layout: false
     let img1Locked = false;
     let img2Locked = false;
     
-    let lastTapLeft = 0;
-    let lastTapRight = 0;
-
-    let savedC1 = localStorage.getItem('feed_count1');
-    let savedC2 = localStorage.getItem('feed_count2');
-    if (savedC1) count1 = parseInt(savedC1);
-    if (savedC2) count2 = parseInt(savedC2);
-
-    document.getElementById('count-1').innerText = count1.toLocaleString();
-    document.getElementById('count-2').innerText = count2.toLocaleString();
-
     let swipeCooldown = false;
 
     function handleSwipe(x, y, counterId) {
@@ -414,15 +409,9 @@ layout: false
         if (counterId === 'count-1' && img1Locked) return;
         if (counterId === 'count-2' && img2Locked) return;
 
-        // Add momentum to the race lines based on taps
-        if (counterId === 'count-1') {
-            lastTapLeft = Date.now();
-            vel1 += (Math.random() * 3) + 4; // Push left line up
-        }
-        if (counterId === 'count-2') {
-            lastTapRight = Date.now();
-            vel2 += (Math.random() * 3) + 4; // Push right line up
-        }
+        // Add effort to the race lines
+        if (counterId === 'count-1') vel1 += (Math.random() * 2) + 3;
+        if (counterId === 'count-2') vel2 += (Math.random() * 2) + 3;
 
         const counterEl = document.getElementById(counterId);
         
@@ -475,29 +464,30 @@ layout: false
     document.addEventListener('DOMContentLoaded', setupInteractions);
 
     // ==========================================
-    // ORGANIC PHYSICS RACE LINES
+    // ORGANIC PHYSICS RACE LINES (12% - 60%)
     // ==========================================
-    let pos1 = 30, pos2 = 30;
+    let pos1 = 36, pos2 = 36; // Start in the middle
     let vel1 = 0, vel2 = 0;
 
     setInterval(function() {
         // Virtual effort (simulating other users tapping)
-        if (Math.random() < 0.3) vel1 += Math.random() * 2;
-        if (Math.random() < 0.3) vel2 += Math.random() * 2;
+        if (Math.random() < 0.3) vel1 += Math.random() * 1.5;
+        if (Math.random() < 0.3) vel2 += Math.random() * 1.5;
 
-        // Gravity/Resistance (pulls lines down)
-        vel1 -= 1.0;
-        vel2 -= 1.0;
+        // Gravity (always pulling down slightly so they don't stick at the top)
+        vel1 -= 0.8;
+        vel2 -= 0.8;
 
         // Apply velocity
         pos1 += vel1;
         pos2 += vel2;
 
-        // Bounce off 30% and 99% limits
-        if (pos1 > 99) { pos1 = 99; vel1 = -Math.abs(vel1) * 0.3; }
-        if (pos1 < 30) { pos1 = 30; vel1 = Math.abs(vel1) * 0.3; }
-        if (pos2 > 99) { pos2 = 99; vel2 = -Math.abs(vel2) * 0.3; }
-        if (pos2 < 30) { pos2 = 30; vel2 = Math.abs(vel2) * 0.3; }
+        // Bounce off the 12% and 60% limits
+        if (pos1 > 60) { pos1 = 60; vel1 = -Math.abs(vel1) * 0.4; }
+        if (pos1 < 12) { pos1 = 12; vel1 = Math.abs(vel1) * 0.4; }
+        
+        if (pos2 > 60) { pos2 = 60; vel2 = -Math.abs(vel2) * 0.4; }
+        if (pos2 < 12) { pos2 = 12; vel2 = Math.abs(vel2) * 0.4; }
 
         // Update UI
         let line1 = document.getElementById('race-line-1');
@@ -513,7 +503,7 @@ layout: false
         pct2.innerText = Math.round(pos2) + '%';
         pct2.style.bottom = "calc(" + pos2 + "% + 8px)";
 
-    }, 50); // Updates every 50ms for smooth organic movement
+    }, 50); 
 
     // ==========================================
     // INDEPENDENT IMAGE FALLING LOGIC
@@ -529,11 +519,8 @@ layout: false
             card1.style.backgroundImage = "url('" + randomImg + "')";
         }, 750);
 
-        setTimeout(function() {
-            card1.style.animation = '';
-        }, 1600);
+        setTimeout(function() { card1.style.animation = ''; }, 1600);
 
-        // Schedule next fall independently (Random 8 to 15 seconds)
         let nextTime = Math.random() * 7000 + 8000;
         setTimeout(triggerLeftFall, nextTime);
     }
@@ -549,16 +536,12 @@ layout: false
             card2.style.backgroundImage = "url('" + randomImg + "')";
         }, 750);
 
-        setTimeout(function() {
-            card2.style.animation = '';
-        }, 1600);
+        setTimeout(function() { card2.style.animation = ''; }, 1600);
 
-        // Schedule next fall independently (Random 8 to 15 seconds)
         let nextTime = Math.random() * 7000 + 8000;
         setTimeout(triggerRightFall, nextTime);
     }
 
-    // Start the independent loops
     setTimeout(triggerLeftFall, 10000);
     setTimeout(triggerRightFall, 13000);
 
@@ -577,6 +560,9 @@ layout: false
         localStorage.setItem('feed_count2', count2);
     }, 2000);
 
+    // ==========================================
+    // IMMEDIATE TICKER START (Default Messages)
+    // ==========================================
     let allFeedComments = [];
     let tickerIndex = 0;
 
@@ -588,6 +574,10 @@ layout: false
         { user: "David", text: "Just joined the club." },
         { user: "Sophia", text: "Target reached!" }
     ];
+
+    // Start ticker immediately with defaults so it doesn't look empty
+    allFeedComments = defaultMessages;
+    startTicker();
 
     window.addEventListener('firebaseLoaded', async function() {
         try {
@@ -637,18 +627,18 @@ layout: false
 
             const q = window.query(window.collection(window.db, "feed_comments"), window.orderBy("createdAt"));
             const snapshot = await window.getDocs(q);
-            allFeedComments = [];
-            snapshot.forEach(function(d) { allFeedComments.push(d.data()); });
             
-            if (allFeedComments.length === 0) {
-                allFeedComments = defaultMessages;
+            if (!snapshot.empty) {
+                allFeedComments = [];
+                snapshot.forEach(function(d) { allFeedComments.push(d.data()); });
+                
+                // Restart ticker with database data if available
+                const tickerContainer = document.getElementById('tickerContainer');
+                tickerContainer.innerHTML = '';
+                startTicker();
             }
-            
-            startTicker();
         } catch(e) { 
-            console.log("Load error:", e); 
-            allFeedComments = defaultMessages;
-            startTicker();
+            console.log("Load error, keeping defaults:", e); 
         }
     });
 
