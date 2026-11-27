@@ -278,16 +278,21 @@ layout: false
 
         if (!username || !email || !pin1 || !pin2) { showError(t('err_required')); return; }
 
-        const usersRef = window.collection(window.db, "users");
-        const q = window.query(usersRef, window.where("username", "==", username));
-        const snapshot = await window.getDocs(q);
+        try {
+            const usersRef = window.collection(window.db, "users");
+            const q = window.query(usersRef, window.where("username", "==", username));
+            const snapshot = await window.getDocs(q);
 
-        if (!snapshot.empty) { showError(t('err_user_exists')); return; }
+            if (!snapshot.empty) { showError(t('err_user_exists')); return; }
 
-        await window.addDoc(usersRef, { username: username, email: email, pin1: pin1, pin2: pin2, createdAt: new Date().toISOString() });
+            await window.addDoc(usersRef, { username: username, email: email, pin1: pin1, pin2: pin2, createdAt: new Date().toISOString() });
 
-        sessionStorage.setItem('loggedInFan', username);
-        runSuccessAnimation();
+            sessionStorage.setItem('loggedInFan', username);
+            runSuccessAnimation();
+        } catch (error) {
+            showError("Network error. Please try again.");
+            console.log(error);
+        }
     }
 
     async function handleSignIn() {
@@ -296,17 +301,22 @@ layout: false
 
         if (!username || !pin1) { showError(t('err_required')); return; }
 
-        const usersRef = window.collection(window.db, "users");
-        const q = window.query(usersRef, window.where("username", "==", username));
-        const snapshot = await window.getDocs(q);
+        try {
+            const usersRef = window.collection(window.db, "users");
+            const q = window.query(usersRef, window.where("username", "==", username));
+            const snapshot = await window.getDocs(q);
 
-        if (snapshot.empty) { showError(t('err_not_found')); return; }
+            if (snapshot.empty) { showError(t('err_not_found')); return; }
 
-        const userData = snapshot.docs[0].data();
-        if (userData.pin1 !== pin1) { showError(t('err_wrong')); return; }
+            const userData = snapshot.docs[0].data();
+            if (userData.pin1 !== pin1) { showError(t('err_wrong')); return; }
 
-        sessionStorage.setItem('loggedInFan', username);
-        runSuccessAnimation();
+            sessionStorage.setItem('loggedInFan', username);
+            runSuccessAnimation();
+        } catch (error) {
+            showError("Network error. Please try again.");
+            console.log(error);
+        }
     }
 
     function runSuccessAnimation() {

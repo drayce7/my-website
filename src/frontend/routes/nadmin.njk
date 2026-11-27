@@ -87,7 +87,6 @@ layout: false
             <button class="btn-logout" onclick="logout()">Logout</button>
         </div>
 
-        <!-- SECTION 1: Feed Pools -->
         <div class="card">
             <h2>1. Feed Image Pools & Settings</h2>
             <p class="section-help">Add up to 10 images per side. The feed will randomly pick from these when the image bounces.</p>
@@ -132,7 +131,6 @@ layout: false
             <button class="btn-save" onclick="saveSettings()">Save Feed Settings</button>
         </div>
 
-        <!-- SECTION 2: VS Screen -->
         <div class="card">
             <h2>2. VS Screen Setup</h2>
             <p class="section-help">Manually set the names and images for the VS selection screen.</p>
@@ -153,7 +151,6 @@ layout: false
             <button class="btn-save" onclick="saveSettings()">Save VS Settings</button>
         </div>
 
-        <!-- SECTION 3: Comments -->
         <div class="card">
             <h2>3. Looping Top Messages</h2>
             <div style="display:flex; gap:10px; margin-bottom:15px;">
@@ -170,7 +167,6 @@ layout: false
 <script>
     const ADMIN_PASSWORD = "admin123";
 
-    // Generate 10 input boxes for each side
     function buildImagePools() {
         let html1 = ''; let html2 = '';
         for(let i=1; i<=10; i++) {
@@ -208,7 +204,6 @@ layout: false
             if (snap.exists()) {
                 const data = snap.data();
                 
-                // Feed Settings
                 document.getElementById('img1Likes').value = data.img1Likes || "";
                 document.getElementById('img1Target').value = data.img1Target || "";
                 document.getElementById('img1Locked').checked = data.img1Locked || false;
@@ -217,19 +212,20 @@ layout: false
                 document.getElementById('img2Target').value = data.img2Target || "";
                 document.getElementById('img2Locked').checked = data.img2Locked || false;
 
-                // Image Pools
                 for(let i=1; i<=10; i++) {
                     if(data['img1Pool_' + i]) document.getElementById('img1Pool_' + i).value = data['img1Pool_' + i];
                     if(data['img2Pool_' + i]) document.getElementById('img2Pool_' + i).value = data['img2Pool_' + i];
                 }
 
-                // VS Settings
                 document.getElementById('vsName1').value = data.vsName1 || "";
                 document.getElementById('vsImg1').value = data.vsImg1 || "";
                 document.getElementById('vsName2').value = data.vsName2 || "";
                 document.getElementById('vsImg2').value = data.vsImg2 || "";
             }
-        } catch(e) { console.log(e); }
+        } catch(e) { 
+            console.log("Error loading settings:", e); 
+            alert("Could not load settings. Check your connection.");
+        }
     }
 
     async function saveSettings() {
@@ -254,7 +250,10 @@ layout: false
 
             await window.setDoc(window.doc(window.db, "app_settings", "feed"), updateData);
             showToast();
-        } catch(e) { alert("Error saving"); }
+        } catch(e) { 
+            console.log(e); 
+            alert("Error saving settings. Please try again."); 
+        }
     }
 
     async function loadComments() {
@@ -275,23 +274,34 @@ layout: false
                                 '<button class="btn-delete" onclick="deleteComment(\'' + docSnap.id + '\')">Delete</button>';
                 list.appendChild(div);
             });
-        } catch(e) { console.log(e); }
+        } catch(e) { 
+            console.log(e); 
+            list.innerHTML = '<p style="color:#ef4444;">Failed to load comments. Check your network.</p>';
+        }
     }
 
     async function addComment() {
         const user = document.getElementById('newCommentUser').value;
         const text = document.getElementById('newCommentText').value;
         if (!user || !text) return alert("Fill both fields");
-        await window.addDoc(window.collection(window.db, "feed_comments"), { user: user, text: text, createdAt: new Date().toISOString() });
-        document.getElementById('newCommentUser').value = "";
-        document.getElementById('newCommentText').value = "";
-        loadComments(); showToast();
+        try {
+            await window.addDoc(window.collection(window.db, "feed_comments"), { user: user, text: text, createdAt: new Date().toISOString() });
+            document.getElementById('newCommentUser').value = "";
+            document.getElementById('newCommentText').value = "";
+            loadComments(); showToast();
+        } catch(e) {
+            alert("Error adding comment.");
+        }
     }
 
     async function deleteComment(id) {
         if (!confirm("Delete this message?")) return;
-        await window.deleteDoc(window.doc(window.db, "feed_comments", id));
-        loadComments();
+        try {
+            await window.deleteDoc(window.doc(window.db, "feed_comments", id));
+            loadComments();
+        } catch(e) {
+            alert("Error deleting comment.");
+        }
     }
 </script>
 </body>
