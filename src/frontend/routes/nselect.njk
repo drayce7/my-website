@@ -1,5 +1,5 @@
 ---
-title: "Select"
+title: "Select Matchup"
 permalink: "/nselect/"
 layout: false
 ---
@@ -9,11 +9,11 @@ layout: false
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Select</title>
+    <title>Select Matchup</title>
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-      import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
@@ -26,7 +26,7 @@ layout: false
 
       const app = initializeApp(firebaseConfig);
       window.db = getFirestore(app);
-      window.doc = doc; window.getDoc = getDoc;
+      window.collection = collection; window.getDocs = getDocs;
 
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseLoaded'));
@@ -37,136 +37,105 @@ layout: false
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         
         body { 
-            background: #0a1128; 
-            height: 100vh; width: 100vw; 
-            display: flex; justify-content: center; align-items: center; 
-            overflow: hidden; font-family: 'Playfair Display', serif; 
-            cursor: pointer;
+            background: #0a1128; min-height: 100vh; 
+            font-family: 'Playfair Display', serif; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
         }
 
         .bg-mesh {
-            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at 50% 50%, rgba(20, 40, 90, 0.8), transparent 60%),
-                        radial-gradient(circle at 80% 20%, rgba(180, 190, 210, 0.1), transparent 40%);
-            animation: meshMove 10s ease-in-out infinite alternate;
-            z-index: 0; pointer-events: none;
-        }
-        @keyframes meshMove {
-            0% { transform: rotate(0deg) scale(1); }
-            100% { transform: rotate(10deg) scale(1.1); }
+            position: fixed; inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(20, 40, 90, 0.8), transparent 60%);
+            z-index: -1;
         }
 
-        .vs-container {
-            position: relative; z-index: 10;
-            width: 100%; max-width: 800px;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 20px;
-        }
+        h1 { color: #e2e8f0; font-family: 'Caveat', cursive; font-size: 42px; margin: 30px 0; text-align: center; }
 
-        .artist-side {
-            display: flex; flex-direction: column; align-items: center;
-            width: 40%;
-            animation: slideIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            transition: transform 0.2s;
-        }
-        .artist-side:hover { transform: scale(1.05); }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+        .matchup-list { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 15px; }
 
-        .artist-side.right { animation: slideInRight 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes slideInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+        .matchup-card {
+            background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(226, 232, 240, 0.2);
+            border-radius: 15px; padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: 0.2s; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .matchup-card:hover { transform: scale(1.02); border-color: #3b82f6; }
 
-        .artist-img {
-            width: 120px; height: 120px;
-            border-radius: 50%;
-            background-size: cover; background-position: center;
-            border: 4px solid #e2e8f0;
-            box-shadow: 0 0 30px rgba(226, 232, 240, 0.4);
-            margin-bottom: 20px;
-            background-color: #111827;
-        }
+        .artist { display: flex; flex-direction: column; align-items: center; width: 40%; }
+        .artist img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #e2e8f0; margin-bottom: 10px; }
+        .artist-name { color: #e2e8f0; font-size: 16px; text-align: center; }
 
-        .artist-name {
-            font-family: 'Caveat', cursive;
-            font-size: 36px; color: #e2e8f0;
-            text-align: center; line-height: 1.1;
-            text-shadow: 0 0 20px rgba(226, 232, 240, 0.5);
-        }
+        .vs { font-size: 28px; font-style: italic; color: #3b82f6; font-weight: bold; }
+        .locked-icon { position: absolute; top: 10px; right: 15px; font-size: 20px; }
 
-        .vs-text {
-            font-size: 64px; color: #3b82f6; font-style: italic;
-            text-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
-            animation: pulseVS 1.5s infinite alternate;
-        }
-        @keyframes pulseVS { from { transform: scale(1); opacity: 0.8; } to { transform: scale(1.1); opacity: 1; } }
-
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
-        .modal-box {
-            background: #111827; border: 2px solid #ef4444;
-            padding: 30px; border-radius: 15px; max-width: 320px; text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-        }
-        .modal-box h2 { font-family: 'Caveat', cursive; color: #ef4444; font-size: 32px; margin-bottom: 10px; }
-        .modal-box p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: #111827; border: 2px solid #ef4444; padding: 30px; border-radius: 15px; max-width: 320px; text-align: center; }
+        .modal-box h2 { color: #ef4444; font-family: 'Caveat', cursive; font-size: 32px; margin-bottom: 10px; }
+        .modal-box p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
         .modal-box button { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        @media (max-width: 600px) {
-            .artist-img { width: 90px; height: 90px; }
-            .artist-name { font-size: 26px; }
-            .vs-text { font-size: 48px; }
-        }
     </style>
 </head>
 <body>
-
     <div class="bg-mesh"></div>
+    <h1>Select a Matchup</h1>
 
-    <div class="vs-container">
-        <div class="artist-side left" onclick="goToFeed()">
-            <div class="artist-img" id="img1"></div>
-            <div class="artist-name" id="name1">Artist One</div>
-        </div>
-
-        <div class="vs-text">VS</div>
-
-        <div class="artist-side right" onclick="showRestricted()">
-            <div class="artist-img" id="img2"></div>
-            <div class="artist-name" id="name2">Artist Two</div>
-        </div>
+    <div class="matchup-list" id="matchupList">
+        <p style="color:white; text-align:center;">Loading...</p>
     </div>
 
-    <div class="modal-overlay" id="restrictedModal" onclick="closeModal()">
-        <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-overlay" id="lockModal">
+        <div class="modal-box">
             <h2>Access Denied</h2>
             <p>Sorry, you do not seem to have a record with this artist.</p>
-            <button onclick="closeModal()">Understood</button>
+            <button onclick="document.getElementById('lockModal').classList.remove('active')">Understood</button>
         </div>
     </div>
 
 <script>
     if (!sessionStorage.getItem('loggedInFan')) { window.location.href = '/my-website/nlogin/'; }
 
-    function showRestricted() { document.getElementById('restrictedModal').classList.add('active'); }
-    function closeModal() { document.getElementById('restrictedModal').classList.remove('active'); }
-    function goToFeed() { window.location.href = '/my-website/nfeed/'; }
-
     window.addEventListener('firebaseLoaded', async () => {
         try {
-            const snap = await window.getDoc(window.doc(window.db, "app_settings", "feed"));
-            if (snap.exists()) {
-                const data = snap.data();
-                if (data.vsName1) document.getElementById('name1').innerText = data.vsName1;
-                if (data.vsImg1) document.getElementById('img1').style.backgroundImage = "url('" + data.vsImg1 + "')";
-                if (data.vsName2) document.getElementById('name2').innerText = data.vsName2;
-                if (data.vsImg2) document.getElementById('img2').style.backgroundImage = "url('" + data.vsImg2 + "')";
+            const snapshot = await window.getDocs(window.collection(window.db, "matchups"));
+            const list = document.getElementById('matchupList');
+            list.innerHTML = '';
+            
+            if (snapshot.empty) {
+                list.innerHTML = '<p style="color:white; text-align:center;">No matchups created in admin yet.</p>';
+                return;
             }
-        } catch(e) { console.log("Error loading VS data:", e); }
-    });
 
-    let timer = setTimeout(goToFeed, 12000);
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const card = document.createElement('div');
+                card.className = 'matchup-card';
+                card.style.position = 'relative';
+                
+                card.innerHTML = `
+                    ${data.isLocked ? '<div class="locked-icon">🔒</div>' : ''}
+                    <div class="artist">
+                        <img src="${data.leftImg || 'https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg'}" alt="Left">
+                        <div class="artist-name">${data.leftName || 'Artist A'}</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="artist">
+                        <img src="${data.rightImg || 'https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg'}" alt="Right">
+                        <div class="artist-name">${data.rightName || 'Artist B'}</div>
+                    </div>
+                `;
+
+                card.onclick = () => {
+                    if (data.isLocked) {
+                        document.getElementById('lockModal').classList.add('active');
+                    } else {
+                        window.location.href = '/my-website/nfeed/?m=' + doc.id;
+                    }
+                };
+                list.appendChild(card);
+            });
+        } catch(e) { console.log(e); }
+    });
 </script>
 </body>
 </html>
