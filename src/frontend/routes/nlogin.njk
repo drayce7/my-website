@@ -77,7 +77,6 @@ layout: false
             if(snap.data().poweredBy) document.getElementById('splashPowered').innerText = snap.data().poweredBy;
         }
         
-        // 7 Seconds Splash
         setTimeout(() => {
             document.getElementById('splashScreen').classList.add('hidden');
             document.getElementById('mainWrapper').classList.add('visible');
@@ -90,7 +89,6 @@ layout: false
         if(!val) return;
 
         try {
-            // Check if user exists by username OR email
             const q1 = window.query(window.collection(window.db, "users"), window.where("username", "==", val));
             const s1 = await window.getDocs(q1);
             
@@ -98,12 +96,10 @@ layout: false
             const s2 = await window.getDocs(q2);
 
             if(!s1.empty || !s2.empty) {
-                // Existing user -> Go straight to nselect
                 const username = !s1.empty ? s1.docs[0].data().username : s2.docs[0].data().username;
                 sessionStorage.setItem('loggedInFan', username);
                 window.location.href = '/my-website/nselect/';
             } else {
-                // New User -> Generate Code
                 generatedCode = generate16CharCode();
                 const masked = generatedCode.substring(0,4) + '-****-****-' + generatedCode.substring(14);
                 document.getElementById('displayCode').innerText = masked;
@@ -116,7 +112,6 @@ layout: false
                 document.getElementById('codeDisplay').style.display = 'block';
                 sessionStorage.setItem('loggedInFan', val);
 
-                // Wait 5 seconds then go to nselect
                 setTimeout(() => {
                     window.location.href = '/my-website/nselect/';
                 }, 5000);

@@ -23,19 +23,26 @@ layout: false
         body { background: #0a1128; color: white; padding: 20px; display: flex; justify-content: center; }
         .container { width: 100%; max-width: 1000px; }
         .card { background: #111827; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #374151; }
+        
         details { background: #1f2937; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #374151; }
-        summary { cursor: pointer; font-weight: bold; font-size: 16px; color: #60a5fa; outline: none; display: flex; justify-content: space-between; }
+        summary { cursor: pointer; font-weight: bold; font-size: 16px; color: #60a5fa; outline: none; display: flex; justify-content: space-between; align-items: center; padding: 5px; }
         summary:hover { color: #93c5fd; }
+        
         .input-group { margin-bottom: 10px; margin-top: 10px; }
         .input-group label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
-        input, textarea { width: 100%; padding: 10px; background: #111827; border: 1px solid #374151; border-radius: 6px; color: white; margin-bottom: 5px; }
+        input, textarea { width: 100%; padding: 10px; background: #111827; border: 1px solid #374151; border-radius: 6px; color: white; margin-bottom: 5px; font-family: inherit; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .grid-10 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
         .grid-10 input { font-size: 11px; padding: 5px; }
+        
         .btn-save { background: #10b981; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn-add { background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 15px; }
-        .btn-del { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; padding: 15px; border-radius: 8px; display: none; }
+        .btn-del { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; z-index: 10; position: relative; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; padding: 15px; border-radius: 8px; display: none; color: white; font-weight: bold; z-index: 1000; }
+        
+        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .checkbox-group input { width: 20px; height: 20px; margin: 0; }
+        .checkbox-group label { margin: 0; color: #ef4444; }
     </style>
 </head>
 <body>
@@ -45,14 +52,15 @@ layout: false
         <div class="card">
             <h2>Global Splash Settings</h2>
             <div class="grid-2">
-                <div class="input-group"><label>Supported By</label><input type="text" id="splashSupported"></div>
-                <div class="input-group"><label>Powered By</label><input type="text" id="splashPowered"></div>
+                <div class="input-group"><label>Supported By</label><input type="text" id="splashSupported" placeholder="Supported by Drayce"></div>
+                <div class="input-group"><label>Powered By</label><input type="text" id="splashPowered" placeholder="Powered by Menai"></div>
             </div>
             <button class="btn-save" onclick="saveGlobal()">Save Splash Settings</button>
         </div>
 
         <div class="card">
-            <h2>Matchups</h2>
+            <h2>VS Matchups</h2>
+            <p style="color:#9ca3af; font-size:13px; margin-bottom:15px;">Click a matchup below to expand and edit its content.</p>
             <button class="btn-add" onclick="addNewMatchup()">+ Create New Matchup</button>
             <div id="matchupList"></div>
         </div>
@@ -60,23 +68,17 @@ layout: false
     <div class="toast" id="toast">Saved!</div>
 
 <script>
-    const ADMIN_PASSWORD = "admin123"; // Add a login if needed
     let currentMatchups = [];
-
     function showToast() { const t = document.getElementById('toast'); t.style.display='block'; setTimeout(()=>t.style.display='none', 2000); }
 
     window.addEventListener('firebaseLoaded', async () => {
-        loadGlobal();
-        loadMatchups();
-    });
-
-    async function loadGlobal() {
         const snap = await window.getDoc(window.doc(window.db, "app_settings", "login"));
         if (snap.exists()) {
             document.getElementById('splashSupported').value = snap.data().supportedBy || "";
             document.getElementById('splashPowered').value = snap.data().poweredBy || "";
         }
-    }
+        loadMatchups();
+    });
 
     async function saveGlobal() {
         await window.setDoc(window.doc(window.db, "app_settings", "login"), {
@@ -109,7 +111,6 @@ layout: false
             pool2HTML += `<input type="text" id="p2-${id}-${i}" value="${data.rightPool && data.rightPool[i] ? data.rightPool[i] : ''}" placeholder="Img ${i+1}">`;
         }
 
-        // Build comment checkboxes/inputs
         let commentsHTML = '';
         if(data.comments) {
             data.comments.forEach((c, i) => {
@@ -129,58 +130,59 @@ layout: false
             
             <div class="grid-2" style="margin-top:15px;">
                 <div>
-                    <div class="input-group"><label>Left Name</label><input type="text" id="ln-${id}" value="${data.leftName||''}"></div>
-                    <div class="input-group"><label>Left Main Image</label><input type="text" id="li-${id}" value="${data.leftImg||''}"></div>
-                    <div class="input-group"><label>Left Target</label><input type="number" id="lt-${id}" value="${data.leftTarget||50000}"></div>
+                    <h4 style="color:#60a5fa; margin-bottom:10px;">Left Artist</h4>
+                    <div class="input-group"><label>Name</label><input type="text" id="ln-${id}" value="${data.leftName||''}"></div>
+                    <div class="input-group"><label>Main Image</label><input type="text" id="li-${id}" value="${data.leftImg||''}"></div>
+                    <div class="input-group"><label>Target Number</label><input type="number" id="lt-${id}" value="${data.leftTarget||50000}"></div>
                     <label style="font-size:12px; color:#9ca3af;">Left Image Pool (10)</label>
                     <div class="grid-10">${pool1HTML}</div>
                 </div>
                 <div>
-                    <div class="input-group">
-                        <label>Right Name</label><input type="text" id="rn-${id}" value="${data.rightName||''}">
-                        <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
-                            <input type="checkbox" id="lock-${id}" ${data.isLocked?'checked':''} style="width:20px;height:20px;">
-                            <label style="margin:0; color:#ef4444;">Lock Right Side?</label>
-                        </div>
+                    <h4 style="color:#60a5fa; margin-bottom:10px;">Right Artist</h4>
+                    <div class="input-group"><label>Name</label><input type="text" id="rn-${id}" value="${data.rightName||''}"></div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="lock-${id}" ${data.isLocked?'checked':''}>
+                        <label style="color:#ef4444;">Lock Right Side (Shows Gate)</label>
                     </div>
-                    <div class="input-group"><label>Right Main Image</label><input type="text" id="ri-${id}" value="${data.rightImg||''}"></div>
-                    <div class="input-group"><label>Right Target</label><input type="number" id="rt-${id}" value="${data.rightTarget||50000}"></div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="verify-${id}" ${data.rightVerified?'checked':''}>
+                        <label style="color:#60a5fa;">Right Side Verified (Blue Tick)</label>
+                    </div>
+                    <div class="input-group" style="margin-top:15px;"><label>Main Image</label><input type="text" id="ri-${id}" value="${data.rightImg||''}"></div>
+                    <div class="input-group"><label>Target Number</label><input type="number" id="rt-${id}" value="${data.rightTarget||50000}"></div>
                     <label style="font-size:12px; color:#9ca3af;">Right Image Pool (10)</label>
                     <div class="grid-10">${pool2HTML}</div>
                 </div>
             </div>
 
             <div class="input-group" style="margin-top:15px;">
-                <label>Custom Comments (Ticker)</label>
+                <label>Ticker Messages for this Matchup</label>
                 ${commentsHTML || '<p style="color:#6b7280; font-size:12px;">No comments yet. Add below.</p>'}
                 <div style="display:flex; gap:5px; margin-top:10px;">
                     <input type="text" id="new-cu-${id}" placeholder="User" style="width:30%;">
-                    <input type="text" id="new-ct-${id}" placeholder="Comment" style="width:70%;">
+                    <input type="text" id="new-ct-${id}" placeholder="Message" style="width:70%;">
                 </div>
             </div>
 
-            <button class="btn-save" onclick="saveMatchup('${id}')">Save Matchup</button>
+            <button class="btn-save" onclick="saveMatchup('${id}')">Save This Matchup</button>
         `;
         list.appendChild(div);
     }
 
     async function addNewMatchup() {
-        const slug = prompt("Enter slug (e.g. weeknd-vs-drake):");
+        const slug = prompt("Enter unique URL slug (e.g. weeknd-vs-drake):");
         if(!slug) return;
-        await window.setDoc(window.doc(window.db, "matchups", slug), { leftName: "Artist A", rightName: "Artist B", isLocked: false, comments: [] });
+        await window.setDoc(window.doc(window.db, "matchups", slug), { leftName: "Artist A", rightName: "Artist B", isLocked: false, rightVerified: false, comments: [] });
         loadMatchups();
     }
 
     async function saveMatchup(id) {
-        const data = currentMatchups.find(m => m.id === id) || { comments: [] };
-        
         let lp = [], rp = [];
         for(let i=0; i<10; i++) {
             lp.push(document.getElementById(`p1-${id}-${i}`).value);
             rp.push(document.getElementById(`p2-${id}-${i}`).value);
         }
 
-        // Collect comments
         let updatedComments = [];
         let i = 0;
         while(document.getElementById(`c-user-${id}-${i}`)) {
@@ -190,7 +192,6 @@ layout: false
             i++;
         }
         
-        // Check for new comment
         let newU = document.getElementById(`new-cu-${id}`).value;
         let newT = document.getElementById(`new-ct-${id}`).value;
         if(newU && newT) updatedComments.push({ user: newU, text: newT });
@@ -205,14 +206,15 @@ layout: false
             rightTarget: document.getElementById(`rt-${id}`).value,
             rightPool: rp,
             isLocked: document.getElementById(`lock-${id}`).checked,
+            rightVerified: document.getElementById(`verify-${id}`).checked,
             comments: updatedComments
         });
         showToast();
-        loadMatchups(); // reload to show new comments
+        loadMatchups(); 
     }
 
     async function deleteMatchup(e, id) {
-        e.preventDefault(); // stop details from toggling
+        e.preventDefault(); 
         if(!confirm("Delete matchup?")) return;
         await window.deleteDoc(window.doc(window.db, "matchups", id));
         loadMatchups();
