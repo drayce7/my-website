@@ -10,131 +10,69 @@ layout: false
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Select Matchup</title>
-    
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
       import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
-        authDomain: "clbomb.firebaseapp.com",
-        projectId: "clbomb",
-        storageBucket: "clbomb.firebasestorage.app",
-        messagingSenderId: "515939060816",
-        appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      window.db = getFirestore(app);
+      const firebaseConfig = { apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw", authDomain: "clbomb.firebaseapp.com", projectId: "clbomb", storageBucket: "clbomb.firebasestorage.app", messagingSenderId: "515939060816", appId: "1:515939060816:web:8a68d9d5f40b02c9029555" };
+      const app = initializeApp(firebaseConfig); window.db = getFirestore(app);
       window.collection = collection; window.getDocs = getDocs;
-
-      window.firebaseReady = true;
-      window.dispatchEvent(new Event('firebaseLoaded'));
+      window.firebaseReady = true; window.dispatchEvent(new Event('firebaseLoaded'));
     </script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        
-        body { 
-            background: #0a1128; min-height: 100vh; 
-            font-family: 'Playfair Display', serif; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
-        }
-
-        .bg-mesh {
-            position: fixed; inset: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(20, 40, 90, 0.8), transparent 60%);
-            z-index: -1;
-        }
-
-        h1 { color: #e2e8f0; font-family: 'Caveat', cursive; font-size: 42px; margin: 30px 0; text-align: center; }
-
-        .matchup-list { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 15px; }
-
-        .matchup-card {
-            background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(226, 232, 240, 0.2);
-            border-radius: 15px; padding: 20px; display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; transition: 0.2s; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+        body { background: #0a1128; height: 100vh; font-family: 'Playfair Display', serif; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
+        h1 { color: #e2e8f0; font-family: 'Caveat', cursive; font-size: 42px; margin: 20px 0; text-align: center; }
+        .matchup-list { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 50px; }
+        .matchup-card { background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(226, 232, 240, 0.2); border-radius: 15px; padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
         .matchup-card:hover { transform: scale(1.02); border-color: #3b82f6; }
-
         .artist { display: flex; flex-direction: column; align-items: center; width: 40%; }
         .artist img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #e2e8f0; margin-bottom: 10px; }
         .artist-name { color: #e2e8f0; font-size: 16px; text-align: center; }
-
         .vs { font-size: 28px; font-style: italic; color: #3b82f6; font-weight: bold; }
         .locked-icon { position: absolute; top: 10px; right: 15px; font-size: 20px; }
-
-        /* Modal */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-overlay.active { display: flex; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-box { background: #111827; border: 2px solid #ef4444; padding: 30px; border-radius: 15px; max-width: 320px; text-align: center; }
         .modal-box h2 { color: #ef4444; font-family: 'Caveat', cursive; font-size: 32px; margin-bottom: 10px; }
-        .modal-box p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
-        .modal-box button { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-
+        .modal-box button { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="bg-mesh"></div>
-    <h1>Select a Matchup</h1>
-
-    <div class="matchup-list" id="matchupList">
-        <p style="color:white; text-align:center;">Loading...</p>
-    </div>
-
+    <h1>Select Matchup</h1>
+    <div class="matchup-list" id="matchupList"><p style="color:white; text-align:center;">Loading...</p></div>
+    
     <div class="modal-overlay" id="lockModal">
         <div class="modal-box">
-            <h2>Access Denied</h2>
-            <p>Sorry, you do not seem to have a record with this artist.</p>
+            <h2>Locked</h2>
+            <p>Sorry, you do not have access.</p>
             <button onclick="document.getElementById('lockModal').classList.remove('active')">Understood</button>
         </div>
     </div>
 
 <script>
-    if (!sessionStorage.getItem('loggedInFan')) { window.location.href = '/my-website/nlogin/'; }
-
     window.addEventListener('firebaseLoaded', async () => {
-        try {
-            const snapshot = await window.getDocs(window.collection(window.db, "matchups"));
-            const list = document.getElementById('matchupList');
-            list.innerHTML = '';
-            
-            if (snapshot.empty) {
-                list.innerHTML = '<p style="color:white; text-align:center;">No matchups created in admin yet.</p>';
-                return;
-            }
+        const snapshot = await window.getDocs(window.collection(window.db, "matchups"));
+        const list = document.getElementById('matchupList');
+        list.innerHTML = '';
+        if (snapshot.empty) { list.innerHTML = '<p style="color:white;">No matchups yet.</p>'; return; }
 
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const card = document.createElement('div');
-                card.className = 'matchup-card';
-                card.style.position = 'relative';
-                
-                card.innerHTML = `
-                    ${data.isLocked ? '<div class="locked-icon">🔒</div>' : ''}
-                    <div class="artist">
-                        <img src="${data.leftImg || 'https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg'}" alt="Left">
-                        <div class="artist-name">${data.leftName || 'Artist A'}</div>
-                    </div>
-                    <div class="vs">VS</div>
-                    <div class="artist">
-                        <img src="${data.rightImg || 'https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg'}" alt="Right">
-                        <div class="artist-name">${data.rightName || 'Artist B'}</div>
-                    </div>
-                `;
-
-                card.onclick = () => {
-                    if (data.isLocked) {
-                        document.getElementById('lockModal').classList.add('active');
-                    } else {
-                        window.location.href = '/my-website/nfeed/?m=' + doc.id;
-                    }
-                };
-                list.appendChild(card);
-            });
-        } catch(e) { console.log(e); }
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const card = document.createElement('div');
+            card.className = 'matchup-card';
+            card.style.position = 'relative';
+            card.innerHTML = `
+                ${data.isLocked ? '<div class="locked-icon">🔒</div>' : ''}
+                <div class="artist"><img src="${data.leftImg || 'https://i.postimg.cc/k47Z4Y3F/pexels-photo-220453.jpg'}"><div class="artist-name">${data.leftName || 'A'}</div></div>
+                <div class="vs">VS</div>
+                <div class="artist"><img src="${data.rightImg || 'https://i.postimg.cc/fyZ4Y3F3/pexels-photo-210241.jpg'}"><div class="artist-name">${data.rightName || 'B'}</div></div>
+            `;
+            card.onclick = () => {
+                if (data.isLocked) document.getElementById('lockModal').classList.add('active');
+                else window.location.href = '/my-website/nfeed/?m=' + doc.id;
+            };
+            list.appendChild(card);
+        });
     });
 </script>
 </body>

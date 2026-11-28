@@ -10,253 +10,212 @@ layout: false
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feed Admin</title>
-    
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-      import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw",
-        authDomain: "clbomb.firebaseapp.com",
-        projectId: "clbomb",
-        storageBucket: "clbomb.firebasestorage.app",
-        messagingSenderId: "515939060816",
-        appId: "1:515939060816:web:8a68d9d5f40b02c9029555"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      window.db = db;
-      window.doc = doc; window.getDoc = getDoc; window.setDoc = setDoc;
-      window.collection = collection; window.getDocs = getDocs;
-      window.query = query; window.orderBy = orderBy; window.deleteDoc = deleteDoc;
-      window.firebaseReady = true;
-      window.dispatchEvent(new Event('firebaseLoaded'));
+      import { getFirestore, doc, getDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      const firebaseConfig = { apiKey: "AIzaSyBEqRVYykZiYnH6R1FdZDQ5XtkCRb5EsIw", authDomain: "clbomb.firebaseapp.com", projectId: "clbomb", storageBucket: "clbomb.firebasestorage.app", messagingSenderId: "515939060816", appId: "1:515939060816:web:8a68d9d5f40b02c9029555" };
+      const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+      window.db = db; window.doc = doc; window.getDoc = getDoc; window.setDoc = setDoc; window.collection = collection; window.getDocs = getDocs; window.deleteDoc = deleteDoc;
+      window.firebaseReady = true; window.dispatchEvent(new Event('firebaseLoaded'));
     </script>
-
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0a1128; color: white; min-height: 100vh; display: flex; justify-content: center; padding: 20px; }
+        body { background: #0a1128; color: white; padding: 20px; display: flex; justify-content: center; }
         .container { width: 100%; max-width: 1000px; }
-        .login-box { background: #111827; padding: 40px; border-radius: 12px; text-align: center; max-width: 400px; margin: 100px auto; border: 1px solid #374151; }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; background: #1f2937; border: 1px solid #374151; color: white; border-radius: 8px; }
-        .login-box button { width: 100%; padding: 12px; background: #e2e8f0; color: #0a1128; font-weight: bold; border-radius: 8px; cursor: pointer; border: none; }
-        
-        .editor-content { display: none; }
-        .editor-content.active { display: block; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #1f2937; padding-bottom: 15px; }
-        .btn-logout { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-        
         .card { background: #111827; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #374151; }
-        h2 { color: #3b82f6; margin-bottom: 15px; font-size: 18px; }
-        .input-group { margin-bottom: 15px; }
+        details { background: #1f2937; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #374151; }
+        summary { cursor: pointer; font-weight: bold; font-size: 16px; color: #60a5fa; outline: none; display: flex; justify-content: space-between; }
+        summary:hover { color: #93c5fd; }
+        .input-group { margin-bottom: 10px; margin-top: 10px; }
         .input-group label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
-        .input-group input, .input-group textarea { width: 100%; padding: 10px; background: #1f2937; border: 1px solid #374151; border-radius: 8px; color: white; }
-        
-        .matchup-card { background: #1f2937; border: 1px solid #374151; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        input, textarea { width: 100%; padding: 10px; background: #111827; border: 1px solid #374151; border-radius: 6px; color: white; margin-bottom: 5px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        
-        .btn-save { background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
-        .btn-add { background: #3b82f6; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 15px; }
-        .btn-del { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; float: right; }
-        
-        .toast { position: fixed; bottom: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; background: #10b981; font-weight: bold; display: none; z-index: 1000; }
+        .grid-10 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+        .grid-10 input { font-size: 11px; padding: 5px; }
+        .btn-save { background: #10b981; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-add { background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 15px; }
+        .btn-del { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; padding: 15px; border-radius: 8px; display: none; }
     </style>
 </head>
 <body>
-
-    <div class="login-box" id="loginBox">
-        <h2>Feed Admin Access</h2>
-        <input type="password" id="adminPass" placeholder="Enter admin password">
-        <button onclick="login()">Unlock</button>
-    </div>
-
-    <div class="container editor-content" id="editorContent">
-        <div class="header">
-            <h1>⚙️ Feed Settings</h1>
-            <button class="btn-logout" onclick="logout()">Logout</button>
-        </div>
-
-        <!-- LOGIN & SPLASH SETTINGS -->
+    <div class="container">
+        <h1 style="color:#e2e8f0; margin-bottom:20px;">⚙️ Feed Master Admin</h1>
+        
         <div class="card">
-            <h2>1. Splash Screen Text</h2>
+            <h2>Global Splash Settings</h2>
             <div class="grid-2">
-                <div class="input-group">
-                    <label>Supported By Text</label>
-                    <input type="text" id="splashSupported" placeholder="Supported by Drayce">
-                </div>
-                <div class="input-group">
-                    <label>Powered By Text</label>
-                    <input type="text" id="splashPowered" placeholder="Powered by Menai">
-                </div>
+                <div class="input-group"><label>Supported By</label><input type="text" id="splashSupported"></div>
+                <div class="input-group"><label>Powered By</label><input type="text" id="splashPowered"></div>
             </div>
-            <button class="btn-save" onclick="saveGlobalSettings()">Save Splash Settings</button>
+            <button class="btn-save" onclick="saveGlobal()">Save Splash Settings</button>
         </div>
 
-        <!-- MATCHUPS LIST -->
         <div class="card">
-            <h2>2. VS Matchups</h2>
-            <p style="color:#9ca3af; font-size:13px; margin-bottom:15px;">Create VS screens here. The Slug is the URL (e.g., "weeknd-vs-drake").</p>
+            <h2>Matchups</h2>
             <button class="btn-add" onclick="addNewMatchup()">+ Create New Matchup</button>
             <div id="matchupList"></div>
         </div>
-
-        <!-- COMMENTS -->
-        <div class="card">
-            <h2>3. Ticker Messages</h2>
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <input type="text" id="newCommentUser" placeholder="User" style="flex:1;">
-                <input type="text" id="newCommentText" placeholder="Message" style="flex:2;">
-                <button class="btn-add" style="width:auto; margin:0;" onclick="addComment()">Add</button>
-            </div>
-            <div id="commentList"></div>
-        </div>
     </div>
-
     <div class="toast" id="toast">Saved!</div>
 
 <script>
-    const ADMIN_PASSWORD = "admin123";
+    const ADMIN_PASSWORD = "admin123"; // Add a login if needed
     let currentMatchups = [];
 
-    function login() {
-        if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
-            document.getElementById('loginBox').style.display = 'none';
-            document.getElementById('editorContent').classList.add('active');
-            loadGlobalSettings();
-            loadMatchups();
-            loadComments();
-        } else { alert("Wrong password"); }
-    }
-    function logout() { location.reload(); }
     function showToast() { const t = document.getElementById('toast'); t.style.display='block'; setTimeout(()=>t.style.display='none', 2000); }
 
-    // --- GLOBAL SETTINGS ---
-    async function loadGlobalSettings() {
-        try {
-            const snap = await window.getDoc(window.doc(window.db, "app_settings", "login"));
-            if (snap.exists()) {
-                document.getElementById('splashSupported').value = snap.data().supportedBy || "";
-                document.getElementById('splashPowered').value = snap.data().poweredBy || "";
-            }
-        } catch(e) { console.log(e); }
+    window.addEventListener('firebaseLoaded', async () => {
+        loadGlobal();
+        loadMatchups();
+    });
+
+    async function loadGlobal() {
+        const snap = await window.getDoc(window.doc(window.db, "app_settings", "login"));
+        if (snap.exists()) {
+            document.getElementById('splashSupported').value = snap.data().supportedBy || "";
+            document.getElementById('splashPowered').value = snap.data().poweredBy || "";
+        }
     }
 
-    async function saveGlobalSettings() {
-        try {
-            await window.setDoc(window.doc(window.db, "app_settings", "login"), {
-                supportedBy: document.getElementById('splashSupported').value,
-                poweredBy: document.getElementById('splashPowered').value
-            });
-            showToast();
-        } catch(e) { alert("Error saving"); }
+    async function saveGlobal() {
+        await window.setDoc(window.doc(window.db, "app_settings", "login"), {
+            supportedBy: document.getElementById('splashSupported').value,
+            poweredBy: document.getElementById('splashPowered').value
+        });
+        showToast();
     }
 
-    // --- MATCHUPS ---
     async function loadMatchups() {
         const list = document.getElementById('matchupList');
         list.innerHTML = 'Loading...';
-        try {
-            const q = window.query(window.collection(window.db, "matchups"));
-            const snapshot = await window.getDocs(q);
-            list.innerHTML = '';
-            currentMatchups = [];
-            
-            snapshot.forEach(function(docSnap) {
-                const data = docSnap.data();
-                currentMatchups.push({ id: docSnap.id, ...data });
-                renderMatchupCard(docSnap.id, data);
-            });
-        } catch(e) { list.innerHTML = 'Error loading'; console.log(e); }
+        const snapshot = await window.getDocs(window.collection(window.db, "matchups"));
+        list.innerHTML = '';
+        currentMatchups = [];
+        
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            currentMatchups.push({ id: docSnap.id, ...data });
+            renderMatchup(docSnap.id, data);
+        });
     }
 
-    function renderMatchupCard(id, data) {
+    function renderMatchup(id, data) {
         const list = document.getElementById('matchupList');
-        const div = document.createElement('div');
-        div.className = 'matchup-card';
+        
+        let pool1HTML = '', pool2HTML = '';
+        for(let i=0; i<10; i++) {
+            pool1HTML += `<input type="text" id="p1-${id}-${i}" value="${data.leftPool && data.leftPool[i] ? data.leftPool[i] : ''}" placeholder="Img ${i+1}">`;
+            pool2HTML += `<input type="text" id="p2-${id}-${i}" value="${data.rightPool && data.rightPool[i] ? data.rightPool[i] : ''}" placeholder="Img ${i+1}">`;
+        }
+
+        // Build comment checkboxes/inputs
+        let commentsHTML = '';
+        if(data.comments) {
+            data.comments.forEach((c, i) => {
+                commentsHTML += `<div style="display:flex; gap:5px; margin-bottom:5px;">
+                    <input type="text" id="c-user-${id}-${i}" value="${c.user}" placeholder="User" style="width:30%;">
+                    <input type="text" id="c-text-${id}-${i}" value="${c.text}" placeholder="Comment" style="width:70%;">
+                </div>`;
+            });
+        }
+
+        const div = document.createElement('details');
         div.innerHTML = `
-            <button class="btn-del" onclick="deleteMatchup('${id}')">Delete</button>
-            <h3 style="font-size:16px; margin-bottom:10px;">${data.leftName || 'Artist A'} VS ${data.rightName || 'Artist B'}</h3>
-            <div class="grid-2">
+            <summary>
+                <span>${data.leftName || 'Left'} VS ${data.rightName || 'Right'} (${id})</span>
+                <button class="btn-del" onclick="deleteMatchup(event, '${id}')">Delete</button>
+            </summary>
+            
+            <div class="grid-2" style="margin-top:15px;">
                 <div>
-                    <div class="input-group"><label>Slug (URL)</label><input type="text" id="slug-${id}" value="${id}" disabled style="opacity:0.6;"></div>
-                    <div class="input-group"><label>Left Name</label><input type="text" id="lname-${id}" value="${data.leftName||''}"></div>
-                    <div class="input-group"><label>Left Image</label><input type="text" id="limg-${id}" value="${data.leftImg||''}"></div>
+                    <div class="input-group"><label>Left Name</label><input type="text" id="ln-${id}" value="${data.leftName||''}"></div>
+                    <div class="input-group"><label>Left Main Image</label><input type="text" id="li-${id}" value="${data.leftImg||''}"></div>
+                    <div class="input-group"><label>Left Target</label><input type="number" id="lt-${id}" value="${data.leftTarget||50000}"></div>
+                    <label style="font-size:12px; color:#9ca3af;">Left Image Pool (10)</label>
+                    <div class="grid-10">${pool1HTML}</div>
                 </div>
                 <div>
-                    <div class="input-group" style="display:flex; align-items:center; margin-top:25px; gap:10px;">
-                        <input type="checkbox" id="lock-${id}" ${data.isLocked ? 'checked' : ''} style="width:20px;height:20px;">
-                        <label style="margin:0; color:#ef4444;">Lock Right Side?</label>
+                    <div class="input-group">
+                        <label>Right Name</label><input type="text" id="rn-${id}" value="${data.rightName||''}">
+                        <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+                            <input type="checkbox" id="lock-${id}" ${data.isLocked?'checked':''} style="width:20px;height:20px;">
+                            <label style="margin:0; color:#ef4444;">Lock Right Side?</label>
+                        </div>
                     </div>
-                    <div class="input-group"><label>Right Name</label><input type="text" id="rname-${id}" value="${data.rightName||''}"></div>
-                    <div class="input-group"><label>Right Image</label><input type="text" id="rimg-${id}" value="${data.rightImg||''}"></div>
+                    <div class="input-group"><label>Right Main Image</label><input type="text" id="ri-${id}" value="${data.rightImg||''}"></div>
+                    <div class="input-group"><label>Right Target</label><input type="number" id="rt-${id}" value="${data.rightTarget||50000}"></div>
+                    <label style="font-size:12px; color:#9ca3af;">Right Image Pool (10)</label>
+                    <div class="grid-10">${pool2HTML}</div>
                 </div>
             </div>
-            <div class="grid-2">
-                <div class="input-group"><label>Left Target</label><input type="number" id="ltarget-${id}" value="${data.leftTarget||50000}"></div>
-                <div class="input-group"><label>Right Target</label><input type="number" id="rtarget-${id}" value="${data.rightTarget||50000}"></div>
+
+            <div class="input-group" style="margin-top:15px;">
+                <label>Custom Comments (Ticker)</label>
+                ${commentsHTML || '<p style="color:#6b7280; font-size:12px;">No comments yet. Add below.</p>'}
+                <div style="display:flex; gap:5px; margin-top:10px;">
+                    <input type="text" id="new-cu-${id}" placeholder="User" style="width:30%;">
+                    <input type="text" id="new-ct-${id}" placeholder="Comment" style="width:70%;">
+                </div>
             </div>
+
             <button class="btn-save" onclick="saveMatchup('${id}')">Save Matchup</button>
         `;
         list.appendChild(div);
     }
 
-    function addNewMatchup() {
-        const slug = prompt("Enter a unique URL slug (e.g., weeknd-vs-drake). No spaces.");
+    async function addNewMatchup() {
+        const slug = prompt("Enter slug (e.g. weeknd-vs-drake):");
         if(!slug) return;
-        if(currentMatchups.find(m => m.id === slug)) return alert("Slug already exists!");
-        
-        window.setDoc(window.doc(window.db, "matchups", slug), {
-            leftName: "Artist A", rightName: "Artist B", isLocked: false
-        }).then(() => { loadMatchups(); showToast(); });
-    }
-
-    async function saveMatchup(id) {
-        try {
-            await window.setDoc(window.doc(window.db, "matchups", id), {
-                leftName: document.getElementById('lname-'+id).value,
-                leftImg: document.getElementById('limg-'+id).value,
-                rightName: document.getElementById('rname-'+id).value,
-                rightImg: document.getElementById('rimg-'+id).value,
-                isLocked: document.getElementById('lock-'+id).checked,
-                leftTarget: document.getElementById('ltarget-'+id).value,
-                rightTarget: document.getElementById('rtarget-'+id).value
-            });
-            showToast();
-        } catch(e) { alert("Error saving"); }
-    }
-
-    async function deleteMatchup(id) {
-        if(!confirm("Delete this matchup?")) return;
-        await window.deleteDoc(window.doc(window.db, "matchups", id));
+        await window.setDoc(window.doc(window.db, "matchups", slug), { leftName: "Artist A", rightName: "Artist B", isLocked: false, comments: [] });
         loadMatchups();
     }
 
-    // --- COMMENTS ---
-    async function loadComments() {
-        const list = document.getElementById('commentList');
-        try {
-            const snapshot = await window.getDocs(window.query(window.collection(window.db, "feed_comments")));
-            list.innerHTML = '';
-            snapshot.forEach(function(docSnap) {
-                const d = docSnap.data();
-                const div = document.createElement('div');
-                div.style = "background:#1f2937; padding:10px; border-radius:6px; margin-bottom:8px; display:flex; justify-content:space-between;";
-                div.innerHTML = `<div><strong style="color:#3b82f6;">${d.user}:</strong> ${d.text}</div>
-                                 <button onclick="window.deleteDoc(window.doc(window.db,'feed_comments','${docSnap.id}')).then(()=>loadComments())" style="background:#ef4444; border:none; color:white; padding:5px 10px; border-radius:4px; cursor:pointer;">X</button>`;
-                list.appendChild(div);
-            });
-        } catch(e) { console.log(e); }
+    async function saveMatchup(id) {
+        const data = currentMatchups.find(m => m.id === id) || { comments: [] };
+        
+        let lp = [], rp = [];
+        for(let i=0; i<10; i++) {
+            lp.push(document.getElementById(`p1-${id}-${i}`).value);
+            rp.push(document.getElementById(`p2-${id}-${i}`).value);
+        }
+
+        // Collect comments
+        let updatedComments = [];
+        let i = 0;
+        while(document.getElementById(`c-user-${id}-${i}`)) {
+            let u = document.getElementById(`c-user-${id}-${i}`).value;
+            let t = document.getElementById(`c-text-${id}-${i}`).value;
+            if(u && t) updatedComments.push({ user: u, text: t });
+            i++;
+        }
+        
+        // Check for new comment
+        let newU = document.getElementById(`new-cu-${id}`).value;
+        let newT = document.getElementById(`new-ct-${id}`).value;
+        if(newU && newT) updatedComments.push({ user: newU, text: newT });
+
+        await window.setDoc(window.doc(window.db, "matchups", id), {
+            leftName: document.getElementById(`ln-${id}`).value,
+            leftImg: document.getElementById(`li-${id}`).value,
+            leftTarget: document.getElementById(`lt-${id}`).value,
+            leftPool: lp,
+            rightName: document.getElementById(`rn-${id}`).value,
+            rightImg: document.getElementById(`ri-${id}`).value,
+            rightTarget: document.getElementById(`rt-${id}`).value,
+            rightPool: rp,
+            isLocked: document.getElementById(`lock-${id}`).checked,
+            comments: updatedComments
+        });
+        showToast();
+        loadMatchups(); // reload to show new comments
     }
 
-    async function addComment() {
-        const u = document.getElementById('newCommentUser').value;
-        const t = document.getElementById('newCommentText').value;
-        if(!u || !t) return;
-        await window.setDoc(window.doc(window.collection(window.db, "feed_comments")), { user: u, text: t, createdAt: new Date().toISOString() });
-        document.getElementById('newCommentUser').value = "";
-        document.getElementById('newCommentText').value = "";
-        loadComments(); showToast();
+    async function deleteMatchup(e, id) {
+        e.preventDefault(); // stop details from toggling
+        if(!confirm("Delete matchup?")) return;
+        await window.deleteDoc(window.doc(window.db, "matchups", id));
+        loadMatchups();
     }
 </script>
 </body>
